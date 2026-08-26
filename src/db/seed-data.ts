@@ -381,7 +381,7 @@ export const initialAboutData = {
 export const initialSiteSettings = [
   { key: "site_name", value: "Trip Snorkeling Gili Trawangan", section: "general", label: "Nama Website / Bisnis" },
   { key: "tagline", value: "Penyedia Wisata Snorkeling Terbaik di Gili Trawangan & 3 Gili", section: "general", label: "Tagline Bisnis" },
-  { key: "whatsapp_number", value: "6287864551234", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
+  { key: "whatsapp_number", value: "6285921358615", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
   { key: "whatsapp_message", value: "Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi / booking paket snorkeling...", section: "contact", label: "Pesan Default WhatsApp" },
   { key: "phone", value: "+62 878-6455-1234", section: "contact", label: "Nomor Telepon" },
   { key: "email", value: "info@snorkelinggilitrawangan.com", section: "contact", label: "Alamat Email" },
