@@ -20,16 +20,14 @@ export default function LanguageSwitcher() {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        background: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
+        background: 'var(--primary-surface)',
+        border: '1px solid rgba(0, 119, 182, 0.2)',
         borderRadius: '9999px',
         padding: '3px 4px',
         gap: '2px',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '6px', paddingRight: '2px', color: '#ffffff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '6px', paddingRight: '2px', color: 'var(--primary-ocean)' }}>
         <Globe size={14} />
       </div>
 
@@ -44,9 +42,13 @@ export default function LanguageSwitcher() {
           border: 'none',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          background: locale === 'id' ? '#ffffff' : 'transparent',
-          color: locale === 'id' ? 'var(--primary-deep)' : 'rgba(255, 255, 255, 0.85)',
-          boxShadow: locale === 'id' ? '0 2px 6px rgba(0, 0, 0, 0.15)' : 'none',
+          background: locale === 'id'
+            ? 'var(--primary-ocean)'
+            : 'transparent',
+          color: locale === 'id'
+            ? '#ffffff'
+            : 'var(--primary-deep)',
+          boxShadow: locale === 'id' ? '0 2px 6px rgba(0, 119, 182, 0.3)' : 'none',
         }}
       >
         ID
@@ -63,9 +65,13 @@ export default function LanguageSwitcher() {
           border: 'none',
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          background: locale === 'en' ? '#ffffff' : 'transparent',
-          color: locale === 'en' ? 'var(--primary-deep)' : 'rgba(255, 255, 255, 0.85)',
-          boxShadow: locale === 'en' ? '0 2px 6px rgba(0, 0, 0, 0.15)' : 'none',
+          background: locale === 'en'
+            ? 'var(--primary-ocean)'
+            : 'transparent',
+          color: locale === 'en'
+            ? '#ffffff'
+            : 'var(--primary-deep)',
+          boxShadow: locale === 'en' ? '0 2px 6px rgba(0, 119, 182, 0.3)' : 'none',
         }}
       >
         EN
