@@ -82,7 +82,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
           gap: "20px",
         }}
       >
-        {filteredItems.map((item) => {
+        {filteredItems.map((item, index) => {
           const title = locale === "id" ? item.titleId : item.titleEn;
           return (
             <div
@@ -102,6 +102,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
                 src={item.imageUrl}
                 alt={title}
                 fill
+                priority={index < 4}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 style={{
                   objectFit: "cover",
