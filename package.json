@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "drizzle-kit push",
+    "db:fresh": "tsx src/db/migrate-fresh.ts",
+    "db:seed": "tsx src/db/seed-runner.ts",
+    "db:fresh:seed": "tsx src/db/migrate-fresh.ts --seed",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -26,6 +31,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }
