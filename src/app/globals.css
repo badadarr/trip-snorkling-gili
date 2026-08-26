@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
 :root {
   /* Color Palette - Tropical Adventure & Trust */
   --primary-deep: #0a2540;
@@ -39,9 +37,6 @@
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-full: 9999px;
-
-  --font-heading: 'Outfit', sans-serif;
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
 }
 
 * {
