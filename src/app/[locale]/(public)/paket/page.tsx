@@ -1,24 +1,28 @@
 import React from 'react';
-import FaqAccordion from '@/components/public/FaqAccordion';
+import PackageCard from '@/components/public/PackageCard';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getFaqList, getSettings } from '@/lib/data';
-import { HelpCircle } from 'lucide-react';
+import { getPackagesList, getSettings } from '@/lib/data';
+import { getTranslations } from 'next-intl/server';
+import { Waves } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function FaqPage() {
-  const faqs = await getFaqList();
+export default async function PackagesPage() {
+  const t = await getTranslations();
+  const allPackages = await getPackagesList();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
+  const activePackages = allPackages.filter((p) => p.isActive);
+
   return (
     <div>
-      {/* Header */}
+      {/* Page Header */}
       <section
         style={{
           paddingTop: '80px',
-          paddingBottom: '50px',
+          paddingBottom: '60px',
           background: 'linear-gradient(135deg, var(--primary-deep) 0%, var(--primary-ocean) 100%)',
           color: '#ffffff',
           textAlign: 'center',
@@ -26,22 +30,26 @@ export default async function FaqPage() {
       >
         <div className="container">
           <div className="section-badge badge-white" style={{ display: 'inline-flex', marginBottom: '16px' }}>
-            <HelpCircle size={14} />
-            <span>PUSAT BANTUAN</span>
+            <Waves size={14} />
+            <span>{t('packages.sectionBadge')}</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', color: '#ffffff', marginBottom: '16px' }}>
-            Pertanyaan yang Sering Diajukan (FAQ)
+            {t('packages.allPackagesTitle')}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', maxWidth: '640px', margin: '0 auto' }}>
-            Temukan jawaban lengkap seputar persiapan, jadwal, keamanan, perlengkapan, dan reservasi trip snorkeling di 3 Gili.
+            {t('packages.allPackagesSubtitle')}
           </p>
         </div>
       </section>
 
-      {/* FAQ Accordion Section */}
+      {/* Packages Grid */}
       <section className="section">
         <div className="container">
-          <FaqAccordion items={faqs} />
+          <div className="grid-3">
+            {activePackages.map((pkg) => (
+              <PackageCard key={pkg.id} pkg={pkg} />
+            ))}
+          </div>
         </div>
       </section>
 

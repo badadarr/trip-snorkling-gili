@@ -1,15 +1,22 @@
 import React from 'react';
 import { getAbout, getSettings } from '@/lib/data';
 import CtaBanner from '@/components/public/CtaBanner';
-import { Waves, Award, ShieldCheck, Heart, Users, MapPin, Compass } from 'lucide-react';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { Waves, ShieldCheck, Heart, Users, Compass } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AboutPage() {
+  const t = await getTranslations();
+  const locale = await getLocale();
   const about = await getAbout();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
+
+  const title = locale === 'id' ? (about.titleId || t('about.title')) : (about.titleEn || t('about.title'));
+  const subtitle = locale === 'id' ? (about.subtitleId || t('about.subtitle')) : (about.subtitleEn || t('about.subtitle'));
+  const story = locale === 'id' ? (about.storyId || '') : (about.storyEn || about.storyId || '');
 
   const stats = about.stats || [
     { number: '5.000+', labelId: 'Wisatawan Puas', labelEn: 'Happy Snorkelers' },
@@ -33,13 +40,13 @@ export default async function AboutPage() {
         <div className="container">
           <div className="section-badge badge-white" style={{ display: 'inline-flex', marginBottom: '16px' }}>
             <Waves size={14} />
-            <span>TENTANG KAMI</span>
+            <span>{t('about.badge')}</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', color: '#ffffff', marginBottom: '16px' }}>
-            {about.titleId || 'Tentang Trip Snorkeling Gili Trawangan'}
+            {title}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', maxWidth: '680px', margin: '0 auto' }}>
-            {about.subtitleId || 'Penyedia Wisata Snorkeling Terpercaya & Berpengalaman di 3 Gili'}
+            {subtitle}
           </p>
         </div>
       </section>
@@ -52,16 +59,16 @@ export default async function AboutPage() {
             <div>
               <div className="section-badge" style={{ marginBottom: '14px' }}>
                 <Compass size={14} />
-                <span>CERITA & DEDIKASI KAMI</span>
+                <span>{t('about.storyBadge')}</span>
               </div>
               <h2 style={{ fontSize: '2.2rem', color: 'var(--primary-deep)', lineHeight: 1.25, marginBottom: '20px' }}>
-                Menghubungkan Anda dengan Keajaiban Bawah Laut Nusantara
+                {t('about.storyTitle')}
               </h2>
               <p style={{ fontSize: '1rem', color: 'var(--text-main)', lineHeight: 1.8, marginBottom: '20px' }}>
-                {about.storyId}
+                {story}
               </p>
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                Kami percaya bahwa snorkeling bukan sekadar melihat ikan dan penyu, melainkan merasakan kedamaian dan membangun kesadaran bersama untuk menjaga kelestarian terumbu karang kepulauan Gili bagi generasi mendatang.
+                {t('about.storyVision')}
               </p>
             </div>
 
@@ -102,7 +109,7 @@ export default async function AboutPage() {
                   {stat.number}
                 </div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-deep)', marginTop: '8px' }}>
-                  {stat.labelId}
+                  {locale === 'id' ? stat.labelId : stat.labelEn}
                 </div>
               </div>
             ))}
@@ -116,9 +123,9 @@ export default async function AboutPage() {
           <div className="section-header">
             <div className="section-badge">
               <ShieldCheck size={14} />
-              <span>NILAI UTAMA KAMI</span>
+              <span>{t('about.valuesBadge')}</span>
             </div>
-            <h2 className="section-title">Komitmen Pelayanan Kami</h2>
+            <h2 className="section-title">{t('about.valuesTitle')}</h2>
           </div>
 
           <div className="grid-3">
@@ -126,9 +133,11 @@ export default async function AboutPage() {
               <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <ShieldCheck size={26} />
               </div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>Keselamatan Adalah Prioritas</h3>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
+                {t('about.val1Title')}
+              </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Setiap perahu dilengkapi pelampung terstandarisasi, kotak P3K bahari, dan pemandu bersertifikasi keselamatan air.
+                {t('about.val1Desc')}
               </p>
             </div>
 
@@ -136,9 +145,11 @@ export default async function AboutPage() {
               <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(6, 214, 160, 0.15)', color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <Heart size={26} />
               </div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>Konservasi & Ramah Karang</h3>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
+                {t('about.val2Title')}
+              </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Kami mengedukasi wisatawan agar tidak menyentuh atau menginjak terumbu karang dan tidak mengganggu penyu di habitat aslinya.
+                {t('about.val2Desc')}
               </p>
             </div>
 
@@ -146,9 +157,11 @@ export default async function AboutPage() {
               <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(255, 183, 3, 0.15)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <Users size={26} />
               </div>
-              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>Pemberdayaan Warga Lokal</h3>
+              <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
+                {t('about.val3Title')}
+              </h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                100% kapten kapal dan kru kami adalah putra daerah asli pulau Gili yang ramah dan berpengetahuan luas.
+                {t('about.val3Desc')}
               </p>
             </div>
           </div>

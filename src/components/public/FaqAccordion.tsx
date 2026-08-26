@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
-import { HelpCircle, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { useLocale } from 'next-intl';
+import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export interface FaqItem {
   id: number;
@@ -16,7 +16,7 @@ export interface FaqItem {
 }
 
 export default function FaqAccordion({ items }: { items: FaqItem[] }) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFaq = (index: number) => {
@@ -26,8 +26,8 @@ export default function FaqAccordion({ items }: { items: FaqItem[] }) {
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {items.map((item, index) => {
-        const question = lang === 'id' ? item.questionId : item.questionEn;
-        const answer = lang === 'id' ? item.answerId : item.answerEn;
+        const question = locale === 'id' ? item.questionId : item.questionEn;
+        const answer = locale === 'id' ? item.answerId : item.answerEn;
         const isOpen = openIndex === index;
 
         return (

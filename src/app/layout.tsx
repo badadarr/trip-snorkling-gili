@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { LanguageProvider } from '@/lib/LanguageContext';
 
 export const metadata: Metadata = {
   title: 'Trip Snorkeling Gili Trawangan | Spot Snorkeling Terbaik 3 Gili',
@@ -50,9 +49,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        {children}
       </body>
     </html>
   );

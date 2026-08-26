@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
-import { useLanguage } from '@/lib/LanguageContext';
+import { useLocale } from 'next-intl';
 
 export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: string }) {
-  const { lang } = useLanguage();
+  const locale = useLocale();
   const phone = whatsappNumber || '6287864551234';
-  const defaultText = lang === 'id'
+  const defaultText = locale === 'id'
     ? 'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin konsultasi / reservasi paket snorkeling...'
     : 'Hello Trip Snorkeling Gili Trawangan! I would like to inquire about snorkeling trip packages...';
   
@@ -23,7 +23,7 @@ export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: st
     >
       <div className="whatsapp-pulse" />
       <MessageCircle size={22} color="#ffffff" strokeWidth={2.3} />
-      <span>{lang === 'id' ? 'Chat WhatsApp' : 'WhatsApp Us'}</span>
+      <span>{locale === 'id' ? 'Chat WhatsApp' : 'WhatsApp Us'}</span>
     </a>
   );
 }

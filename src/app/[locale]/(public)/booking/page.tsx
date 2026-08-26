@@ -1,7 +1,8 @@
 import React from 'react';
 import BookingForm from '@/components/public/BookingForm';
 import { getPackagesList, getSettings } from '@/lib/data';
-import { Calendar, ShieldCheck, Sparkles } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
+import { Calendar } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ interface PageProps {
 }
 
 export default async function BookingPage({ searchParams }: PageProps) {
+  const t = await getTranslations('booking');
   const params = await searchParams;
   const packagesList = await getPackagesList();
   const settings = await getSettings();
@@ -34,13 +36,13 @@ export default async function BookingPage({ searchParams }: PageProps) {
         <div className="container">
           <div className="section-badge badge-white" style={{ display: 'inline-flex', marginBottom: '16px' }}>
             <Calendar size={14} />
-            <span>RESERVASI MUDAH & CEPAT</span>
+            <span>{t('badge')}</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', color: '#ffffff', marginBottom: '16px' }}>
-            Booking Trip Snorkeling Gili
+            {t('title')}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', maxWidth: '640px', margin: '0 auto' }}>
-            Isi formulir pemesanan di bawah ini. Kami akan memproses data Anda dan mengonfirmasi jadwal secepatnya.
+            {t('subtitle')}
           </p>
         </div>
       </section>

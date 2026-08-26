@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/navigation';
-import NextLink from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import LanguageSwitcher from './LanguageSwitcher';
-import { Waves, Menu, X, PhoneCall, Calendar, Compass, Lock } from 'lucide-react';
+import { Waves, Menu, X, Calendar, Lock } from 'lucide-react';
 
 export default function Navbar() {
-  const { t, lang } = useLanguage();
+  const t = useTranslations('nav');
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -38,7 +37,7 @@ export default function Navbar() {
     >
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '80px' }}>
         {/* Brand Logo */}
-        <NextLink href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
           <div
             style={{
               width: '46px',
@@ -80,11 +79,11 @@ export default function Navbar() {
               Gili Trawangan • 3 Gili
             </span>
           </div>
-        </NextLink>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav style={{ display: 'none', alignItems: 'center', gap: '32px' }} className="desktop-nav">
-          <NextLink
+          <Link
             href="/"
             style={{
               fontWeight: 600,
@@ -93,9 +92,9 @@ export default function Navbar() {
               transition: 'color 0.2s',
             }}
           >
-            {t.nav.home}
-          </NextLink>
-          <NextLink
+            {t('home')}
+          </Link>
+          <Link
             href="/paket"
             style={{
               fontWeight: 600,
@@ -104,9 +103,9 @@ export default function Navbar() {
               transition: 'color 0.2s',
             }}
           >
-            {t.nav.packages}
-          </NextLink>
-          <NextLink
+            {t('packages')}
+          </Link>
+          <Link
             href="/gallery"
             style={{
               fontWeight: 600,
@@ -115,9 +114,9 @@ export default function Navbar() {
               transition: 'color 0.2s',
             }}
           >
-            {t.nav.gallery}
-          </NextLink>
-          <NextLink
+            {t('gallery')}
+          </Link>
+          <Link
             href="/tentang"
             style={{
               fontWeight: 600,
@@ -126,9 +125,9 @@ export default function Navbar() {
               transition: 'color 0.2s',
             }}
           >
-            {t.nav.about}
-          </NextLink>
-          <NextLink
+            {t('about')}
+          </Link>
+          <Link
             href="/faq"
             style={{
               fontWeight: 600,
@@ -137,17 +136,17 @@ export default function Navbar() {
               transition: 'color 0.2s',
             }}
           >
-            {t.nav.faq}
-          </NextLink>
+            {t('faq')}
+          </Link>
         </nav>
 
         {/* Right CTA Area */}
         <div style={{ display: 'none', alignItems: 'center', gap: '16px' }} className="desktop-actions">
           <LanguageSwitcher />
-          <NextLink href="/booking" className="btn btn-primary btn-sm">
+          <Link href="/booking" className="btn btn-primary btn-sm">
             <Calendar size={15} />
-            {t.nav.bookNow}
-          </NextLink>
+            {t('bookNow')}
+          </Link>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -196,7 +195,7 @@ export default function Navbar() {
             overflowY: 'auto',
           }}
         >
-          <NextLink
+          <Link
             href="/"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -207,9 +206,9 @@ export default function Navbar() {
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            {t.nav.home}
-          </NextLink>
-          <NextLink
+            {t('home')}
+          </Link>
+          <Link
             href="/paket"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -220,9 +219,9 @@ export default function Navbar() {
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            {t.nav.packages}
-          </NextLink>
-          <NextLink
+            {t('packages')}
+          </Link>
+          <Link
             href="/gallery"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -233,9 +232,9 @@ export default function Navbar() {
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            {t.nav.gallery}
-          </NextLink>
-          <NextLink
+            {t('gallery')}
+          </Link>
+          <Link
             href="/tentang"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -246,9 +245,9 @@ export default function Navbar() {
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            {t.nav.about}
-          </NextLink>
-          <NextLink
+            {t('about')}
+          </Link>
+          <Link
             href="/faq"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -259,9 +258,9 @@ export default function Navbar() {
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            {t.nav.faq}
-          </NextLink>
-          <NextLink
+            {t('faq')}
+          </Link>
+          <a
             href="/admin"
             onClick={() => setMobileMenuOpen(false)}
             style={{
@@ -275,19 +274,19 @@ export default function Navbar() {
             }}
           >
             <Lock size={16} />
-            {t.nav.admin}
-          </NextLink>
+            {t('admin')}
+          </a>
 
           <div style={{ marginTop: '20px' }}>
-            <NextLink
+            <Link
               href="/booking"
               onClick={() => setMobileMenuOpen(false)}
               className="btn btn-primary"
               style={{ width: '100%', padding: '16px', fontSize: '1.05rem' }}
             >
               <Calendar size={18} />
-              {t.nav.bookNow}
-            </NextLink>
+              {t('bookNow')}
+            </Link>
           </div>
         </div>
       )}

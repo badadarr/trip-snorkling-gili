@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Star, ShieldCheck, Sparkles, Quote, MapPin } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Star, Sparkles, MapPin } from 'lucide-react';
 
 export interface TestimonialItem {
   id: number;
@@ -18,7 +18,8 @@ export interface TestimonialItem {
 }
 
 export default function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('testimonials');
 
   return (
     <section className="section section-alt">
@@ -27,16 +28,16 @@ export default function TestimonialsSection({ items }: { items: TestimonialItem[
         <div className="section-header">
           <div className="section-badge">
             <Sparkles size={14} />
-            <span>{t.testimonials.badge}</span>
+            <span>{t('badge')}</span>
           </div>
-          <h2 className="section-title">{t.testimonials.title}</h2>
-          <p className="section-subtitle">{t.testimonials.subtitle}</p>
+          <h2 className="section-title">{t('title')}</h2>
+          <p className="section-subtitle">{t('subtitle')}</p>
         </div>
 
         {/* Testimonials Grid */}
         <div className="grid-3">
           {items.map((item) => {
-            const review = lang === 'id' ? item.contentId : item.contentEn;
+            const review = locale === 'id' ? item.contentId : item.contentEn;
             const ratingCount = item.rating || 5;
 
             return (

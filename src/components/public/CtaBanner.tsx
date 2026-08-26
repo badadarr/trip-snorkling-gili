@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import NextLink from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Calendar, MessageCircle, Sparkles, Waves } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { Calendar, MessageCircle, Sparkles } from 'lucide-react';
 
 export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string }) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('cta');
   const phone = whatsappNumber || '6287864551234';
 
   return (
@@ -37,7 +38,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
         <div style={{ maxWidth: '780px', margin: '0 auto' }}>
           <div className="section-badge badge-gold" style={{ display: 'inline-flex', marginBottom: '18px' }}>
             <Sparkles size={14} />
-            <span>{lang === 'id' ? 'SLOT TERBATAS SETIAP HARI' : 'LIMITED DAILY SLOTS'}</span>
+            <span>{locale === 'id' ? 'SLOT TERBATAS SETIAP HARI' : 'LIMITED DAILY SLOTS'}</span>
           </div>
 
           <h2
@@ -49,7 +50,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
               fontFamily: 'var(--font-heading)',
             }}
           >
-            {t.cta.title}
+            {t('title')}
           </h2>
 
           <p
@@ -60,7 +61,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
               marginBottom: '36px',
             }}
           >
-            {t.cta.subtitle}
+            {t('subtitle')}
           </p>
 
           <div
@@ -72,14 +73,14 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
               flexWrap: 'wrap',
             }}
           >
-            <NextLink href="/booking" className="btn btn-gold btn-lg">
+            <Link href="/booking" className="btn btn-gold btn-lg">
               <Calendar size={20} />
-              <span>{t.cta.bookButton}</span>
-            </NextLink>
+              <span>{t('bookButton')}</span>
+            </Link>
 
             <a
               href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                lang === 'id'
+                locale === 'id'
                   ? 'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin tanya slot & booking...'
                   : 'Hello! I would like to ask about available slots for snorkeling tour.'
               )}`}
@@ -88,7 +89,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
               className="btn btn-whatsapp btn-lg"
             >
               <MessageCircle size={20} />
-              <span>{t.cta.whatsappButton}</span>
+              <span>{t('whatsappButton')}</span>
             </a>
           </div>
         </div>

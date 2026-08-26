@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import NextLink from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Sparkles, Calendar, Compass, ShieldCheck, Camera, Users, Award, ChevronRight } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { Sparkles, Calendar, Compass, ShieldCheck, Camera, Users, Award } from 'lucide-react';
 
 interface HeroProps {
   heroData?: {
@@ -24,13 +24,14 @@ interface HeroProps {
 }
 
 export default function HeroSection({ heroData }: HeroProps) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('hero');
 
-  const badge = lang === 'id' ? (heroData?.badgeId || t.hero.popularTag) : (heroData?.badgeEn || t.hero.popularTag);
-  const title = lang === 'id' ? (heroData?.titleId || t.hero.mainHeading) : (heroData?.titleEn || t.hero.mainHeading);
-  const subtitle = lang === 'id' ? (heroData?.subtitleId || t.hero.subHeading) : (heroData?.subtitleEn || t.hero.subHeading);
-  const ctaText = lang === 'id' ? (heroData?.ctaTextId || t.hero.ctaBook) : (heroData?.ctaTextEn || t.hero.ctaBook);
-  const secondaryCtaText = lang === 'id' ? (heroData?.secondaryCtaId || t.hero.ctaPackages) : (heroData?.secondaryCtaEn || t.hero.ctaPackages);
+  const badge = locale === 'id' ? (heroData?.badgeId || t('popularTag')) : (heroData?.badgeEn || t('popularTag'));
+  const title = locale === 'id' ? (heroData?.titleId || t('mainHeading')) : (heroData?.titleEn || t('mainHeading'));
+  const subtitle = locale === 'id' ? (heroData?.subtitleId || t('subHeading')) : (heroData?.subtitleEn || t('subHeading'));
+  const ctaText = locale === 'id' ? (heroData?.ctaTextId || t('ctaBook')) : (heroData?.ctaTextEn || t('ctaBook'));
+  const secondaryCtaText = locale === 'id' ? (heroData?.secondaryCtaId || t('ctaPackages')) : (heroData?.secondaryCtaEn || t('ctaPackages'));
   const bgImage = heroData?.backgroundImage || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop';
 
   return (
@@ -110,15 +111,15 @@ export default function HeroSection({ heroData }: HeroProps) {
               marginBottom: '50px',
             }}
           >
-            <NextLink href={heroData?.ctaLink || '/booking'} className="btn btn-gold btn-lg">
+            <Link href={heroData?.ctaLink || '/booking'} className="btn btn-gold btn-lg">
               <Calendar size={20} />
               {ctaText}
-            </NextLink>
+            </Link>
 
-            <NextLink href={heroData?.secondaryCtaLink || '/paket'} className="btn btn-outline-white btn-lg">
+            <Link href={heroData?.secondaryCtaLink || '/paket'} className="btn btn-outline-white btn-lg">
               <Compass size={20} />
               {secondaryCtaText}
-            </NextLink>
+            </Link>
           </div>
 
           {/* Trust Guarantees Bar */}
@@ -141,7 +142,7 @@ export default function HeroSection({ heroData }: HeroProps) {
                 <ShieldCheck size={20} />
               </div>
               <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.3 }}>
-                {t.hero.feature1}
+                {t('feature1')}
               </span>
             </div>
 
@@ -150,7 +151,7 @@ export default function HeroSection({ heroData }: HeroProps) {
                 <Camera size={20} />
               </div>
               <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.3 }}>
-                {t.hero.feature2}
+                {t('feature2')}
               </span>
             </div>
 
@@ -159,7 +160,7 @@ export default function HeroSection({ heroData }: HeroProps) {
                 <Award size={20} />
               </div>
               <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.3 }}>
-                {t.hero.feature3}
+                {t('feature3')}
               </span>
             </div>
 
@@ -168,7 +169,7 @@ export default function HeroSection({ heroData }: HeroProps) {
                 <Users size={20} />
               </div>
               <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 600, lineHeight: 1.3 }}>
-                {t.hero.feature4}
+                {t('feature4')}
               </span>
             </div>
           </div>

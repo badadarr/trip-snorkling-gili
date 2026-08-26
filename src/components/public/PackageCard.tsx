@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import NextLink from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Clock, Calendar, CheckCircle2, MapPin, ArrowRight, Sparkles, Users } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { Clock, Calendar, CheckCircle2, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 
 export interface PackageData {
   id: number;
@@ -31,15 +31,16 @@ export interface PackageData {
 }
 
 export default function PackageCard({ pkg }: { pkg: PackageData }) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('packages');
 
-  const name = lang === 'id' ? pkg.nameId : pkg.nameEn;
-  const tag = lang === 'id' ? pkg.tagId : pkg.tagEn;
-  const description = lang === 'id' ? pkg.descriptionId : pkg.descriptionEn;
-  const duration = lang === 'id' ? pkg.durationId : pkg.durationEn;
-  const schedule = lang === 'id' ? pkg.scheduleId : pkg.scheduleEn;
-  const includes = lang === 'id' ? (pkg.includesId || []) : (pkg.includesEn || []);
-  const spots = lang === 'id' ? (pkg.spotsId || []) : (pkg.spotsEn || []);
+  const name = locale === 'id' ? pkg.nameId : pkg.nameEn;
+  const tag = locale === 'id' ? pkg.tagId : pkg.tagEn;
+  const description = locale === 'id' ? pkg.descriptionId : pkg.descriptionEn;
+  const duration = locale === 'id' ? pkg.durationId : pkg.durationEn;
+  const schedule = locale === 'id' ? pkg.scheduleId : pkg.scheduleEn;
+  const includes = locale === 'id' ? (pkg.includesId || []) : (pkg.includesEn || []);
+  const spots = locale === 'id' ? (pkg.spotsId || []) : (pkg.spotsEn || []);
 
   const formatPrice = (amount: number, currency: 'IDR' | 'USD') => {
     if (currency === 'USD') {
@@ -123,13 +124,13 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
         >
           <div>
             <span style={{ fontSize: '0.75rem', color: '#90e0ef', textTransform: 'uppercase', fontWeight: 600, display: 'block' }}>
-              {lang === 'id' ? 'Mulai dari' : 'Starting from'}
+              {t('priceStarts')}
             </span>
             <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-              {lang === 'id' ? formatPrice(pkg.price, 'IDR') : formatPrice(pkg.priceUsd, 'USD')}
+              {locale === 'id' ? formatPrice(pkg.price, 'IDR') : formatPrice(pkg.priceUsd, 'USD')}
             </span>
             <span style={{ fontSize: '0.8rem', color: '#caf0f8', marginLeft: '4px' }}>
-              {pkg.price > 500000 ? (lang === 'id' ? '/ Kapal' : '/ Boat') : (lang === 'id' ? '/ Orang' : '/ Pax')}
+              {pkg.price > 500000 ? t('perBoat') : t('perPerson')}
             </span>
           </div>
         </div>
@@ -191,7 +192,7 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
         {spots.length > 0 && (
           <div style={{ marginBottom: '18px', borderTop: '1px dashed var(--border-light)', paddingTop: '14px' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-              {t.packages.highlights}:
+              {t('highlights')}:
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {spots.slice(0, 3).map((spot, idx) => (
@@ -220,22 +221,22 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
 
         {/* Action Buttons */}
         <div style={{ marginTop: 'auto', display: 'flex', gap: '10px', paddingTop: '10px' }}>
-          <NextLink
+          <Link
             href={`/paket/${pkg.slug}`}
             className="btn btn-secondary btn-sm"
             style={{ flex: 1, padding: '10px 14px', fontSize: '0.85rem' }}
           >
-            <span>{t.packages.viewDetail}</span>
+            <span>{t('viewDetail')}</span>
             <ArrowRight size={14} />
-          </NextLink>
-          <NextLink
+          </Link>
+          <Link
             href={`/booking?package=${pkg.slug}`}
             className="btn btn-primary btn-sm"
             style={{ flex: 1, padding: '10px 14px', fontSize: '0.85rem' }}
           >
             <Calendar size={14} />
-            <span>{lang === 'id' ? 'Pesan' : 'Book'}</span>
-          </NextLink>
+            <span>{t('bookPackage')}</span>
+          </Link>
         </div>
       </div>
     </div>

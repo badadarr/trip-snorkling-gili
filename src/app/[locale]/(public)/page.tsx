@@ -7,12 +7,14 @@ import TestimonialsSection from '@/components/public/TestimonialsSection';
 import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
 import { getHero, getPackagesList, getGalleryList, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
-import NextLink from 'next/link';
+import { Link } from '@/i18n/navigation';
+import { getTranslations } from 'next-intl/server';
 import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
+  const t = await getTranslations();
   const heroData = await getHero();
   const allPackages = await getPackagesList();
   const galleryItems = await getGalleryList();
@@ -36,11 +38,11 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <Sparkles size={14} />
-              <span>PILIHAN PAKET TRIP</span>
+              <span>{t('packages.sectionBadge')}</span>
             </div>
-            <h2 className="section-title">Paket Snorkeling Trip 3 Gili Terbaik</h2>
+            <h2 className="section-title">{t('packages.sectionTitle')}</h2>
             <p className="section-subtitle">
-              Pilihan tour lengkap untuk solo traveler, pasangan, hingga keluarga & rombongan dengan harga transparan dan fasilitas lengkap.
+              {t('packages.sectionSubtitle')}
             </p>
           </div>
 
@@ -51,10 +53,10 @@ export default async function HomePage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <NextLink href="/paket" className="btn btn-secondary btn-lg">
-              <span>Lihat Semua Paket Snorkeling</span>
+            <Link href="/paket" className="btn btn-secondary btn-lg">
+              <span>{t('packages.viewAllPackages')}</span>
               <ArrowRight size={18} />
-            </NextLink>
+            </Link>
           </div>
         </div>
       </section>
@@ -68,11 +70,11 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <Award size={14} />
-              <span>KEUNGGULAN KAMI</span>
+              <span>{t('whyUs.badge')}</span>
             </div>
-            <h2 className="section-title">Mengapa Memilih Trip Snorkeling Bersama Kami?</h2>
+            <h2 className="section-title">{t('whyUs.title')}</h2>
             <p className="section-subtitle">
-              Kepuasan, kenyamanan, dan keselamatan petualangan bahari Anda di 3 Gili adalah dedikasi utama kami.
+              {t('whyUs.subtitle')}
             </p>
           </div>
 
@@ -94,10 +96,10 @@ export default async function HomePage() {
                 <ShieldCheck size={30} />
               </div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
-                Pemandu Berlisensi & Aman
+                {t('whyUs.reason1Title')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                Pemandu lokal berpengalaman dan berlisensi dengan pelampung standar keselamatan untuk segala usia.
+                {t('whyUs.reason1Desc')}
               </p>
             </div>
 
@@ -118,10 +120,10 @@ export default async function HomePage() {
                 <Camera size={30} />
               </div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
-                Free Foto/Video GoPro HD
+                {t('whyUs.reason2Title')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                Dokumentasi bawah air dengan kamera GoPro kualitas tinggi tanpa biaya tambahan, langsung dibagikan.
+                {t('whyUs.reason2Desc')}
               </p>
             </div>
 
@@ -142,10 +144,10 @@ export default async function HomePage() {
                 <Users size={30} />
               </div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
-                Armada Glass Bottom Nyaman
+                {t('whyUs.reason3Title')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                Kapal bersih dengan kaca transparan di lantai untuk melihat ikan tanpa harus langsung basah.
+                {t('whyUs.reason3Desc')}
               </p>
             </div>
 
@@ -166,10 +168,10 @@ export default async function HomePage() {
                 <Calendar size={30} />
               </div>
               <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-deep)', marginBottom: '10px' }}>
-                Booking Mudah & Fleksibel
+                {t('whyUs.reason4Title')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
-                Pesan instan secara online atau lewat WhatsApp dengan pilihan bayar di tempat atau transfer.
+                {t('whyUs.reason4Desc')}
               </p>
             </div>
           </div>
@@ -182,21 +184,21 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <Camera size={14} />
-              <span>GALERI FOTO</span>
+              <span>{t('gallery.badge')}</span>
             </div>
-            <h2 className="section-title">Dokumentasi Petualangan Tamu Kami</h2>
+            <h2 className="section-title">{t('gallery.title')}</h2>
             <p className="section-subtitle">
-              Momen nyata dari keseruan berenang bersama penyu, foto di patung bawah air, dan keindahan pulau 3 Gili.
+              {t('gallery.subtitle')}
             </p>
           </div>
 
           <GalleryGrid items={galleryItems} />
 
           <div style={{ textAlign: 'center', marginTop: '36px' }}>
-            <NextLink href="/gallery" className="btn btn-secondary">
-              <span>Buka Galeri Lengkap</span>
+            <Link href="/gallery" className="btn btn-secondary">
+              <span>{t('gallery.openFullGallery')}</span>
               <ArrowRight size={16} />
-            </NextLink>
+            </Link>
           </div>
         </div>
       </section>
@@ -210,11 +212,11 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <HelpCircle size={14} />
-              <span>FAQ</span>
+              <span>{t('faq.badge')}</span>
             </div>
-            <h2 className="section-title">Pertanyaan yang Sering Diajukan</h2>
+            <h2 className="section-title">{t('faq.title')}</h2>
             <p className="section-subtitle">
-              Semua info yang perlu Anda ketahui sebelum memulai snorkeling trip di Gili Trawangan.
+              {t('faq.subtitle')}
             </p>
           </div>
 

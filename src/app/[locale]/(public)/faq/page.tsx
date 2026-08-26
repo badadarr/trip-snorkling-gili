@@ -1,26 +1,26 @@
 import React from 'react';
-import PackageCard from '@/components/public/PackageCard';
+import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getPackagesList, getSettings } from '@/lib/data';
-import { Sparkles, Waves } from 'lucide-react';
+import { getFaqList, getSettings } from '@/lib/data';
+import { getTranslations } from 'next-intl/server';
+import { HelpCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PackagesPage() {
-  const allPackages = await getPackagesList();
+export default async function FaqPage() {
+  const t = await getTranslations('faq');
+  const faqs = await getFaqList();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const activePackages = allPackages.filter((p) => p.isActive);
-
   return (
     <div>
-      {/* Page Header */}
+      {/* Header */}
       <section
         style={{
           paddingTop: '80px',
-          paddingBottom: '60px',
+          paddingBottom: '50px',
           background: 'linear-gradient(135deg, var(--primary-deep) 0%, var(--primary-ocean) 100%)',
           color: '#ffffff',
           textAlign: 'center',
@@ -28,26 +28,22 @@ export default async function PackagesPage() {
       >
         <div className="container">
           <div className="section-badge badge-white" style={{ display: 'inline-flex', marginBottom: '16px' }}>
-            <Waves size={14} />
-            <span>PILIHAN PAKET WISATA</span>
+            <HelpCircle size={14} />
+            <span>{t('badge')}</span>
           </div>
           <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', color: '#ffffff', marginBottom: '16px' }}>
-            Paket Snorkeling Trip 3 Gili
+            {t('title')}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'rgba(255, 255, 255, 0.85)', maxWidth: '640px', margin: '0 auto' }}>
-            Jelajahi keindahan bawah laut Gili Trawangan, Gili Meno, dan Gili Air dengan pilihan tour publik maupun privat.
+            {t('subtitle')}
           </p>
         </div>
       </section>
 
-      {/* Packages Grid */}
+      {/* FAQ Accordion Section */}
       <section className="section">
         <div className="container">
-          <div className="grid-3">
-            {activePackages.map((pkg) => (
-              <PackageCard key={pkg.id} pkg={pkg} />
-            ))}
-          </div>
+          <FaqAccordion items={faqs} />
         </div>
       </section>
 

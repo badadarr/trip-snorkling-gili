@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
-import NextLink from 'next/link';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Waves, MapPin, Phone, Mail, MessageCircle, ShieldCheck, Camera, Sparkles, Lock, Compass, Share2 } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Waves, MapPin, Phone, Mail, MessageCircle, Lock } from 'lucide-react';
 
 export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
-  const { t, lang } = useLanguage();
+  const tNav = useTranslations('nav');
+  const tFooter = useTranslations('footer');
 
   const getSetting = (key: string, fallback: string) => {
     if (!siteSettings) return fallback;
@@ -56,7 +57,7 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
               </div>
             </div>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.7', marginBottom: '20px' }}>
-              {t.footer.aboutText}
+              {tFooter('aboutText')}
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <a
@@ -75,6 +76,7 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
                   border: '1px solid rgba(37, 211, 102, 0.4)',
                   transition: 'transform 0.2s',
                 }}
+                aria-label="WhatsApp"
               >
                 <MessageCircle size={18} />
               </a>
@@ -124,38 +126,38 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
           {/* Column 2: Quick Links */}
           <div>
             <h4 style={{ color: '#ffffff', fontSize: '1.05rem', marginBottom: '20px', letterSpacing: '-0.01em' }}>
-              {t.footer.quickLinks}
+              {tFooter('quickLinks')}
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <li>
-                <NextLink href="/" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  {t.nav.home}
-                </NextLink>
+                <Link href="/" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {tNav('home')}
+                </Link>
               </li>
               <li>
-                <NextLink href="/paket" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  {t.nav.packages}
-                </NextLink>
+                <Link href="/paket" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {tNav('packages')}
+                </Link>
               </li>
               <li>
-                <NextLink href="/gallery" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  {t.nav.gallery}
-                </NextLink>
+                <Link href="/gallery" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {tNav('gallery')}
+                </Link>
               </li>
               <li>
-                <NextLink href="/tentang" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  {t.nav.about}
-                </NextLink>
+                <Link href="/tentang" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {tNav('about')}
+                </Link>
               </li>
               <li>
-                <NextLink href="/faq" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
-                  {t.nav.faq}
-                </NextLink>
+                <Link href="/faq" style={{ color: '#94a3b8', fontSize: '0.9rem', transition: 'color 0.2s' }}>
+                  {tNav('faq')}
+                </Link>
               </li>
               <li>
-                <NextLink href="/booking" style={{ color: 'var(--primary-turquoise)', fontWeight: 600, fontSize: '0.9rem' }}>
-                  {t.nav.bookNow} →
-                </NextLink>
+                <Link href="/booking" style={{ color: 'var(--primary-turquoise)', fontWeight: 600, fontSize: '0.9rem' }}>
+                  {tNav('bookNow')} →
+                </Link>
               </li>
             </ul>
           </div>
@@ -163,28 +165,28 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
           {/* Column 3: Featured Tours */}
           <div>
             <h4 style={{ color: '#ffffff', fontSize: '1.05rem', marginBottom: '20px', letterSpacing: '-0.01em' }}>
-              {t.footer.popularTours}
+              {tFooter('popularTours')}
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <li>
-                <NextLink href="/paket/public-sharing-trip-3-gili" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                <Link href="/paket/public-sharing-trip-3-gili" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
                   Public Sharing Trip (3 Gili)
-                </NextLink>
+                </Link>
               </li>
               <li>
-                <NextLink href="/paket/private-glass-bottom-boat" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                <Link href="/paket/private-glass-bottom-boat" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
                   Private Glass Bottom Boat
-                </NextLink>
+                </Link>
               </li>
               <li>
-                <NextLink href="/paket/sunset-snorkeling-private-tour" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                <Link href="/paket/sunset-snorkeling-private-tour" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
                   Sunset Snorkeling Tour
-                </NextLink>
+                </Link>
               </li>
               <li>
-                <NextLink href="/paket/speed-boat-snorkeling-lombok-gili" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+                <Link href="/paket/speed-boat-snorkeling-lombok-gili" style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
                   Speedboat Lombok - 3 Gili
-                </NextLink>
+                </Link>
               </li>
             </ul>
           </div>
@@ -192,7 +194,7 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
           {/* Column 4: Contact & Meeting Point */}
           <div>
             <h4 style={{ color: '#ffffff', fontSize: '1.05rem', marginBottom: '20px', letterSpacing: '-0.01em' }}>
-              {t.footer.contactUs}
+              {tFooter('contactUs')}
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
@@ -236,10 +238,10 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
           }}
         >
           <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-            © {new Date().getFullYear()} Trip Snorkeling Gili Trawangan. {t.footer.rights}
+            © {new Date().getFullYear()} Trip Snorkeling Gili Trawangan. {tFooter('rights')}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <NextLink
+            <a
               href="/admin"
               style={{
                 display: 'inline-flex',
@@ -253,7 +255,7 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
             >
               <Lock size={13} />
               Admin Portal
-            </NextLink>
+            </a>
           </div>
         </div>
       </div>

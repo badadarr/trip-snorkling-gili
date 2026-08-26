@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
-import { Calendar, Users, Phone, Mail, User, MapPin, FileText, CheckCircle2, MessageCircle, ArrowLeft, Clock, ShieldCheck, Sparkles } from 'lucide-react';
-import NextLink from 'next/link';
+import { Calendar, CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
 
 interface BookingFormProps {
   packagesList: PackageData[];
@@ -13,7 +13,10 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ packagesList, initialSlug, whatsappNumber }: BookingFormProps) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('booking');
+  const tPkg = useTranslations('packages');
+  const tCta = useTranslations('cta');
   const phoneTarget = whatsappNumber || '6287864551234';
 
   const [selectedPkgSlug, setSelectedPkgSlug] = useState<string>(
@@ -48,7 +51,6 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   // Compute estimated total
   const computePrice = () => {
     if (!currentPackage) return { idr: 0, usd: 0 };
-    // If package price > 500k, it is considered private per-boat price up to max pax
     if (currentPackage.price > 500000) {
       return {
         idr: currentPackage.price,
@@ -73,7 +75,7 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     try {
       const payload = {
         packageId: currentPackage.id,
-        packageName: lang === 'id' ? currentPackage.nameId : currentPackage.nameEn,
+        packageName: locale === 'id' ? currentPackage.nameId : currentPackage.nameEn,
         customerName,
         customerEmail,
         customerPhone,
@@ -94,20 +96,20 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
       });
 
       if (!res.ok) {
-        throw new Error('Gagal mengirim pemesanan. Silakan coba lagi.');
+        throw new Error(locale === 'id' ? 'Gagal mengirim pemesanan. Silakan coba lagi.' : 'Failed to submit reservation. Please try again.');
       }
 
       const data = await res.json();
       setSubmittedBooking(data.booking || payload);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Terjadi kesalahan sistem');
+      setErrorMsg(err.message || (locale === 'id' ? 'Terjadi kesalahan sistem' : 'System error occurred'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const getWhatsAppBookingUrl = (booking: any) => {
-    const packageName = lang === 'id' ? currentPackage?.nameId : currentPackage?.nameEn;
+    const packageName = locale === 'id' ? currentPackage?.nameId : currentPackage?.nameEn;
     const msg = `Halo Admin Trip Snorkeling Gili Trawangan!
 Saya telah melakukan booking online dengan detail:
 - Kode Booking: *${booking.bookingCode || 'ONLINE-BOOKING'}*
@@ -154,11 +156,11 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
         </div>
 
         <h2 style={{ fontSize: '1.8rem', color: 'var(--primary-deep)', marginBottom: '12px' }}>
-          {t.booking.successTitle}
+          {t('successTitle')}
         </h2>
 
         <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-          {t.booking.successDesc}
+          {t('successDesc')}
           <strong style={{ color: 'var(--primary-ocean)', fontSize: '1.15rem', display: 'block', marginTop: '6px' }}>
             {submittedBooking.bookingCode || 'GILI-SUCCESS'}
           </strong>
@@ -175,19 +177,19 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           }}
         >
           <h4 style={{ fontSize: '0.95rem', color: 'var(--primary-navy)', marginBottom: '12px' }}>
-            {t.booking.summaryTitle}:
+            {t('summaryTitle')}:
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.88rem' }}>
-            <div><strong>{lang === 'id' ? 'Paket' : 'Package'}:</strong> {lang === 'id' ? currentPackage?.nameId : currentPackage?.nameEn}</div>
-            <div><strong>{lang === 'id' ? 'Nama' : 'Name'}:</strong> {customerName}</div>
-            <div><strong>{lang === 'id' ? 'Tanggal' : 'Date'}:</strong> {tripDate} ({tripSession})</div>
-            <div><strong>{lang === 'id' ? 'Peserta' : 'Guests'}:</strong> {numberOfPeople} {lang === 'id' ? 'Orang' : 'Pax'}</div>
-            <div><strong>{lang === 'id' ? 'Total Biaya' : 'Total'}:</strong> Rp {totals.idr.toLocaleString('id-ID')} (${totals.usd})</div>
+            <div><strong>{locale === 'id' ? 'Paket' : 'Package'}:</strong> {locale === 'id' ? currentPackage?.nameId : currentPackage?.nameEn}</div>
+            <div><strong>{locale === 'id' ? 'Nama' : 'Name'}:</strong> {customerName}</div>
+            <div><strong>{locale === 'id' ? 'Tanggal' : 'Date'}:</strong> {tripDate} ({tripSession})</div>
+            <div><strong>{locale === 'id' ? 'Peserta' : 'Guests'}:</strong> {numberOfPeople} {locale === 'id' ? 'Orang' : 'Pax'}</div>
+            <div><strong>{locale === 'id' ? 'Total Biaya' : 'Total'}:</strong> Rp {totals.idr.toLocaleString('id-ID')} (${totals.usd})</div>
           </div>
         </div>
 
         <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-          {t.booking.successNote}
+          {t('successNote')}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -199,13 +201,13 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             style={{ width: '100%' }}
           >
             <MessageCircle size={20} />
-            <span>{t.booking.chatWaNow}</span>
+            <span>{t('chatWaNow')}</span>
           </a>
 
-          <NextLink href="/" className="btn btn-secondary">
+          <Link href="/" className="btn btn-secondary">
             <ArrowLeft size={16} />
-            <span>{t.booking.backHome}</span>
-          </NextLink>
+            <span>{t('backHome')}</span>
+          </Link>
         </div>
       </div>
     );
@@ -233,7 +235,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
 
           {/* 1. Select Package */}
           <div className="form-group">
-            <label className="form-label">{t.booking.selectPackage} *</label>
+            <label className="form-label">{t('selectPackage')} *</label>
             <select
               className="form-control"
               value={selectedPkgSlug}
@@ -242,7 +244,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             >
               {packagesList.map((pkg) => (
                 <option key={pkg.id} value={pkg.slug}>
-                  {lang === 'id' ? pkg.nameId : pkg.nameEn} — Rp {pkg.price.toLocaleString('id-ID')} (${pkg.priceUsd})
+                  {locale === 'id' ? pkg.nameId : pkg.nameEn} — Rp {pkg.price.toLocaleString('id-ID')} (${pkg.priceUsd})
                 </option>
               ))}
             </select>
@@ -250,38 +252,36 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
 
           {/* 2. Customer Name */}
           <div className="form-group">
-            <label className="form-label">{t.booking.fullName} *</label>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="text"
-                className="form-control"
-                placeholder={t.booking.fullNamePlaceholder}
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                required
-              />
-            </div>
+            <label className="form-label">{t('fullName')} *</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder={t('fullNamePlaceholder')}
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              required
+            />
           </div>
 
           {/* 3. Customer Email & Phone */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div className="form-group">
-              <label className="form-label">{t.booking.email} *</label>
+              <label className="form-label">{t('email')} *</label>
               <input
                 type="email"
                 className="form-control"
-                placeholder={t.booking.emailPlaceholder}
+                placeholder={t('emailPlaceholder')}
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 required
               />
             </div>
             <div className="form-group">
-              <label className="form-label">{t.booking.phone} *</label>
+              <label className="form-label">{t('phone')} *</label>
               <input
                 type="tel"
                 className="form-control"
-                placeholder={t.booking.phonePlaceholder}
+                placeholder={t('phonePlaceholder')}
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 required
@@ -292,7 +292,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           {/* 4. Number of People & Date */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div className="form-group">
-              <label className="form-label">{t.booking.pax} *</label>
+              <label className="form-label">{t('pax')} *</label>
               <input
                 type="number"
                 min="1"
@@ -304,7 +304,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               />
             </div>
             <div className="form-group">
-              <label className="form-label">{t.booking.tripDate} *</label>
+              <label className="form-label">{t('tripDate')} *</label>
               <input
                 type="date"
                 className="form-control"
@@ -317,26 +317,26 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
 
           {/* 5. Session */}
           <div className="form-group">
-            <label className="form-label">{t.booking.session} *</label>
+            <label className="form-label">{t('session')} *</label>
             <select
               className="form-control"
               value={tripSession}
               onChange={(e) => setTripSession(e.target.value)}
             >
-              <option value="morning">{t.booking.sessionMorning}</option>
-              <option value="afternoon">{t.booking.sessionAfternoon}</option>
-              <option value="sunset">{t.booking.sessionSunset}</option>
-              <option value="flexible">{t.booking.sessionFlexible}</option>
+              <option value="morning">{t('sessionMorning')}</option>
+              <option value="afternoon">{t('sessionAfternoon')}</option>
+              <option value="sunset">{t('sessionSunset')}</option>
+              <option value="flexible">{t('sessionFlexible')}</option>
             </select>
           </div>
 
           {/* 6. Pickup Location (Optional) */}
           <div className="form-group">
-            <label className="form-label">{t.booking.pickup}</label>
+            <label className="form-label">{t('pickup')}</label>
             <input
               type="text"
               className="form-control"
-              placeholder={t.booking.pickupPlaceholder}
+              placeholder={t('pickupPlaceholder')}
               value={pickupLocation}
               onChange={(e) => setPickupLocation(e.target.value)}
             />
@@ -344,10 +344,10 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
 
           {/* 7. Special Requests */}
           <div className="form-group">
-            <label className="form-label">{t.booking.notes}</label>
+            <label className="form-label">{t('notes')}</label>
             <textarea
               className="form-control"
-              placeholder={t.booking.notesPlaceholder}
+              placeholder={t('notesPlaceholder')}
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
               rows={3}
@@ -362,7 +362,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             style={{ width: '100%', marginTop: '10px' }}
           >
             <Calendar size={18} />
-            <span>{isSubmitting ? t.booking.submitting : t.booking.submitBtn}</span>
+            <span>{isSubmitting ? t('submitting') : t('submitBtn')}</span>
           </button>
         </form>
       </div>
@@ -374,16 +374,16 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div className="glass-card" style={{ padding: '28px', border: '1px solid var(--primary-turquoise)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <div style={{ padding: '6px 12px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>
-                {lang === 'id' ? 'RINGKASAN PAKET' : 'PACKAGE SUMMARY'}
+                {locale === 'id' ? 'RINGKASAN PAKET' : 'PACKAGE SUMMARY'}
               </div>
             </div>
 
             <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-deep)', marginBottom: '8px' }}>
-              {lang === 'id' ? currentPackage.nameId : currentPackage.nameEn}
+              {locale === 'id' ? currentPackage.nameId : currentPackage.nameEn}
             </h3>
 
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.5 }}>
-              {lang === 'id' ? currentPackage.descriptionId : currentPackage.descriptionEn}
+              {locale === 'id' ? currentPackage.descriptionId : currentPackage.descriptionEn}
             </p>
 
             {/* Price Breakdown */}
@@ -399,8 +399,8 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
                   {currentPackage.price > 500000
-                    ? (lang === 'id' ? 'Tarif Private Boat' : 'Private Boat Rate')
-                    : `${lang === 'id' ? 'Harga per Orang' : 'Rate per Person'} (${numberOfPeople}x)`}
+                    ? (locale === 'id' ? 'Tarif Private Boat' : 'Private Boat Rate')
+                    : `${locale === 'id' ? 'Harga per Orang' : 'Rate per Person'} (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
                   Rp {currentPackage.price.toLocaleString('id-ID')}
@@ -417,7 +417,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
                 }}
               >
                 <span style={{ fontWeight: 700, color: 'var(--primary-deep)', fontSize: '0.95rem' }}>
-                  {t.booking.estimatedTotal}
+                  {t('estimatedTotal')}
                 </span>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-ocean)', fontFamily: 'var(--font-heading)' }}>
@@ -434,10 +434,10 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             {currentPackage.includesId && (
               <div>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                  {t.packages.includes}:
+                  {tPkg('includes')}:
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {(lang === 'id' ? currentPackage.includesId : (currentPackage.includesEn || currentPackage.includesId)).slice(0, 4).map((inc, i) => (
+                  {(locale === 'id' ? currentPackage.includesId : (currentPackage.includesEn || currentPackage.includesId)).slice(0, 4).map((inc, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                       <CheckCircle2 size={14} color="var(--accent-green)" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <span>{inc}</span>
@@ -461,17 +461,17 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <MessageCircle size={22} color="#25d366" />
             <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)' }}>
-              {lang === 'id' ? 'Mau Konsultasi Dulu?' : 'Prefer Quick Chat?'}
+              {locale === 'id' ? 'Mau Konsultasi Dulu?' : 'Prefer Quick Chat?'}
             </h4>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
-            {lang === 'id'
+            {locale === 'id'
               ? 'Ada pertanyaan seputar cuaca, rute penjemputan dari Lombok, atau permintaan khusus? Hubungi tim kami langsung via WhatsApp.'
               : 'Have special questions regarding weather, speedboat transfer from Lombok, or customized routes? Chat directly with our local coordinator.'}
           </p>
           <a
             href={`https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-              lang === 'id'
+              locale === 'id'
                 ? `Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi paket snorkeling...`
                 : `Hello! I would like to ask some questions about your Gili snorkeling packages.`
             )}`}
@@ -481,7 +481,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             style={{ width: '100%' }}
           >
             <MessageCircle size={16} />
-            <span>{t.cta.whatsappButton}</span>
+            <span>{tCta('whatsappButton')}</span>
           </a>
         </div>
       </div>

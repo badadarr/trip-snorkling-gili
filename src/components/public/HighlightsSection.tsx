@@ -1,37 +1,37 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Compass, Sparkles, MapPin, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Compass, MapPin } from 'lucide-react';
 
 export default function HighlightsSection() {
-  const { t, lang } = useLanguage();
+  const t = useTranslations('highlights');
 
   const highlights = [
     {
-      title: t.highlights.spot1Title,
-      desc: t.highlights.spot1Desc,
+      title: t('spot1Title'),
+      desc: t('spot1Desc'),
       image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop',
       tag: 'Gili Meno',
       depth: '2 - 4 Meter',
     },
     {
-      title: t.highlights.spot2Title,
-      desc: t.highlights.spot2Desc,
+      title: t('spot2Title'),
+      desc: t('spot2Desc'),
       image: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=1200&auto=format&fit=crop',
       tag: 'Bask Nest Meno',
       depth: '3 - 5 Meter',
     },
     {
-      title: t.highlights.spot3Title,
-      desc: t.highlights.spot3Desc,
+      title: t('spot3Title'),
+      desc: t('spot3Desc'),
       image: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=1200&auto=format&fit=crop',
       tag: 'Gili Air',
       depth: '1.5 - 3 Meter',
     },
     {
-      title: t.highlights.spot4Title,
-      desc: t.highlights.spot4Desc,
+      title: t('spot4Title'),
+      desc: t('spot4Desc'),
       image: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=1200&auto=format&fit=crop',
       tag: 'Gili Trawangan Waters',
       depth: 'Sunset Spot',
@@ -45,10 +45,10 @@ export default function HighlightsSection() {
         <div className="section-header">
           <div className="section-badge">
             <Compass size={14} />
-            <span>{t.highlights.badge}</span>
+            <span>{t('badge')}</span>
           </div>
-          <h2 className="section-title">{t.highlights.title}</h2>
-          <p className="section-subtitle">{t.highlights.subtitle}</p>
+          <h2 className="section-title">{t('title')}</h2>
+          <p className="section-subtitle">{t('subtitle')}</p>
         </div>
 
         {/* Highlights Grid */}

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useLanguage } from '@/lib/LanguageContext';
-import { Camera, X, ZoomIn, Image as ImageIcon } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { X, ZoomIn } from 'lucide-react';
 
 export interface GalleryItem {
   id: number;
@@ -14,17 +14,18 @@ export interface GalleryItem {
 }
 
 export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
-  const { lang, t } = useLanguage();
+  const locale = useLocale();
+  const t = useTranslations('gallery');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
 
   const categories = [
-    { key: 'all', label: t.gallery.all },
-    { key: 'turtles', label: t.gallery.turtles },
-    { key: 'statues', label: t.gallery.statues },
-    { key: 'underwater', label: t.gallery.underwater },
-    { key: 'sunset', label: t.gallery.sunset },
-    { key: 'boats', label: t.gallery.boats },
+    { key: 'all', label: t('all') },
+    { key: 'turtles', label: t('turtles') },
+    { key: 'statues', label: t('statues') },
+    { key: 'underwater', label: t('underwater') },
+    { key: 'sunset', label: t('sunset') },
+    { key: 'boats', label: t('boats') },
   ];
 
   const filteredItems = activeCategory === 'all'
@@ -75,7 +76,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
         }}
       >
         {filteredItems.map((item) => {
-          const title = lang === 'id' ? item.titleId : item.titleEn;
+          const title = locale === 'id' ? item.titleId : item.titleEn;
           return (
             <div
               key={item.id}
@@ -189,7 +190,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
             <div style={{ maxHeight: '70vh', overflow: 'hidden' }}>
               <img
                 src={selectedPhoto.imageUrl}
-                alt={lang === 'id' ? selectedPhoto.titleId : selectedPhoto.titleEn}
+                alt={locale === 'id' ? selectedPhoto.titleId : selectedPhoto.titleEn}
                 style={{ width: '100%', maxHeight: '70vh', objectFit: 'contain', margin: '0 auto' }}
               />
             </div>
@@ -197,7 +198,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
             <div style={{ padding: '20px 24px', background: 'rgba(13, 33, 55, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <h4 style={{ color: '#ffffff', fontSize: '1.1rem', marginBottom: '4px' }}>
-                  {lang === 'id' ? selectedPhoto.titleId : selectedPhoto.titleEn}
+                  {locale === 'id' ? selectedPhoto.titleId : selectedPhoto.titleEn}
                 </h4>
                 <span style={{ color: 'var(--primary-aqua)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Spot: {selectedPhoto.category || 'Gili Islands'}
