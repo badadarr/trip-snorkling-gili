@@ -14,6 +14,11 @@ import {
   TrendingUp,
   Plus,
   Eye,
+  Users,
+  Anchor,
+  Compass,
+  FileSpreadsheet,
+  AlertCircle,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -26,131 +31,348 @@ export default async function AdminDashboardPage() {
   const settings = await getSettings();
 
   const totalBookings = bookings.length;
-  const pendingBookings = bookings.filter((b) => b.status === 'pending').length;
-  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed').length;
-  const totalRevenue = bookings
-    .filter((b) => b.status === 'confirmed')
-    .reduce((acc, b) => acc + (b.totalPriceIdr || 0), 0);
+  const pendingBookings = bookings.filter((b) => b.status === 'pending');
+  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
+  const totalRevenue = confirmedBookings.reduce((acc, b) => acc + (b.totalPriceIdr || 0), 0);
+  const totalRevenueUsd = confirmedBookings.reduce((acc, b) => acc + (b.totalPriceUsd || 0), 0);
+
+  // Today's trips
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayTrips = bookings.filter((b) => b.tripDate === todayStr && b.status !== 'cancelled');
+  const todayMorningTrips = todayTrips.filter((b) => b.tripSession === 'morning');
+  const todayAfternoonTrips = todayTrips.filter((b) => b.tripSession === 'afternoon' || b.tripSession === 'sunset');
+  const todayTotalPassengers = todayTrips.reduce((acc, b) => acc + (b.numberOfPeople || 0), 0);
 
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
   return (
     <div>
-      {/* Top Welcome Title */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+      {/* Top Welcome Title & Quick Actions */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
         <div>
           <h1 style={{ fontSize: '1.75rem', color: 'var(--primary-deep)', marginBottom: '4px' }}>
-            Dashboard Overview
+            Dashboard Operasional Trip
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Pantau reservasi masuk, kelola paket snorkeling, dan atur konten website.
+            Pantau keberangkatan kapal hari ini, reservasi masuk, dan kelola paket snorkeling 3 Gili.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <NextLink href="/admin/booking" className="btn btn-secondary btn-sm">
+            <FileSpreadsheet size={15} />
+            <span>Kelola Booking & Manifest</span>
+          </NextLink>
           <NextLink href="/admin/paket" className="btn btn-primary btn-sm">
-            <Plus size={16} />
+            <Plus size={15} />
             <span>Tambah Paket Trip</span>
           </NextLink>
           <NextLink href="/" target="_blank" className="btn btn-secondary btn-sm">
-            <Eye size={16} />
-            <span>Preview Web</span>
+            <Eye size={15} />
+            <span>Website Live</span>
           </NextLink>
         </div>
       </div>
 
-      {/* 4 Stat Cards */}
+      {/* 4 Stat Metric Cards */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '20px',
-          marginBottom: '36px',
+          gap: '16px',
+          marginBottom: '28px',
         }}
       >
-        <div className="glass-card" style={{ padding: '22px', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Total Reservasi
+        {/* Penumpang Hari Ini */}
+        <div className="glass-card" style={{ padding: '20px', background: '#ffffff', borderLeft: '4px solid var(--primary-ocean)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Penumpang Hari Ini
             </span>
-            <div style={{ padding: '8px', borderRadius: '10px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)' }}>
-              <CalendarCheck size={20} />
+            <div style={{ padding: '6px', borderRadius: '8px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)' }}>
+              <Users size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-            {totalBookings}
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--primary-deep)' }}>
+            {todayTotalPassengers} <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-muted)' }}>Orang</span>
           </div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--accent-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-            <TrendingUp size={13} /> {confirmedBookings} Terkonfirmasi
+          <span style={{ fontSize: '0.78rem', color: 'var(--primary-ocean)', fontWeight: 600, display: 'block', marginTop: '4px' }}>
+            {todayTrips.length} Rombongan Keberangkatan
           </span>
         </div>
 
-        <div className="glass-card" style={{ padding: '22px', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        {/* Booking Pending Follow-up */}
+        <div className="glass-card" style={{ padding: '20px', background: '#ffffff', borderLeft: '4px solid #d97706' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Booking Pending
             </span>
-            <div style={{ padding: '8px', borderRadius: '10px', background: '#fef3c7', color: '#d97706' }}>
-              <Clock size={20} />
+            <div style={{ padding: '6px', borderRadius: '8px', background: '#fef3c7', color: '#d97706' }}>
+              <Clock size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#d97706', fontFamily: 'var(--font-heading)' }}>
-            {pendingBookings}
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#d97706' }}>
+            {pendingBookings.length}
           </div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-            Perlu konfirmasi WhatsApp
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+            Butuh konfirmasi via WhatsApp
           </span>
         </div>
 
-        <div className="glass-card" style={{ padding: '22px', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Paket Snorkeling Aktif
+        {/* Total Terkonfirmasi */}
+        <div className="glass-card" style={{ padding: '20px', background: '#ffffff', borderLeft: '4px solid var(--accent-green)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              Booking Confirmed
             </span>
-            <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(6, 214, 160, 0.15)', color: 'var(--accent-green)' }}>
-              <Package size={20} />
+            <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(6, 214, 160, 0.15)', color: 'var(--accent-green)' }}>
+              <CalendarCheck size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-            {packages.length}
+          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--primary-deep)' }}>
+            {confirmedBookings.length} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 500 }}>/ {totalBookings} total</span>
           </div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-            {packages.filter((p) => p.isFeatured).length} Paket Populer
+          <span style={{ fontSize: '0.78rem', color: 'var(--accent-green)', fontWeight: 600, display: 'block', marginTop: '4px' }}>
+            {Math.round((confirmedBookings.length / (totalBookings || 1)) * 100)}% Rasio Konversi
           </span>
         </div>
 
-        <div className="glass-card" style={{ padding: '22px', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        {/* Total Omset */}
+        <div className="glass-card" style={{ padding: '20px', background: '#ffffff', borderLeft: '4px solid #00b4d8' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Estimasi Omset
             </span>
-            <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(0, 180, 216, 0.15)', color: 'var(--primary-ocean)' }}>
-              <Sparkles size={20} />
+            <div style={{ padding: '6px', borderRadius: '8px', background: 'rgba(0, 180, 216, 0.15)', color: 'var(--primary-ocean)' }}>
+              <Sparkles size={18} />
             </div>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-ocean)', fontFamily: 'var(--font-heading)' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--primary-ocean)' }}>
             Rp {totalRevenue.toLocaleString('id-ID')}
           </div>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-            Dari booking terkonfirmasi
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+            {totalRevenueUsd > 0 ? `+ $${totalRevenueUsd} USD` : 'Dari booking confirmed'}
           </span>
         </div>
       </div>
 
-      {/* Recent Bookings Section */}
-      <div className="glass-card" style={{ padding: '28px', background: '#ffffff', marginBottom: '36px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      {/* Two Columns: Today's Departure Schedule & Pending Follow-up Queue */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', marginBottom: '28px' }}>
+        {/* Today's Departures Schedule */}
+        <div className="glass-card" style={{ padding: '24px', background: '#ffffff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)' }}>
+                <Anchor size={18} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.05rem', color: 'var(--primary-deep)', margin: 0 }}>
+                  Jadwal Keberangkatan Hari Ini
+                </h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  Tanggal: <strong>{todayStr}</strong> ({todayTotalPassengers} Penumpang)
+                </span>
+              </div>
+            </div>
+
+            <NextLink href="/admin/booking" className="btn btn-secondary btn-sm" style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
+              <span>Buka Manifest</span>
+            </NextLink>
+          </div>
+
+          {todayTrips.length === 0 ? (
+            <div
+              style={{
+                padding: '30px 20px',
+                textAlign: 'center',
+                background: '#f8fafc',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px dashed var(--border-light)',
+                color: 'var(--text-muted)',
+                fontSize: '0.88rem',
+              }}
+            >
+              Belum ada jadwal keberangkatan untuk hari ini.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {todayTrips.map((b) => (
+                <div
+                  key={b.id}
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-light)',
+                    background: '#f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong style={{ fontSize: '0.88rem', color: 'var(--primary-deep)' }}>
+                        {b.customerName}
+                      </strong>
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: b.tripSession === 'morning' ? '#e0f2fe' : '#fef3c7',
+                          color: b.tripSession === 'morning' ? '#0369a1' : '#b45309',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {b.tripSession === 'morning' ? 'Pagi (09:30)' : 'Siang (13:00)'}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      {b.packageName} • <strong>{b.numberOfPeople} Org</strong>
+                    </span>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${(b.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                      `Halo Kak ${b.customerName}! Kami dari Trip Snorkeling Gili mengingatkan jadwal keberangkatan Anda hari ini (${b.bookingCode}) pada sesi ${b.tripSession === 'morning' ? 'Pagi 09:30' : 'Siang 13:00'}. Mohon tiba di counter dermaga 15 menit sebelum kapal bertolak ya.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(37, 211, 102, 0.15)',
+                      color: '#15803d',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <MessageCircle size={14} />
+                    <span>WA Tamu</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Pending Booking Follow-up Queue */}
+        <div className="glass-card" style={{ padding: '24px', background: '#ffffff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '6px', borderRadius: '8px', background: '#fef3c7', color: '#d97706' }}>
+                <Clock size={18} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.05rem', color: 'var(--primary-deep)', margin: 0 }}>
+                  Antrean Booking Pending
+                </h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  {pendingBookings.length} reservasi perlu konfirmasi
+                </span>
+              </div>
+            </div>
+
+            <NextLink href="/admin/booking" className="btn btn-secondary btn-sm" style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
+              <span>Lihat Semua</span>
+            </NextLink>
+          </div>
+
+          {pendingBookings.length === 0 ? (
+            <div
+              style={{
+                padding: '30px 20px',
+                textAlign: 'center',
+                background: '#f0fdf4',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px dashed #bbf7d0',
+                color: '#15803d',
+                fontSize: '0.88rem',
+              }}
+            >
+              Semua reservasi telah terkonfirmasi! Tidak ada antrean pending.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {pendingBookings.slice(0, 4).map((b) => (
+                <div
+                  key={b.id}
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-light)',
+                    background: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: '0.88rem', color: 'var(--primary-deep)', display: 'block' }}>
+                      {b.customerName}
+                    </strong>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      {b.tripDate} • {b.numberOfPeople} Org • Rp {b.totalPriceIdr?.toLocaleString('id-ID')}
+                    </span>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${(b.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                      `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili Trawangan ingin mengonfirmasi pesanan trip snorkeling Anda dengan kode ${b.bookingCode} untuk tanggal ${b.tripDate}...`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(37, 211, 102, 0.15)',
+                      color: '#15803d',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <MessageCircle size={14} />
+                    <span>Follow Up</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent Bookings Full Table */}
+      <div className="glass-card" style={{ padding: '24px', background: '#ffffff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
           <div>
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)' }}>
+            <h3 style={{ fontSize: '1.15rem', color: 'var(--primary-deep)', margin: 0 }}>
               Daftar Reservasi Terbaru
             </h3>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Klik tombol WhatsApp untuk follow up atau ubah status reservasi
+              Riwayat reservasi masuk dari form website publik & walk-in
             </span>
           </div>
+
           <NextLink href="/admin/booking" className="btn btn-secondary btn-sm">
-            <span>Lihat Semua Booking</span>
+            <span>Lihat Semua ({totalBookings})</span>
             <ArrowRight size={14} />
           </NextLink>
         </div>
@@ -166,11 +388,11 @@ export default async function AdminDashboardPage() {
                 <th>Peserta</th>
                 <th>Total</th>
                 <th>Status</th>
-                <th>Aksi</th>
+                <th>Aksi Cepat</th>
               </tr>
             </thead>
             <tbody>
-              {bookings.slice(0, 5).map((b) => (
+              {bookings.slice(0, 6).map((b) => (
                 <tr key={b.id}>
                   <td>
                     <strong style={{ color: 'var(--primary-ocean)', fontSize: '0.85rem' }}>
@@ -186,12 +408,14 @@ export default async function AdminDashboardPage() {
                   </td>
                   <td>
                     <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{b.tripDate}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.tripSession || 'Pagi'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                      {b.tripSession || 'Pagi'}
+                    </div>
                   </td>
                   <td>{b.numberOfPeople} Org</td>
                   <td>
                     <strong style={{ color: 'var(--text-main)' }}>
-                      Rp {b.totalPriceIdr.toLocaleString('id-ID')}
+                      Rp {b.totalPriceIdr?.toLocaleString('id-ID')}
                     </strong>
                   </td>
                   <td>
@@ -200,28 +424,41 @@ export default async function AdminDashboardPage() {
                     </span>
                   </td>
                   <td>
-                    <a
-                      href={`https://wa.me/${b.customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                        `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili Trawangan mengonfirmasi pesanan Anda dengan kode ${b.bookingCode}...`
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 12px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'rgba(37, 211, 102, 0.15)',
-                        color: '#15803d',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        textDecoration: 'none',
-                      }}
-                    >
-                      <MessageCircle size={14} />
-                      <span>Chat WA</span>
-                    </a>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <NextLink
+                        href="/admin/booking"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          background: 'var(--primary-surface)',
+                          color: 'var(--primary-ocean)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          textDecoration: 'none',
+                        }}
+                      >
+                        Detail
+                      </NextLink>
+                      <a
+                        href={`https://wa.me/${(b.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                          `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili mengonfirmasi pesanan ${b.bookingCode}...`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          background: 'rgba(37, 211, 102, 0.15)',
+                          color: '#15803d',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        title="Chat WhatsApp"
+                      >
+                        <MessageCircle size={14} />
+                      </a>
+                    </div>
                   </td>
                 </tr>
               ))}

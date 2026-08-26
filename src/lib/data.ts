@@ -322,23 +322,30 @@ export async function createBooking(data: any) {
   return newItem;
 }
 
-export async function updateBookingStatus(id: number, status: string) {
+export async function updateBooking(id: number, data: any) {
   const db = getDb();
   if (db) {
     try {
-      const [updated] = await db.update(bookings).set({ status, updatedAt: new Date() }).where(eq(bookings.id, id)).returning();
+      const [updated] = await db.update(bookings).set({ ...data, updatedAt: new Date() }).where(eq(bookings.id, id)).returning();
       return updated;
     } catch (e) {
-      console.error('Error updating booking status in DB:', e);
+      console.error('Error updating booking in DB:', e);
     }
   }
   const index = fallbackStore.bookings.findIndex((b) => b.id === id);
   if (index !== -1) {
-    fallbackStore.bookings[index].status = status;
-    fallbackStore.bookings[index].updatedAt = new Date().toISOString();
+    fallbackStore.bookings[index] = {
+      ...fallbackStore.bookings[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
     return fallbackStore.bookings[index];
   }
   return null;
+}
+
+export async function updateBookingStatus(id: number, status: string) {
+  return updateBooking(id, { status });
 }
 
 export async function deleteBooking(id: number) {

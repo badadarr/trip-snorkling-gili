@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 
-const ADMIN_EMAIL = process.env.ADMIN_DEFAULT_EMAIL || 'admin@snorkelinggilitrawangan.com';
-const ADMIN_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'AdminSnorkeling2026!';
+const ADMIN_EMAIL = process.env.ADMIN_DEFAULT_EMAIL || 'admin@skt.com';
+const ADMIN_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'admin123';
 const SESSION_COOKIE_NAME = 'snorkeling_admin_session';
 
 export interface AdminUser {

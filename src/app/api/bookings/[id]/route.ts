@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateBookingStatus, deleteBooking } from '@/lib/data';
+import { updateBooking, deleteBooking } from '@/lib/data';
 import { getAdminSession } from '@/lib/auth';
 
 interface RouteProps {
@@ -14,8 +14,8 @@ export async function PUT(req: Request, { params }: RouteProps) {
 
   try {
     const { id } = await params;
-    const { status } = await req.json();
-    const updated = await updateBookingStatus(parseInt(id), status);
+    const body = await req.json();
+    const updated = await updateBooking(parseInt(id), body);
     return NextResponse.json({ success: true, booking: updated });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
