@@ -24,8 +24,6 @@ export default function ManualBookingModal({
   onSuccess,
   packages,
 }: ManualBookingModalProps) {
-  if (!isOpen) return null;
-
   // Format today's date YYYY-MM-DD
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -93,6 +91,8 @@ export default function ManualBookingModal({
       setIsSubmitting(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div
