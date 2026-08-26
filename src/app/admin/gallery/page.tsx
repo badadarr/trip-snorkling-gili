@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Image as ImageIcon, Plus, Trash2, X, CheckCircle2 } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, X, CheckCircle2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminGalleryPage() {
   const [gallery, setGallery] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     imageUrl: '',
@@ -26,6 +29,7 @@ export default function AdminGalleryPage() {
       }
     } catch (e) {
       console.error(e);
+      toast.error('Gagal memuat galeri');
     } finally {
       setLoading(false);
     }
@@ -37,6 +41,8 @@ export default function AdminGalleryPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+    const toastId = toast.loading('Menambahkan foto ke galeri...');
     try {
       const res = await fetch('/api/gallery', {
         method: 'POST',
@@ -44,31 +50,37 @@ export default function AdminGalleryPage() {
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        fetchGallery();
-        setIsModalOpen(false);
-        setFormData({
-          imageUrl: '',
-          titleId: '',
-          titleEn: '',
-          category: 'underwater',
-          orderIndex: 1,
-        });
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menambahkan foto');
+      toast.success('Foto baru berhasil ditambahkan!', { id: toastId });
+      fetchGallery();
+      setIsModalOpen(false);
+      setFormData({
+        imageUrl: '',
+        titleId: '',
+        titleEn: '',
+        category: 'underwater',
+        orderIndex: 1,
+      });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menambahkan foto', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Hapus foto ini dari galeri?')) return;
+    setDeletingId(id);
+    const toastId = toast.loading('Menghapus foto...');
     try {
       const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setGallery((prev) => prev.filter((g) => g.id !== id));
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menghapus foto');
+      setGallery((prev) => prev.filter((g) => g.id !== id));
+      toast.success('Foto berhasil dihapus dari galeri!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menghapus foto', { id: toastId });
+    } finally {
+      setDeletingId(null);
     }
   };
 

@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Edit3, Trash2, CheckCircle2, Sparkles, X, Eye } from 'lucide-react';
+import { Package, Plus, Edit3, Trash2, CheckCircle2, Sparkles, X, Eye, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminPackagesPage() {
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -102,6 +105,8 @@ export default function AdminPackagesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+    const toastId = toast.loading(editingId ? 'Menyimpan perubahan paket...' : 'Menambahkan paket baru...');
 
     const payload = {
       ...formData,
@@ -118,35 +123,41 @@ export default function AdminPackagesPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (res.ok) {
-          fetchPackages();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal memperbarui paket');
+        toast.success('Paket berhasil diperbarui!', { id: toastId });
+        fetchPackages();
+        setIsModalOpen(false);
       } else {
         const res = await fetch('/api/packages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (res.ok) {
-          fetchPackages();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal menambahkan paket');
+        toast.success('Paket baru berhasil ditambahkan!', { id: toastId });
+        fetchPackages();
+        setIsModalOpen(false);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      toast.error(e.message || 'Terjadi kesalahan saat menyimpan', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Hapus paket trip ini secara permanen?')) return;
+    setDeletingId(id);
+    const toastId = toast.loading('Menghapus paket...');
     try {
       const res = await fetch(`/api/packages/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setPackages((prev) => prev.filter((p) => p.id !== id));
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menghapus paket');
+      setPackages((prev) => prev.filter((p) => p.id !== id));
+      toast.success('Paket berhasil dihapus!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menghapus', { id: toastId });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -253,6 +264,7 @@ export default function AdminPackagesPage() {
                       </button>
                       <button
                         type="button"
+                        disabled={deletingId === pkg.id}
                         onClick={() => handleDelete(pkg.id)}
                         style={{
                           padding: '6px',
@@ -260,10 +272,15 @@ export default function AdminPackagesPage() {
                           background: '#fee2e2',
                           color: '#b91c1c',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: deletingId === pkg.id ? 'not-allowed' : 'pointer',
+                          opacity: deletingId === pkg.id ? 0.6 : 1,
                         }}
                       >
-                        <Trash2 size={14} />
+                        {deletingId === pkg.id ? (
+                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
                       </button>
                     </div>
                   </td>
@@ -483,11 +500,12 @@ export default function AdminPackagesPage() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
-                <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
+                <button type="button" disabled={isSaving} onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingId ? 'Simpan Perubahan' : 'Tambahkan Paket'}
+                <button type="submit" disabled={isSaving} className="btn btn-primary" style={{ opacity: isSaving ? 0.85 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}>
+                  {isSaving && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
+                  <span>{isSaving ? 'Menyimpan...' : (editingId ? 'Simpan Perubahan' : 'Tambahkan Paket')}</span>
                 </button>
               </div>
             </form>

@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CalendarCheck, MessageCircle, Trash2, CheckCircle2, XCircle, Clock, Search, RefreshCw } from 'lucide-react';
+import { CalendarCheck, MessageCircle, Trash2, CheckCircle2, XCircle, Clock, Search, RefreshCw, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -19,6 +22,7 @@ export default function AdminBookingsPage() {
       }
     } catch (e) {
       console.error(e);
+      toast.error('Gagal memuat data booking');
     } finally {
       setLoading(false);
     }
@@ -29,31 +33,39 @@ export default function AdminBookingsPage() {
   }, []);
 
   const handleUpdateStatus = async (id: number, newStatus: string) => {
+    setUpdatingId(id);
+    const toastId = toast.loading(`Mengubah status reservasi ke ${newStatus}...`);
     try {
       const res = await fetch(`/api/bookings/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) {
-        setBookings((prev) =>
-          prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
-        );
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal memperbarui status');
+      setBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+      );
+      toast.success(`Status berhasil diubah menjadi ${newStatus}!`, { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal mengubah status', { id: toastId });
+    } finally {
+      setUpdatingId(null);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus data reservasi ini?')) return;
+    setDeletingId(id);
+    const toastId = toast.loading('Menghapus data reservasi...');
     try {
       const res = await fetch(`/api/bookings/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setBookings((prev) => prev.filter((b) => b.id !== id));
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menghapus');
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+      toast.success('Data reservasi berhasil dihapus!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menghapus', { id: toastId });
+    } finally {
+      setDeletingId(null);
     }
   };
 

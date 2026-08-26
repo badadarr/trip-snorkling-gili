@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Plus, Edit3, Trash2, X, Star } from 'lucide-react';
+import { MessageSquare, Plus, Edit3, Trash2, X, Star, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -31,6 +34,7 @@ export default function AdminTestimonialsPage() {
       }
     } catch (e) {
       console.error(e);
+      toast.error('Gagal memuat daftar testimoni');
     } finally {
       setLoading(false);
     }
@@ -74,6 +78,8 @@ export default function AdminTestimonialsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+    const toastId = toast.loading(editingId ? 'Menyimpan perubahan testimoni...' : 'Menambahkan testimoni baru...');
     try {
       if (editingId) {
         const res = await fetch(`/api/testimonials/${editingId}`, {
@@ -81,35 +87,41 @@ export default function AdminTestimonialsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         });
-        if (res.ok) {
-          fetchTestimonials();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal memperbarui testimoni');
+        toast.success('Testimoni berhasil diperbarui!', { id: toastId });
+        fetchTestimonials();
+        setIsModalOpen(false);
       } else {
         const res = await fetch('/api/testimonials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         });
-        if (res.ok) {
-          fetchTestimonials();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal menambahkan testimoni');
+        toast.success('Testimoni baru berhasil ditambahkan!', { id: toastId });
+        fetchTestimonials();
+        setIsModalOpen(false);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menyimpan testimoni', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Hapus ulasan tamu ini?')) return;
+    setDeletingId(id);
+    const toastId = toast.loading('Menghapus ulasan...');
     try {
       const res = await fetch(`/api/testimonials/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setTestimonials((prev) => prev.filter((t) => t.id !== id));
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menghapus');
+      setTestimonials((prev) => prev.filter((t) => t.id !== id));
+      toast.success('Ulasan berhasil dihapus!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menghapus', { id: toastId });
+    } finally {
+      setDeletingId(null);
     }
   };
 

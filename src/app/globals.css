@@ -187,24 +187,14 @@ img {
 
 /* Glassmorphism & Cards */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .glass-dark {
-  background: rgba(13, 33, 55, 0.7);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(13, 33, 55, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
 }

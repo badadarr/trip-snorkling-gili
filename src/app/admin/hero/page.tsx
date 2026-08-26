@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Save, CheckCircle2, Eye } from 'lucide-react';
+import { Sparkles, Save, CheckCircle2, Eye, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminHeroPage() {
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ export default function AdminHeroPage() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetch('/api/hero')
@@ -30,12 +31,17 @@ export default function AdminHeroPage() {
         setFormData(data);
         setLoading(false);
       })
-      .catch((e) => console.error(e));
+      .catch((e) => {
+        console.error(e);
+        toast.error('Gagal memuat konten Hero');
+        setLoading(false);
+      });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(false);
+    setIsSaving(true);
+    const toastId = toast.loading('Menyimpan perubahan Hero Banner...');
 
     try {
       const res = await fetch('/api/hero', {
@@ -44,12 +50,12 @@ export default function AdminHeroPage() {
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menyimpan');
+      toast.success('Perubahan Hero Banner berhasil disimpan!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menyimpan perubahan', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -69,25 +75,6 @@ export default function AdminHeroPage() {
           </p>
         </div>
       </div>
-
-      {savedSuccess && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '14px 20px',
-            borderRadius: 'var(--radius-md)',
-            background: '#d1fae5',
-            color: '#065f46',
-            marginBottom: '24px',
-            fontWeight: 600,
-          }}
-        >
-          <CheckCircle2 size={20} />
-          <span>Perubahan konten Hero Banner berhasil disimpan!</span>
-        </div>
-      )}
 
       <div className="glass-card" style={{ padding: '36px', background: '#ffffff' }}>
         <form onSubmit={handleSubmit}>
@@ -202,9 +189,18 @@ export default function AdminHeroPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '28px' }}>
-            <button type="submit" className="btn btn-primary btn-lg">
-              <Save size={18} />
-              <span>Simpan Perubahan Hero</span>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="btn btn-primary btn-lg"
+              style={{ opacity: isSaving ? 0.85 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+            >
+              {isSaving ? (
+                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <Save size={18} />
+              )}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan Hero'}</span>
             </button>
           </div>
         </form>

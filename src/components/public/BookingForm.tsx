@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
-import { Calendar, CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import CustomSelect from '@/components/ui/CustomSelect';
+import ModernDatePicker from '@/components/ui/ModernDatePicker';
+import SessionTimePicker from '@/components/ui/SessionTimePicker';
 
 interface BookingFormProps {
   packagesList: PackageData[];
@@ -71,6 +75,7 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     if (!currentPackage) return;
     setErrorMsg('');
     setIsSubmitting(true);
+    const toastId = toast.loading(locale === 'id' ? 'Sedang memproses reservasi...' : 'Processing your reservation...');
 
     try {
       const payload = {
@@ -100,9 +105,15 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
       }
 
       const data = await res.json();
+      toast.success(
+        locale === 'id' ? 'Booking berhasil dikirim! Silakan konfirmasi via WhatsApp.' : 'Booking submitted successfully! Please confirm via WhatsApp.',
+        { id: toastId }
+      );
       setSubmittedBooking(data.booking || payload);
     } catch (err: any) {
-      setErrorMsg(err.message || (locale === 'id' ? 'Terjadi kesalahan sistem' : 'System error occurred'));
+      const msg = err.message || (locale === 'id' ? 'Terjadi kesalahan sistem' : 'System error occurred');
+      setErrorMsg(msg);
+      toast.error(msg, { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -233,38 +244,40 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             </div>
           )}
 
-          {/* 1. Select Package */}
+          {/* 1. Custom Package Dropdown */}
           <div className="form-group">
-            <label className="form-label">{t('selectPackage')} *</label>
-            <select
-              className="form-control"
+            <CustomSelect
+              label={`${t('selectPackage')} *`}
               value={selectedPkgSlug}
-              onChange={(e) => setSelectedPkgSlug(e.target.value)}
-              required
-            >
-              {packagesList.map((pkg) => (
-                <option key={pkg.id} value={pkg.slug}>
-                  {locale === 'id' ? pkg.nameId : pkg.nameEn} — Rp {pkg.price.toLocaleString('id-ID')} (${pkg.priceUsd})
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedPkgSlug(val)}
+              options={packagesList.map((pkg) => ({
+                value: pkg.slug,
+                label: locale === 'id' ? pkg.nameId : pkg.nameEn,
+                subtitle: locale === 'id'
+                  ? `Rp ${pkg.price.toLocaleString('id-ID')} / ${pkg.durationId || '4-5 Jam'}`
+                  : `$${pkg.priceUsd} USD / ${pkg.durationEn || '4-5 Hours'}`,
+                badge: pkg.isFeatured ? (locale === 'id' ? 'Populer' : 'Popular') : undefined,
+              }))}
+            />
           </div>
 
           {/* 2. Customer Name */}
           <div className="form-group">
             <label className="form-label">{t('fullName')} *</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder={t('fullNamePlaceholder')}
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              required
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder={t('fullNamePlaceholder')}
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           {/* 3. Customer Email & Phone */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
             <div className="form-group">
               <label className="form-label">{t('email')} *</label>
               <input
@@ -289,45 +302,82 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             </div>
           </div>
 
-          {/* 4. Number of People & Date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          {/* 4. Number of People & Modern Date Picker */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
             <div className="form-group">
               <label className="form-label">{t('pax')} *</label>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                className="form-control"
-                value={numberOfPeople}
-                onChange={(e) => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
-                required
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-light)',
+                    background: '#ffffff',
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    color: 'var(--primary-deep)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  className="form-control"
+                  value={numberOfPeople}
+                  onChange={(e) => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
+                  style={{ textAlign: 'center', fontWeight: 700 }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setNumberOfPeople((prev) => Math.min(50, prev + 1))}
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-light)',
+                    background: '#ffffff',
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    color: 'var(--primary-deep)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  +
+                </button>
+              </div>
             </div>
+
             <div className="form-group">
-              <label className="form-label">{t('tripDate')} *</label>
-              <input
-                type="date"
-                className="form-control"
+              <ModernDatePicker
+                label={`${t('tripDate')} *`}
                 value={tripDate}
-                onChange={(e) => setTripDate(e.target.value)}
-                required
+                onChange={(d) => setTripDate(d)}
+                locale={locale}
               />
             </div>
           </div>
 
-          {/* 5. Session */}
+          {/* 5. Session Time Selection Cards */}
           <div className="form-group">
-            <label className="form-label">{t('session')} *</label>
-            <select
-              className="form-control"
+            <SessionTimePicker
+              label={`${t('session')} *`}
               value={tripSession}
-              onChange={(e) => setTripSession(e.target.value)}
-            >
-              <option value="morning">{t('sessionMorning')}</option>
-              <option value="afternoon">{t('sessionAfternoon')}</option>
-              <option value="sunset">{t('sessionSunset')}</option>
-              <option value="flexible">{t('sessionFlexible')}</option>
-            </select>
+              onChange={(s) => setTripSession(s)}
+              locale={locale}
+            />
           </div>
 
           {/* 6. Pickup Location (Optional) */}
@@ -359,9 +409,13 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             type="submit"
             disabled={isSubmitting}
             className="btn btn-primary btn-lg"
-            style={{ width: '100%', marginTop: '10px' }}
+            style={{ width: '100%', marginTop: '10px', opacity: isSubmitting ? 0.85 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
           >
-            <Calendar size={18} />
+            {isSubmitting ? (
+              <Loader2 size={18} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Calendar size={18} />
+            )}
             <span>{isSubmitting ? t('submitting') : t('submitBtn')}</span>
           </button>
         </form>

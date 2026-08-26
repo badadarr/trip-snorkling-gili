@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { HelpCircle, Plus, Edit3, Trash2, X } from 'lucide-react';
+import { HelpCircle, Plus, Edit3, Trash2, X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminFaqPage() {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
@@ -29,6 +32,7 @@ export default function AdminFaqPage() {
       }
     } catch (e) {
       console.error(e);
+      toast.error('Gagal memuat daftar FAQ');
     } finally {
       setLoading(false);
     }
@@ -68,6 +72,8 @@ export default function AdminFaqPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
+    const toastId = toast.loading(editingId ? 'Menyimpan perubahan FAQ...' : 'Menambahkan FAQ baru...');
     try {
       if (editingId) {
         const res = await fetch(`/api/faq/${editingId}`, {
@@ -75,35 +81,41 @@ export default function AdminFaqPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         });
-        if (res.ok) {
-          fetchFaqs();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal memperbarui FAQ');
+        toast.success('FAQ berhasil diperbarui!', { id: toastId });
+        fetchFaqs();
+        setIsModalOpen(false);
       } else {
         const res = await fetch('/api/faq', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData),
         });
-        if (res.ok) {
-          fetchFaqs();
-          setIsModalOpen(false);
-        }
+        if (!res.ok) throw new Error('Gagal menambahkan FAQ');
+        toast.success('FAQ baru berhasil ditambahkan!', { id: toastId });
+        fetchFaqs();
+        setIsModalOpen(false);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menyimpan FAQ', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Hapus pertanyaan FAQ ini?')) return;
+    setDeletingId(id);
+    const toastId = toast.loading('Menghapus FAQ...');
     try {
       const res = await fetch(`/api/faq/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        setFaqs((prev) => prev.filter((f) => f.id !== id));
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menghapus');
+      setFaqs((prev) => prev.filter((f) => f.id !== id));
+      toast.success('FAQ berhasil dihapus!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menghapus', { id: toastId });
+    } finally {
+      setDeletingId(null);
     }
   };
 

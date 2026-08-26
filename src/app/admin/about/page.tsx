@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Info, Save, CheckCircle2 } from 'lucide-react';
+import { Info, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminAboutPage() {
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ export default function AdminAboutPage() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetch('/api/about')
@@ -24,12 +25,17 @@ export default function AdminAboutPage() {
         setFormData(data);
         setLoading(false);
       })
-      .catch((e) => console.error(e));
+      .catch((e) => {
+        console.error(e);
+        toast.error('Gagal memuat konten Tentang Kami');
+        setLoading(false);
+      });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(false);
+    setIsSaving(true);
+    const toastId = toast.loading('Menyimpan perubahan Tentang Kami...');
 
     try {
       const res = await fetch('/api/about', {
@@ -38,17 +44,22 @@ export default function AdminAboutPage() {
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
-      }
-    } catch (e) {
-      console.error(e);
+      if (!res.ok) throw new Error('Gagal menyimpan');
+      toast.success('Perubahan halaman Tentang Kami berhasil disimpan!', { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || 'Gagal menyimpan perubahan', { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   if (loading) {
-    return <div>Memuat data tentang kami...</div>;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--primary-ocean)' }}>
+        <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
+        <span>Memuat data tentang kami...</span>
+      </div>
+    );
   }
 
   return (
@@ -64,30 +75,12 @@ export default function AdminAboutPage() {
         </div>
       </div>
 
-      {savedSuccess && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '14px 20px',
-            borderRadius: 'var(--radius-md)',
-            background: '#d1fae5',
-            color: '#065f46',
-            marginBottom: '24px',
-            fontWeight: 600,
-          }}
-        >
-          <CheckCircle2 size={20} />
-          <span>Perubahan data Tentang Kami berhasil disimpan!</span>
-        </div>
-      )}
-
       <div className="glass-card" style={{ padding: '36px', background: '#ffffff' }}>
         <form onSubmit={handleSubmit}>
+          {/* Main Titles */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             <div className="form-group">
-              <label className="form-label">Judul Utama (ID) *</label>
+              <label className="form-label">Judul Utama Halaman (ID)</label>
               <input
                 type="text"
                 className="form-control"
@@ -97,7 +90,7 @@ export default function AdminAboutPage() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Judul Utama (EN) *</label>
+              <label className="form-label">Judul Utama Halaman (EN)</label>
               <input
                 type="text"
                 className="form-control"
@@ -108,9 +101,10 @@ export default function AdminAboutPage() {
             </div>
           </div>
 
+          {/* Subtitles */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             <div className="form-group">
-              <label className="form-label">Subjudul (ID)</label>
+              <label className="form-label">Subjudul Halaman (ID)</label>
               <input
                 type="text"
                 className="form-control"
@@ -119,7 +113,7 @@ export default function AdminAboutPage() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Subjudul (EN)</label>
+              <label className="form-label">Subjudul Halaman (EN)</label>
               <input
                 type="text"
                 className="form-control"
@@ -129,24 +123,26 @@ export default function AdminAboutPage() {
             </div>
           </div>
 
+          {/* Story ID */}
           <div className="form-group">
-            <label className="form-label">Cerita / Profil Usaha (Bahasa Indonesia) *</label>
+            <label className="form-label">Cerita & Nilai Dedikasi (Bahasa Indonesia)</label>
             <textarea
               className="form-control"
+              rows={4}
               value={formData.storyId || ''}
               onChange={(e) => setFormData({ ...formData, storyId: e.target.value })}
-              rows={5}
               required
             />
           </div>
 
+          {/* Story EN */}
           <div className="form-group">
-            <label className="form-label">Cerita / Profil Usaha (English) *</label>
+            <label className="form-label">Cerita & Nilai Dedikasi (English)</label>
             <textarea
               className="form-control"
+              rows={4}
               value={formData.storyEn || ''}
               onChange={(e) => setFormData({ ...formData, storyEn: e.target.value })}
-              rows={5}
               required
             />
           </div>
@@ -167,9 +163,18 @@ export default function AdminAboutPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '28px' }}>
-            <button type="submit" className="btn btn-primary btn-lg">
-              <Save size={18} />
-              <span>Simpan Perubahan</span>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="btn btn-primary btn-lg"
+              style={{ opacity: isSaving ? 0.85 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+            >
+              {isSaving ? (
+                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <Save size={18} />
+              )}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
             </button>
           </div>
         </form>

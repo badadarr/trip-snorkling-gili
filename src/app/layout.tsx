@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import AppProviders from '@/components/providers/AppProviders';
 
 export const metadata: Metadata = {
   title: 'Trip Snorkeling Gili Trawangan | Spot Snorkeling Terbaik 3 Gili',
@@ -49,7 +50,9 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <AppProviders>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

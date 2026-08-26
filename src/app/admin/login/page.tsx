@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Waves, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
-import NextLink from 'next/link';
+import { Waves, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@snorkelinggilitrawangan.com');
-  const [password, setPassword] = useState('AdminSnorkeling2026!');
+  const [email, setEmail] = useState('admin@skt.com');
+  const [password, setPassword] = useState('admin123');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,6 +17,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setErrorMsg('');
     setLoading(true);
+    const toastId = toast.loading('Memverifikasi kredensial admin...');
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -30,10 +32,13 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Login gagal');
       }
 
+      toast.success('Login berhasil! Mengalihkan ke dashboard...', { id: toastId });
       router.push('/admin');
       router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Email atau password salah');
+      const msg = err.message || 'Email atau password salah';
+      setErrorMsg(msg);
+      toast.error(msg, { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -138,17 +143,21 @@ export default function AdminLoginPage() {
             type="submit"
             disabled={loading}
             className="btn btn-primary"
-            style={{ width: '100%', padding: '14px', fontSize: '1rem', marginTop: '10px' }}
+            style={{ width: '100%', padding: '14px', fontSize: '1rem', marginTop: '10px', opacity: loading ? 0.85 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
           >
-            <Lock size={18} />
+            {loading ? (
+              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Lock size={18} />
+            )}
             <span>{loading ? 'Memverifikasi...' : 'Masuk ke Dashboard'}</span>
           </button>
         </form>
 
         <div style={{ marginTop: '24px', textAlign: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '16px' }}>
-          <NextLink href="/" style={{ fontSize: '0.85rem', color: 'var(--primary-ocean)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Link href="/" style={{ fontSize: '0.85rem', color: 'var(--primary-ocean)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <span>← Kembali ke Website Publik</span>
-          </NextLink>
+          </Link>
         </div>
       </div>
     </div>
