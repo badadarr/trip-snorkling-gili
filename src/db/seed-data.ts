@@ -1,0 +1,394 @@
+export const initialHeroData = {
+  id: 1,
+  badgeId: "Spot Snorkeling #1 di Gili Trawangan & 3 Gili",
+  badgeEn: "#1 Snorkeling Experience in Gili Trawangan & 3 Gilis",
+  titleId: "Jelajahi Pesona Bawah Laut 3 Gili Bersama Ahlinya",
+  titleEn: "Explore the Majestic Underwater World of 3 Gilis with the Pros",
+  subtitleId: "Berenang bersama Penyu Hijau di Turtle Point, nikmati keajaiban Patung Bawah Air Meno (Bask Nest), dan jelajahi terumbu karang warna-warni bersama pemandu lokal berlisensi.",
+  subtitleEn: "Swim with wild sea turtles at Turtle Point, discover the iconic underwater statues at Meno (Bask Nest), and explore vibrant coral reefs with certified local guides.",
+  backgroundImage: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+  ctaTextId: "Booking Trip Sekarang",
+  ctaTextEn: "Book Your Trip Now",
+  ctaLink: "/booking",
+  secondaryCtaId: "Lihat Semua Paket",
+  secondaryCtaEn: "View All Packages",
+  secondaryCtaLink: "/paket",
+};
+
+export const initialPackagesData = [
+  {
+    id: 1,
+    slug: "public-sharing-trip-3-gili",
+    nameId: "Public Sharing Trip (3 Gili)",
+    nameEn: "Public Sharing Trip (3 Gilis)",
+    tagId: "Paling Hemat & Seru",
+    tagEn: "Best Value & Fun",
+    descriptionId: "Pilihan terbaik untuk solo traveler, pasangan, atau teman-teman yang ingin menikmati snorkeling 3 Gili (Trawangan, Meno, Air) dengan harga terjangkau dan suasana ramah.",
+    descriptionEn: "The perfect choice for solo travelers, couples, or friends looking to experience 3 Gili islands snorkeling at an affordable price with great social vibes.",
+    price: 150000,
+    priceUsd: 10,
+    durationId: "4 - 5 Jam",
+    durationEn: "4 - 5 Hours",
+    scheduleId: "Setiap Hari: 09:30 & 13:00 WITA",
+    scheduleEn: "Daily: 09:30 AM & 01:00 PM (GMT+8)",
+    includesId: [
+      "Perahu Glass Bottom Boat bersama",
+      "Peralatan Snorkeling lengkap (Masker, Snorkel, Fin)",
+      "Life Jacket / Pelampung keselamatan berstandar",
+      "Pemandu Snorkeling Lokal Berlisensi",
+      "Dokumentasi Foto & Video GoPro Underwater (Free file via Google Drive)",
+      "Air Mineral selama perjalanan",
+      "Singgah makan siang di Gili Air (makanan biaya sendiri)"
+    ],
+    includesEn: [
+      "Shared Glass Bottom Boat trip",
+      "Full Snorkeling Gear (Mask, Snorkel, Fins)",
+      "Certified Standard Life Jackets",
+      "Certified Local Snorkel Guide",
+      "Free GoPro Underwater Photos & Videos (via Google Drive)",
+      "Complimentary Mineral Water",
+      "Lunch stop at Gili Air (meals not included)"
+    ],
+    spotsId: [
+      "Turtle Point (Spot Penyu Gili Meno)",
+      "Underwater Statues / Patung Bawah Laut (Bask Nest)",
+      "Coral Garden & Blue Coral (Gili Air)",
+      "Fish Garden (Beri makan ikan jinak)"
+    ],
+    spotsEn: [
+      "Turtle Point (Wild Sea Turtles at Gili Meno)",
+      "Iconic Underwater Statues (Bask Nest Meno)",
+      "Coral Garden & Blue Coral (Gili Air)",
+      "Fish Garden (Tropical fish feeding)"
+    ],
+    imageUrl: "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop",
+    isFeatured: true,
+    isActive: true,
+    orderIndex: 1,
+  },
+  {
+    id: 2,
+    slug: "private-glass-bottom-boat",
+    nameId: "Private Glass Bottom Boat Trip",
+    nameEn: "Private Glass Bottom Boat Trip",
+    tagId: "Pilihan Favorit Keluarga & Grup",
+    tagEn: "Top Pick for Families & Groups",
+    descriptionId: "Nikmati kebebasan dan privasi maksimal menjelajahi spot terbaik 3 Gili bersama orang tersayang tanpa terburu-buru. Jadwal dan durasi di setiap spot bisa fleksibel sesuai keinginan Anda.",
+    descriptionEn: "Enjoy maximum freedom and exclusivity exploring the top spots of 3 Gilis with loved ones at your own relaxed pace. Flexible timing and spot durations tailored to your preferences.",
+    price: 850000,
+    priceUsd: 55,
+    durationId: "4 - 5 Jam (Fleksibel)",
+    durationEn: "4 - 5 Hours (Flexible)",
+    scheduleId: "Waktu keberangkatan bebas (Rekomendasi 08:30 / 14:00 WITA)",
+    scheduleEn: "Custom departure time (Recommended 08:30 AM / 02:00 PM)",
+    includesId: [
+      "Satu Perahu Glass Bottom Eksklusif untuk rombongan Anda (maks 10 orang)",
+      "Kapten & Pemandu Privat Berpengalaman",
+      "Peralatan Snorkeling kualitas premium untuk semua peserta",
+      "Life Jacket semua ukuran (dewasa & anak-anak)",
+      "Dokumentasi Eksklusif GoPro Underwater HD Unlimited",
+      "Roti untuk fish feeding (memberi makan ikan)",
+      "Air Mineral dingin & Buah Segar",
+      "Bebas tentukan waktu di setiap spot snorkeling"
+    ],
+    includesEn: [
+      "Exclusive Glass Bottom Boat solely for your group (up to 10 pax)",
+      "Dedicated Private Captain & Certified Snorkel Guide",
+      "Premium Snorkeling Equipment for all guests",
+      "Life Jackets in all sizes (adults & kids)",
+      "Unlimited Exclusive GoPro Underwater HD Photos & Videos",
+      "Fish feeding bread included",
+      "Chilled Mineral Water & Fresh Fruits",
+      "Total freedom on time spent at each snorkeling spot"
+    ],
+    spotsId: [
+      "Turtle Point (Spot Penyu Gili Meno)",
+      "Underwater Statues / Patung Romantis (Gili Meno)",
+      "Blue Coral Garden (Gili Air)",
+      "Shark Point & Reef Garden (Opsional sesuai cuaca)"
+    ],
+    spotsEn: [
+      "Turtle Point (Wild Sea Turtles at Gili Meno)",
+      "Underwater Romantic Statues (Gili Meno)",
+      "Blue Coral Garden (Gili Air)",
+      "Shark Point & Reef Garden (Optional, weather permitting)"
+    ],
+    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+    isFeatured: true,
+    isActive: true,
+    orderIndex: 2,
+  },
+  {
+    id: 3,
+    slug: "sunset-snorkeling-private-tour",
+    nameId: "Sunset Snorkeling & Romantic Trip",
+    nameEn: "Sunset Snorkeling & Romantic Tour",
+    tagId: "Paling Romantis & Instagrammable",
+    tagEn: "Most Romantic & Photogenic",
+    descriptionId: "Kombinasi magis antara snorkeling sore melihat penyu saat air tenang, dilanjutkan dengan bersantai menyaksikan sunset spektakuler di tengah laut Gili dengan pemandangan Gunung Agung.",
+    descriptionEn: "A magical blend of late afternoon snorkeling with peaceful turtles, followed by cruising to catch the world-famous golden sunset over Mount Agung from the open sea.",
+    price: 950000,
+    priceUsd: 62,
+    durationId: "3.5 Jam (15:30 - 19:00 WITA)",
+    durationEn: "3.5 Hours (03:30 PM - 07:00 PM)",
+    scheduleId: "Sore Hari: 15:30 WITA",
+    scheduleEn: "Afternoon: 03:30 PM (GMT+8)",
+    includesId: [
+      "Private Boat bernuansa senja dengan sound system musik santai",
+      "Snorkeling di 2 spot terbaik (Turtle Point & Statues) saat sepi pengunjung",
+      "Peralatan Snorkeling & Life Jacket lengkap",
+      "Kelapa Muda Segar / Minuman Dingin di atas kapal",
+      "Spot terbaik menyaksikan Golden Sunset Gili Trawangan",
+      "Dokumentasi Foto Sunset & Underwater GoPro",
+      "Pemandu ramah & helpful"
+    ],
+    includesEn: [
+      "Private Boat with relaxing sound system for twilight cruise",
+      "Snorkeling at 2 top spots (Turtle Point & Statues) during uncrowded hours",
+      "Full Snorkeling Equipment & Life Jackets",
+      "Fresh Young Coconut / Chilled Refreshments onboard",
+      "Prime ocean vantage point for the epic Gili Golden Sunset",
+      "Golden Hour & Underwater GoPro Photography",
+      "Friendly dedicated guide"
+    ],
+    spotsId: [
+      "Turtle Point Sore Hari (Penyu aktif mencari makan)",
+      "Underwater Statues (Foto tanpa antri pengunjung)",
+      "Sunset Point Ocean View (Spot sunset tengah laut)"
+    ],
+    spotsEn: [
+      "Afternoon Turtle Point (Turtles actively feeding)",
+      "Underwater Statues (Uncrowded photo opportunities)",
+      "Sunset Point Ocean View (Open ocean golden sunset spot)"
+    ],
+    imageUrl: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2070&auto=format&fit=crop",
+    isFeatured: true,
+    isActive: true,
+    orderIndex: 3,
+  },
+  {
+    id: 4,
+    slug: "speed-boat-snorkeling-lombok-gili",
+    nameId: "Speedboat Snorkeling Trip (Lombok - 3 Gili)",
+    nameEn: "Speedboat Snorkeling Trip (Lombok - 3 Gilis)",
+    tagId: "Eksklusif dari Lombok / Senggigi",
+    tagEn: "Exclusive from Lombok / Senggigi",
+    descriptionId: "Bagi Anda yang menginap di Pulau Lombok (Senggigi, Mataram, atau Teluk Nare), kami jemput langsung dengan Private Speedboat untuk trip snorkeling 3 Gili dalam 1 hari tanpa ribet.",
+    descriptionEn: "For travelers staying in mainland Lombok (Senggigi, Mataram, or Teluk Nare), we provide direct private speedboat pickup for a hassle-free 1-day 3-Gili snorkeling tour.",
+    price: 1500000,
+    priceUsd: 98,
+    durationId: "6 - 7 Jam (Full Day)",
+    durationEn: "6 - 7 Hours (Full Day)",
+    scheduleId: "08:30 - 15:30 WITA",
+    scheduleEn: "08:30 AM - 03:30 PM",
+    includesId: [
+      "Private Speedboat pulang-pergi Lombok - 3 Gili",
+      "Penjemputan dermaga Teluk Nare / Bangsal",
+      "Snorkeling lengkap di 4 spot utama 3 Gili",
+      "Peralatan Snorkeling & Life Jacket",
+      "Dokumentasi Foto/Video GoPro Underwater",
+      "Eksplorasi darat Gili Trawangan & Gili Air",
+      "Air Mineral & Pemandu Berpengalaman"
+    ],
+    includesEn: [
+      "Round-trip Private Speedboat Lombok - 3 Gilis",
+      "Harbor pickup at Teluk Nare / Bangsal",
+      "Full snorkeling at 4 prime spots across the 3 Gilis",
+      "Complete Snorkeling Gear & Life Jackets",
+      "GoPro Underwater HD Photo & Video documentation",
+      "Island leisure stops on Gili Trawangan & Gili Air",
+      "Mineral Water & Professional Guide"
+    ],
+    spotsId: [
+      "Turtle Point Meno",
+      "Underwater Statues Meno",
+      "Coral Garden Gili Air",
+      "Gili Trawangan East Coast"
+    ],
+    spotsEn: [
+      "Turtle Point Meno",
+      "Underwater Statues Meno",
+      "Coral Garden Gili Air",
+      "Gili Trawangan East Coast"
+    ],
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+    isFeatured: false,
+    isActive: true,
+    orderIndex: 4,
+  }
+];
+
+export const initialGalleryData = [
+  {
+    id: 1,
+    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+    titleId: "Berenang Bersama Penyu Hijau di Gili Meno",
+    titleEn: "Swimming with Wild Sea Turtles at Gili Meno",
+    category: "turtles",
+    orderIndex: 1,
+  },
+  {
+    id: 2,
+    imageUrl: "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop",
+    titleId: "Spot Ikonik Patung Bawah Laut Bask Nest",
+    titleEn: "The Iconic Bask Nest Underwater Statues",
+    category: "statues",
+    orderIndex: 2,
+  },
+  {
+    id: 3,
+    imageUrl: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2070&auto=format&fit=crop",
+    titleId: "Pesona Sunset Emas di Tengah Laut 3 Gili",
+    titleEn: "Golden Sunset Cruise over the 3 Gilis Waters",
+    category: "sunset",
+    orderIndex: 3,
+  },
+  {
+    id: 4,
+    imageUrl: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=2074&auto=format&fit=crop",
+    titleId: "Keindahan Terumbu Karang Warna-Warni Coral Garden",
+    titleEn: "Vibrant Marine Life at Blue Coral Garden",
+    category: "underwater",
+    orderIndex: 4,
+  },
+  {
+    id: 5,
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+    titleId: "Armada Glass Bottom Boat Nyaman & Bersih",
+    titleEn: "Comfortable Glass Bottom Boat Fleet",
+    category: "boats",
+    orderIndex: 5,
+  },
+  {
+    id: 6,
+    imageUrl: "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?q=80&w=2070&auto=format&fit=crop",
+    titleId: "Pengalaman Snorkeling Seru Bersama Keluarga",
+    titleEn: "Fun Family Snorkeling Adventure",
+    category: "underwater",
+    orderIndex: 6,
+  }
+];
+
+export const initialTestimonialsData = [
+  {
+    id: 1,
+    name: "Sarah Jenkins & Mark",
+    origin: "Sydney, Australia",
+    countryCode: "AU",
+    rating: 5,
+    tripType: "Private Glass Bottom Boat",
+    contentId: "Pengalaman terbaik selama liburan kami di Indonesia! Pemandu sangat ramah, sabar membantu kami yang pemula, dan foto underwater GoPro-nya luar biasa jernih. Kami melihat 4 penyu besar berenang tepat di sebelah kami!",
+    contentEn: "The absolute highlight of our Indonesia trip! The guide was extremely warm and patient, and the underwater GoPro photos are stunningly clear. We saw four giant sea turtles swimming right next to us!",
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop",
+    isActive: true,
+  },
+  {
+    id: 2,
+    name: "Dimas Pratama & Keluarga",
+    origin: "Surabaya, Indonesia",
+    countryCode: "ID",
+    rating: 5,
+    tripType: "Public Sharing Trip",
+    contentId: "Awalnya ragu karena bawa anak 7 tahun, tapi ternyata kru sangat menjaga keselamatan dan ramah banget. Life jacket anak pas, alat snorkeling bersih, dan langsung dikasih file foto setelah trip. Sangat recommended!",
+    contentEn: "Initially worried since we brought our 7-year-old, but the crew was remarkably safety-focused and caring. Clean sanitized gear, proper kids life jacket, and we got our GoPro files right after the tour. Highly recommended!",
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
+    isActive: true,
+  },
+  {
+    id: 3,
+    name: "Elena Rostova",
+    origin: "Frankfurt, Germany",
+    countryCode: "DE",
+    rating: 5,
+    tripType: "Sunset Snorkeling Tour",
+    contentId: "Melihat patung bawah laut Meno saat sore hari tanpa kerumunan orang adalah momen magis. Ditambah sunset dengan siluet Gunung Agung dari atas kapal. Tim sangat profesional dan informatif!",
+    contentEn: "Seeing the underwater statues in the calm afternoon without crowds was purely magical. Watching the golden sunset with Mount Agung in the backdrop topped it off. Super professional and friendly team!",
+    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop",
+    isActive: true,
+  }
+];
+
+export const initialFaqData = [
+  {
+    id: 1,
+    questionId: "Apakah orang yang tidak bisa berenang bisa ikut snorkeling?",
+    questionEn: "Can non-swimmers join the snorkeling trip?",
+    answerId: "Tentu bisa! Kami menyediakan life jacket (pelampung) berstandar keselamatan tinggi dan pemandu kami akan mendampingi Anda di dalam air menggunakan pelampung ring buoy untuk memastikan Anda tetap aman dan nyaman menikmati pemandangan bawah laut.",
+    answerEn: "Absolutely yes! We provide certified life jackets for all body sizes, and our guides accompany you in the water with a safety ring buoy so you can comfortably float and enjoy the underwater views with total peace of mind.",
+    category: "safety",
+    orderIndex: 1,
+    isActive: true,
+  },
+  {
+    id: 2,
+    questionId: "Di mana titik kumpul dan jam keberangkatannya?",
+    questionEn: "Where is the meeting point and departure schedule?",
+    answerId: "Titik kumpul utama kami berada di Pelabuhan / Pantai Timur Gili Trawangan (dekat kantor tiket). Untuk Public Sharing Trip berangkat pukul 09:30 & 13:00 WITA. Untuk Private Trip, waktu keberangkatan fleksibel sesuai permintaan Anda.",
+    answerEn: "Our main meeting point is right by the Gili Trawangan Harbor / East Beach front. Public sharing trips depart daily at 09:30 AM & 01:00 PM. For private boat bookings, departure times are fully customizable according to your schedule.",
+    category: "general",
+    orderIndex: 2,
+    isActive: true,
+  },
+  {
+    id: 3,
+    questionId: "Apakah dokumentasi foto & video underwater sudah termasuk?",
+    questionEn: "Are underwater photos and videos included in the price?",
+    answerId: "Ya! Semua paket trip kami sudah termasuk dokumentasi foto dan video bawah air menggunakan kamera GoPro kualitas tinggi. Setelah trip selesai, file akan langsung dibagikan ke HP Anda melalui Google Drive atau transfer langsung secara gratis.",
+    answerEn: "Yes! All our trip packages include underwater HD photo and video documentation using high-quality GoPro cameras. Files are shared directly to you after the tour via Google Drive or fast local transfer without extra charge.",
+    category: "equipment",
+    orderIndex: 3,
+    isActive: true,
+  },
+  {
+    id: 4,
+    questionId: "Bagaimana cara melakukan booking dan pembayarannya?",
+    questionEn: "How do I book and pay for the trip?",
+    answerId: "Anda dapat mengisi form pemesanan langsung di website ini atau menghubungi WhatsApp kami. Pembayaran bisa dilakukan dengan transfer bank, QRIS, atau bayar tunai saat bertemu di lokasi meeting point.",
+    answerEn: "You can easily submit the booking form right on this website or chat directly via WhatsApp. Payment is flexible: Indonesian bank transfer, QRIS, or cash on the day of the tour at the meeting point.",
+    category: "booking",
+    orderIndex: 4,
+    isActive: true,
+  },
+  {
+    id: 5,
+    questionId: "Apa saja yang perlu dibawa saat trip snorkeling?",
+    questionEn: "What should I bring for the snorkeling tour?",
+    answerId: "Kami sarankan membawa: pakaian renang, pakaian ganti, handuk, kacamata hitam, tabir surya (sunscreen aman untuk terumbu karang), serta uang tunai secukupnya untuk makan siang di Gili Air atau membeli kelapa muda.",
+    answerEn: "We recommend bringing: swimwear, change of clothes, towel, sunglasses, reef-safe sunscreen, and some cash for lunch on Gili Air or refreshments.",
+    category: "general",
+    orderIndex: 5,
+    isActive: true,
+  }
+];
+
+export const initialAboutData = {
+  id: 1,
+  titleId: "Trip Snorkeling Gili Trawangan — Sahabat Petualangan Bahari Anda",
+  titleEn: "Trip Snorkeling Gili Trawangan — Your Trusted Marine Adventure Partner",
+  subtitleId: "Dedikasi Menghadirkan Pengalaman Snorkeling Terbaik, Aman & Tak Terlupakan di 3 Gili",
+  subtitleEn: "Dedicated to delivering the safest, most memorable, and authentic 3-Gili snorkeling experience",
+  storyId: "Berawal dari kecintaan mendalam kami terhadap keindahan alam bawah laut Gili Trawangan, Gili Meno, dan Gili Air, kami hadir untuk membagikan keajaiban ini kepada wisatawan dari seluruh penjuru dunia. Dengan tim kapten dan pemandu lokal yang lahir dan besar di kepulauan Gili, kami memahami setiap arus laut, waktu terbaik melihat penyu, dan spot terumbu karang tersembunyi yang masih asri. Keselamatan tamu, keramahan pelayanan, dan pelestarian ekosistem laut adalah prioritas utama kami.",
+  storyEn: "Born from our deep passion for the pristine marine sanctuary surrounding Gili Trawangan, Gili Meno, and Gili Air, we exist to share this underwater wonder with travelers from across the globe. Powered by local captains and certified guides who were born and raised on these islands, we know every ocean current, the optimal times to greet sea turtles, and hidden vibrant reefs. Guest safety, genuine hospitality, and coral conservation remain our highest priorities.",
+  imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+  stats: [
+    { number: "5.000+", labelId: "Wisatawan Puas", labelEn: "Happy Snorkelers" },
+    { number: "100%", labelId: "Spot Bergaransi Penyu", labelEn: "Turtle Spot Guarantee" },
+    { number: "8+ Thn", labelId: "Pengalaman Bahari", labelEn: "Years Marine Experience" },
+    { number: "4.9/5", labelId: "Rating Ulasan", labelEn: "Average Guest Rating" }
+  ]
+};
+
+export const initialSiteSettings = [
+  { key: "site_name", value: "Trip Snorkeling Gili Trawangan", section: "general", label: "Nama Website / Bisnis" },
+  { key: "tagline", value: "Penyedia Wisata Snorkeling Terbaik di Gili Trawangan & 3 Gili", section: "general", label: "Tagline Bisnis" },
+  { key: "whatsapp_number", value: "6287864551234", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
+  { key: "whatsapp_message", value: "Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi / booking paket snorkeling...", section: "contact", label: "Pesan Default WhatsApp" },
+  { key: "phone", value: "+62 878-6455-1234", section: "contact", label: "Nomor Telepon" },
+  { key: "email", value: "info@snorkelinggilitrawangan.com", section: "contact", label: "Alamat Email" },
+  { key: "address", value: "Jl. Pantai Gili Trawangan, Pemenang, Lombok Utara, Nusa Tenggara Barat, Indonesia", section: "contact", label: "Alamat / Lokasi Meeting Point" },
+  { key: "instagram_url", value: "https://instagram.com/tripsnorkelinggili", section: "social", label: "Link Akun Instagram" },
+  { key: "facebook_url", value: "https://facebook.com/tripsnorkelinggili", section: "social", label: "Link Facebook" },
+  { key: "tiktok_url", value: "https://tiktok.com/@tripsnorkelinggili", section: "social", label: "Link TikTok" },
+  { key: "tripadvisor_url", value: "https://tripadvisor.com", section: "social", label: "Link TripAdvisor" },
+  { key: "google_maps_url", value: "https://maps.google.com/?q=Gili+Trawangan", section: "contact", label: "Link Google Maps Meeting Point" }
+];
