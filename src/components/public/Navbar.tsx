@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import LanguageSwitcher from './LanguageSwitcher';
+
 import { Waves, Menu, X, Calendar, Lock } from 'lucide-react';
 
 export default function Navbar() {
@@ -142,7 +142,6 @@ export default function Navbar() {
 
         {/* Right CTA Area */}
         <div style={{ display: 'none', alignItems: 'center', gap: '16px' }} className="desktop-actions">
-          <LanguageSwitcher />
           <Link href="/booking" className="btn btn-primary btn-sm">
             <Calendar size={15} />
             {t('bookNow')}
@@ -151,9 +150,6 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="mobile-toggle-group">
-          <div className="mobile-lang-wrap">
-            <LanguageSwitcher />
-          </div>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

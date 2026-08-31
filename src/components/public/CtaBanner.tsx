@@ -2,11 +2,10 @@
 
 import React from 'react';
 import { Link } from '@/i18n/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Calendar, MessageCircle, Sparkles } from 'lucide-react';
 
 export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string }) {
-  const locale = useLocale();
   const t = useTranslations('cta');
   const phone = whatsappNumber || '6287864551234';
 
@@ -38,7 +37,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
         <div style={{ maxWidth: '780px', margin: '0 auto' }}>
           <div className="section-badge badge-gold" style={{ display: 'inline-flex', marginBottom: '18px' }}>
             <Sparkles size={14} />
-            <span>{locale === 'id' ? 'SLOT TERBATAS SETIAP HARI' : 'LIMITED DAILY SLOTS'}</span>
+            <span>SLOT TERBATAS SETIAP HARI</span>
           </div>
 
           <h2
@@ -80,9 +79,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
 
             <a
               href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                locale === 'id'
-                  ? 'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin tanya slot & booking...'
-                  : 'Hello! I would like to ask about available slots for snorkeling tour.'
+                'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin tanya slot & booking...'
               )}`}
               target="_blank"
               rel="noreferrer"

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
 import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass } from 'lucide-react';
@@ -17,7 +17,6 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ packagesList, initialSlug, whatsappNumber }: BookingFormProps) {
-  const locale = useLocale();
   const t = useTranslations('booking');
   const tPkg = useTranslations('packages');
   const tCta = useTranslations('cta');
@@ -75,12 +74,12 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     if (!currentPackage) return;
     setErrorMsg('');
     setIsSubmitting(true);
-    const toastId = toast.loading(locale === 'id' ? 'Sedang memproses reservasi...' : 'Processing your reservation...');
+    const toastId = toast.loading('Sedang memproses reservasi...');
 
     try {
       const payload = {
         packageId: currentPackage.id,
-        packageName: locale === 'id' ? currentPackage.nameId : currentPackage.nameEn,
+        packageName: currentPackage.nameId,
         customerName,
         customerEmail,
         customerPhone,
@@ -101,17 +100,17 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
       });
 
       if (!res.ok) {
-        throw new Error(locale === 'id' ? 'Gagal mengirim pemesanan. Silakan coba lagi.' : 'Failed to submit reservation. Please try again.');
+        throw new Error('Gagal mengirim pemesanan. Silakan coba lagi.');
       }
 
       const data = await res.json();
       toast.success(
-        locale === 'id' ? 'Booking berhasil dikirim! Silakan konfirmasi via WhatsApp.' : 'Booking submitted successfully! Please confirm via WhatsApp.',
+        'Booking berhasil dikirim! Silakan konfirmasi via WhatsApp.',
         { id: toastId }
       );
       setSubmittedBooking(data.booking || payload);
     } catch (err: any) {
-      const msg = err.message || (locale === 'id' ? 'Terjadi kesalahan sistem' : 'System error occurred');
+      const msg = err.message || 'Terjadi kesalahan sistem';
       setErrorMsg(msg);
       toast.error(msg, { id: toastId });
     } finally {
@@ -120,7 +119,7 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   };
 
   const getWhatsAppBookingUrl = (booking: any) => {
-    const packageName = locale === 'id' ? currentPackage?.nameId : currentPackage?.nameEn;
+    const packageName = currentPackage?.nameId;
     const msg = `Halo Admin Trip Snorkeling Gili Trawangan!
 Saya telah melakukan booking online dengan detail:
 - Kode Booking: *${booking.bookingCode || 'ONLINE-BOOKING'}*
@@ -191,11 +190,11 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             {t('summaryTitle')}:
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.88rem' }}>
-            <div><strong>{locale === 'id' ? 'Paket' : 'Package'}:</strong> {locale === 'id' ? currentPackage?.nameId : currentPackage?.nameEn}</div>
-            <div><strong>{locale === 'id' ? 'Nama' : 'Name'}:</strong> {customerName}</div>
-            <div><strong>{locale === 'id' ? 'Tanggal' : 'Date'}:</strong> {tripDate} ({tripSession})</div>
-            <div><strong>{locale === 'id' ? 'Peserta' : 'Guests'}:</strong> {numberOfPeople} {locale === 'id' ? 'Orang' : 'Pax'}</div>
-            <div><strong>{locale === 'id' ? 'Total Biaya' : 'Total'}:</strong> Rp {totals.idr.toLocaleString('id-ID')} (${totals.usd})</div>
+            <div><strong>Paket:</strong> {currentPackage?.nameId}</div>
+            <div><strong>Nama:</strong> {customerName}</div>
+            <div><strong>Tanggal:</strong> {tripDate} ({tripSession})</div>
+            <div><strong>Peserta:</strong> {numberOfPeople} Orang</div>
+            <div><strong>Total Biaya:</strong> Rp {totals.idr.toLocaleString('id-ID')} (${totals.usd})</div>
           </div>
         </div>
 
@@ -306,11 +305,9 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               onChange={(val) => setSelectedPkgSlug(val)}
               options={packagesList.map((pkg) => ({
                 value: pkg.slug,
-                label: locale === 'id' ? pkg.nameId : pkg.nameEn,
-                subtitle: locale === 'id'
-                  ? `Rp ${pkg.price.toLocaleString('id-ID')} / ${pkg.durationId || '4-5 Jam'}`
-                  : `$${pkg.priceUsd} USD / ${pkg.durationEn || '4-5 Hours'}`,
-                badge: pkg.isFeatured ? (locale === 'id' ? 'Populer' : 'Popular') : undefined,
+                label: pkg.nameId,
+                subtitle: `Rp ${pkg.price.toLocaleString('id-ID')} / ${pkg.durationId || '4-5 Jam'}`,
+                badge: pkg.isFeatured ? 'Populer' : undefined,
               }))}
             />
           </div>
@@ -419,7 +416,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
                 label={`${t('tripDate')} *`}
                 value={tripDate}
                 onChange={(d) => setTripDate(d)}
-                locale={locale}
+                locale="id"
               />
             </div>
           </div>
@@ -430,7 +427,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               label={`${t('session')} *`}
               value={tripSession}
               onChange={(s) => setTripSession(s)}
-              locale={locale}
+              locale="id"
             />
           </div>
 
@@ -482,16 +479,16 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div className="glass-card" style={{ padding: '28px', border: '1px solid var(--primary-turquoise)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <div style={{ padding: '6px 12px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>
-                {locale === 'id' ? 'RINGKASAN PAKET' : 'PACKAGE SUMMARY'}
+                RINGKASAN PAKET
               </div>
             </div>
 
             <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-deep)', marginBottom: '8px' }}>
-              {locale === 'id' ? currentPackage.nameId : currentPackage.nameEn}
+              {currentPackage.nameId}
             </h3>
 
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.5 }}>
-              {locale === 'id' ? currentPackage.descriptionId : currentPackage.descriptionEn}
+              {currentPackage.descriptionId}
             </p>
 
             {/* Price Breakdown */}
@@ -507,8 +504,8 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
                   {currentPackage.price > 500000
-                    ? (locale === 'id' ? 'Tarif Private Boat' : 'Private Boat Rate')
-                    : `${locale === 'id' ? 'Harga per Orang' : 'Rate per Person'} (${numberOfPeople}x)`}
+                    ? 'Tarif Private Boat'
+                    : `Harga per Orang (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
                   Rp {currentPackage.price.toLocaleString('id-ID')}
@@ -545,7 +542,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
                   {tPkg('includes')}:
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {(locale === 'id' ? currentPackage.includesId : (currentPackage.includesEn || currentPackage.includesId)).slice(0, 4).map((inc, i) => (
+                  {currentPackage.includesId.slice(0, 4).map((inc, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                       <CheckCircle2 size={14} color="var(--accent-green)" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <span>{inc}</span>
@@ -569,19 +566,15 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <MessageCircle size={22} color="#25d366" />
             <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)' }}>
-              {locale === 'id' ? 'Mau Konsultasi Dulu?' : 'Prefer Quick Chat?'}
+              Mau Konsultasi Dulu?
             </h4>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
-            {locale === 'id'
-              ? 'Ada pertanyaan seputar cuaca, rute penjemputan dari Lombok, atau permintaan khusus? Hubungi tim kami langsung via WhatsApp.'
-              : 'Have special questions regarding weather, speedboat transfer from Lombok, or customized routes? Chat directly with our local coordinator.'}
+            Ada pertanyaan seputar cuaca, rute penjemputan dari Lombok, atau permintaan khusus? Hubungi tim kami langsung via WhatsApp.
           </p>
           <a
             href={`https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-              locale === 'id'
-                ? `Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi paket snorkeling...`
-                : `Hello! I would like to ask some questions about your Gili snorkeling packages.`
+              `Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi paket snorkeling...`
             )}`}
             target="_blank"
             rel="noreferrer"

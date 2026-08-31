@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from '@/i18n/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Clock, Calendar, CheckCircle2, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 
 export interface PackageData {
@@ -31,16 +31,15 @@ export interface PackageData {
 }
 
 export default function PackageCard({ pkg }: { pkg: PackageData }) {
-  const locale = useLocale();
   const t = useTranslations('packages');
 
-  const name = locale === 'id' ? pkg.nameId : pkg.nameEn;
-  const tag = locale === 'id' ? pkg.tagId : pkg.tagEn;
-  const description = locale === 'id' ? pkg.descriptionId : pkg.descriptionEn;
-  const duration = locale === 'id' ? pkg.durationId : pkg.durationEn;
-  const schedule = locale === 'id' ? pkg.scheduleId : pkg.scheduleEn;
-  const includes = locale === 'id' ? (pkg.includesId || []) : (pkg.includesEn || []);
-  const spots = locale === 'id' ? (pkg.spotsId || []) : (pkg.spotsEn || []);
+  const name = pkg.nameId;
+  const tag = pkg.tagId;
+  const description = pkg.descriptionId;
+  const duration = pkg.durationId;
+  const schedule = pkg.scheduleId;
+  const includes = pkg.includesId || [];
+  const spots = pkg.spotsId || [];
 
   const formatPrice = (amount: number, currency: 'IDR' | 'USD') => {
     if (currency === 'USD') {
@@ -127,7 +126,7 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
               {t('priceStarts')}
             </span>
             <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-              {locale === 'id' ? formatPrice(pkg.price, 'IDR') : formatPrice(pkg.priceUsd, 'USD')}
+              {formatPrice(pkg.price, 'IDR')}
             </span>
             <span style={{ fontSize: '0.8rem', color: '#caf0f8', marginLeft: '4px' }}>
               {pkg.price > 500000 ? t('perBoat') : t('perPerson')}

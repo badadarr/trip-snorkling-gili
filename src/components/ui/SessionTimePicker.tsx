@@ -14,33 +14,30 @@ export default function SessionTimePicker({
   value,
   onChange,
   label,
-  locale = 'id',
 }: SessionTimePickerProps) {
-  const isId = locale === 'id';
-
   const sessions = [
     {
       id: 'morning',
-      title: isId ? 'Sesi Pagi' : 'Morning',
+      title: 'Sesi Pagi',
       time: '09:30 WITA',
       icon: <Sunrise size={18} />,
     },
     {
       id: 'afternoon',
-      title: isId ? 'Sesi Siang' : 'Afternoon',
+      title: 'Sesi Siang',
       time: '13:00 WITA',
       icon: <Sun size={18} />,
     },
     {
       id: 'sunset',
-      title: isId ? 'Sunset Trip' : 'Sunset',
+      title: 'Sunset Trip',
       time: '15:30 WITA',
       icon: <Sunset size={18} />,
     },
     {
       id: 'flexible',
-      title: isId ? 'Fleksibel' : 'Flexible',
-      time: isId ? 'Bebas' : 'Custom',
+      title: 'Fleksibel',
+      time: 'Bebas',
       icon: <Clock size={18} />,
     },
   ];

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from '@/i18n/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Sparkles, Calendar, Compass, ShieldCheck, Camera, Users, Award } from 'lucide-react';
 
 interface HeroProps {
@@ -24,14 +24,13 @@ interface HeroProps {
 }
 
 export default function HeroSection({ heroData }: HeroProps) {
-  const locale = useLocale();
   const t = useTranslations('hero');
 
-  const badge = locale === 'id' ? (heroData?.badgeId || t('popularTag')) : (heroData?.badgeEn || t('popularTag'));
-  const title = locale === 'id' ? (heroData?.titleId || t('mainHeading')) : (heroData?.titleEn || t('mainHeading'));
-  const subtitle = locale === 'id' ? (heroData?.subtitleId || t('subHeading')) : (heroData?.subtitleEn || t('subHeading'));
-  const ctaText = locale === 'id' ? (heroData?.ctaTextId || t('ctaBook')) : (heroData?.ctaTextEn || t('ctaBook'));
-  const secondaryCtaText = locale === 'id' ? (heroData?.secondaryCtaId || t('ctaPackages')) : (heroData?.secondaryCtaEn || t('ctaPackages'));
+  const badge = heroData?.badgeId || t('popularTag');
+  const title = heroData?.titleId || t('mainHeading');
+  const subtitle = heroData?.subtitleId || t('subHeading');
+  const ctaText = heroData?.ctaTextId || t('ctaBook');
+  const secondaryCtaText = heroData?.secondaryCtaId || t('ctaPackages');
   const bgImage = heroData?.backgroundImage || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop';
 
   return (

@@ -1,22 +1,21 @@
 import React from 'react';
 import { getAbout, getSettings } from '@/lib/data';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Waves, ShieldCheck, Heart, Users, Compass } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AboutPage() {
   const t = await getTranslations();
-  const locale = await getLocale();
   const about = await getAbout();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const title = locale === 'id' ? (about.titleId || t('about.title')) : (about.titleEn || t('about.title'));
-  const subtitle = locale === 'id' ? (about.subtitleId || t('about.subtitle')) : (about.subtitleEn || t('about.subtitle'));
-  const story = locale === 'id' ? (about.storyId || '') : (about.storyEn || about.storyId || '');
+  const title = about.titleId || t('about.title');
+  const subtitle = about.subtitleId || t('about.subtitle');
+  const story = about.storyId || '';
 
   const stats = about.stats || [
     { number: '5.000+', labelId: 'Wisatawan Puas', labelEn: 'Happy Snorkelers' },
@@ -109,7 +108,7 @@ export default async function AboutPage() {
                   {stat.number}
                 </div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-deep)', marginTop: '8px' }}>
-                  {locale === 'id' ? stat.labelId : stat.labelEn}
+                  {stat.labelId}
                 </div>
               </div>
             ))}

@@ -2,18 +2,18 @@ import React from 'react';
 import { getPackageBySlug, getSettings } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Clock, Calendar, CheckCircle2, Sparkles, ShieldCheck, Camera, MessageCircle, ChevronRight } from 'lucide-react';
 import CtaBanner from '@/components/public/CtaBanner';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: Promise<{ slug: string; locale: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default async function PackageDetailPage({ params }: PageProps) {
-  const { slug, locale } = await params;
+  const { slug } = await params;
   const t = await getTranslations();
   const pkg = await getPackageBySlug(slug);
 
@@ -25,13 +25,13 @@ export default async function PackageDetailPage({ params }: PageProps) {
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const name = locale === 'id' ? pkg.nameId : pkg.nameEn;
-  const tag = locale === 'id' ? pkg.tagId : pkg.tagEn;
-  const description = locale === 'id' ? pkg.descriptionId : pkg.descriptionEn;
-  const duration = locale === 'id' ? (pkg.durationId || '4 - 5 Jam') : (pkg.durationEn || '4 - 5 Hours');
-  const schedule = locale === 'id' ? (pkg.scheduleId || '09:30 & 13:00') : (pkg.scheduleEn || '09:30 AM & 01:00 PM');
-  const includes = (locale === 'id' ? pkg.includesId : (pkg.includesEn || pkg.includesId)) || [];
-  const spots = (locale === 'id' ? pkg.spotsId : (pkg.spotsEn || pkg.spotsId)) || [];
+  const name = pkg.nameId;
+  const tag = pkg.tagId;
+  const description = pkg.descriptionId;
+  const duration = pkg.durationId || '4 - 5 Jam';
+  const schedule = pkg.scheduleId || '09:30 & 13:00';
+  const includes = pkg.includesId || [];
+  const spots = pkg.spotsId || [];
 
   return (
     <div>
@@ -76,9 +76,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
               </Link>
               <a
                 href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                  locale === 'id'
-                    ? `Halo Admin! Saya tertarik dengan paket ${pkg.nameId}. Mau tanya ketersediaan jadwal...`
-                    : `Hello Admin! I am interested in ${pkg.nameEn} package. Would like to inquire about schedule...`
+                  `Halo Admin! Saya tertarik dengan paket ${pkg.nameId}. Mau tanya ketersediaan jadwal...`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
@@ -209,7 +207,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-                    {locale === 'id' ? `Rp ${pkg.price.toLocaleString('id-ID')}` : `$${pkg.priceUsd} USD`}
+                    Rp {pkg.price.toLocaleString('id-ID')}
                   </span>
                   <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
                     {pkg.price > 500000 ? t('packages.perBoat') : t('packages.perPerson')}
@@ -217,7 +215,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
                 </div>
 
                 <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                  {locale === 'id' ? `setara ~ $${pkg.priceUsd} USD` : `approx Rp ${pkg.price.toLocaleString('id-ID')}`}
+                  setara ~ ${pkg.priceUsd} USD
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
@@ -228,9 +226,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
                   <a
                     href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                      locale === 'id'
-                        ? `Halo Admin! Mau booking ${pkg.nameId}...`
-                        : `Hello Admin! I would like to book ${pkg.nameEn}...`
+                      `Halo Admin! Mau booking ${pkg.nameId}...`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

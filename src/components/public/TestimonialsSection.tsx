@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Star, Sparkles, MapPin } from 'lucide-react';
 
 export interface TestimonialItem {
@@ -18,7 +18,6 @@ export interface TestimonialItem {
 }
 
 export default function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
-  const locale = useLocale();
   const t = useTranslations('testimonials');
 
   return (
@@ -37,7 +36,7 @@ export default function TestimonialsSection({ items }: { items: TestimonialItem[
         {/* Testimonials Grid */}
         <div className="grid-3">
           {items.map((item) => {
-            const review = locale === 'id' ? item.contentId : item.contentEn;
+            const review = item.contentId;
             const ratingCount = item.rating || 5;
 
             return (

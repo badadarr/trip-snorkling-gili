@@ -14,7 +14,6 @@ export default function ModernDatePicker({
   value,
   onChange,
   label,
-  locale = 'id',
 }: ModernDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,23 +23,14 @@ export default function ModernDatePicker({
     new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
   );
 
-  const isId = locale === 'id';
-
-  const monthNamesId = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-  const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const dayNamesId = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-  const dayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  const monthNames = isId ? monthNamesId : monthNamesEn;
-  const dayNames = isId ? dayNamesId : dayNamesEn;
+  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
   const formatDisplay = (dateString: string) => {
-    if (!dateString) return isId ? 'Pilih tanggal trip...' : 'Select trip date...';
+    if (!dateString) return 'Pilih tanggal trip...';
     const d = new Date(dateString + 'T00:00:00');
     if (isNaN(d.getTime())) return dateString;
-    const dayName = isId
-      ? ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()]
-      : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
+    const dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()];
     return `${dayName}, ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
   };
 
@@ -123,9 +113,9 @@ export default function ModernDatePicker({
           {/* Quick Presets */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
             {[
-              { days: 1, label: isId ? 'Besok' : 'Tomorrow', icon: <Zap size={12} /> },
-              { days: 2, label: isId ? 'Lusa' : '2 Days', icon: <ArrowRight size={12} /> },
-              { days: 7, label: isId ? 'Pekan Depan' : 'Next Week', icon: <FastForward size={12} /> },
+              { days: 1, label: 'Besok', icon: <Zap size={12} /> },
+              { days: 2, label: 'Lusa', icon: <ArrowRight size={12} /> },
+              { days: 7, label: 'Pekan Depan', icon: <FastForward size={12} /> },
             ].map((p) => (
               <button
                 key={p.days}

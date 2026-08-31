@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { X, ZoomIn } from "lucide-react";
 
 export interface GalleryItem {
@@ -15,7 +15,6 @@ export interface GalleryItem {
 }
 
 export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
-  const locale = useLocale();
   const t = useTranslations("gallery");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
@@ -83,7 +82,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
         }}
       >
         {filteredItems.map((item, index) => {
-          const title = locale === "id" ? item.titleId : item.titleEn;
+          const title = item.titleId;
           return (
             <div
               key={item.id}
@@ -226,11 +225,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
             >
               <Image
                 src={selectedPhoto.imageUrl}
-                alt={
-                  locale === "id"
-                    ? selectedPhoto.titleId
-                    : selectedPhoto.titleEn
-                }
+                alt={selectedPhoto.titleId}
                 fill
                 sizes="(max-width: 900px) 100vw, 900px"
                 style={{
@@ -256,9 +251,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
                     marginBottom: "4px",
                   }}
                 >
-                  {locale === "id"
-                    ? selectedPhoto.titleId
-                    : selectedPhoto.titleEn}
+                  {selectedPhoto.titleId}
                 </h4>
                 <span
                   style={{
