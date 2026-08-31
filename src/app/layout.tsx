@@ -17,35 +17,69 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trip-snorkling-gili.vercel.app';
+
 export const metadata: Metadata = {
-  title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    template: '%s | Gili Trawangan Snorkeling Trip',
+  },
   description: 'Licensed premier snorkeling trip provider in Gili Trawangan, Gili Meno, and Gili Air. Swim with sea turtles at Turtle Point, underwater Bask Nest statues, Blue Coral reefs, free GoPro HD photo & video documentation.',
   keywords: [
+    'trip snorkeling gili trawangan',
+    'snorkeling gili trawangan murah',
+    'paket snorkeling 3 gili',
+    'snorkeling gili meno turtle point',
+    'patung bawah air gili meno bask nest',
+    'sewa perahu private boat gili trawangan',
+    'glass bottom boat gili trawangan',
     'gili trawangan snorkeling trip',
-    'snorkeling gili trawangan',
-    '3 gilis snorkeling tour',
-    'gili meno turtle point',
-    'underwater statues gili meno',
-    'private boat gili trawangan',
-    'glass bottom boat gili',
-    'snorkeling lombok gili',
+    'best snorkeling 3 gilis lombok',
+    'gili islands snorkeling tour',
   ],
-  authors: [{ name: 'Gili Trawangan Snorkeling Trip' }],
+  authors: [{ name: 'Gili Trawangan Snorkeling Trip', url: SITE_URL }],
+  creator: 'Gili Trawangan Snorkeling Trip',
+  publisher: 'Gili Trawangan Snorkeling Trip',
+  alternates: {
+    canonical: '/',
+    languages: {
+      'id-ID': '/id',
+      'en-US': '/en',
+    },
+  },
   openGraph: {
     title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
-    description: 'Swim with sea turtles at Turtle Point & Underwater Statues. Free GoPro HD Underwater Photo & Video.',
-    url: 'https://snorkelinggilitrawangan.vercel.app',
+    description: 'Swim with sea turtles at Turtle Point & underwater Bask Nest statues. Free GoPro HD photos & videos included.',
+    url: SITE_URL,
     siteName: 'Gili Trawangan Snorkeling Trip',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200',
+        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop',
         width: 1200,
         height: 630,
-        alt: 'Snorkeling Gili Trawangan',
+        alt: 'Snorkeling Gili Trawangan Sea Turtles and Coral Reefs',
       },
     ],
     locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    description: 'Swim with sea turtles at Turtle Point & underwater statues. Free GoPro HD photos & videos.',
+    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
