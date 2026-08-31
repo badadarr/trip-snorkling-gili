@@ -100,13 +100,18 @@ export async function deletePackage(id: number) {
   const db = getDb();
   if (db) {
     try {
+      // Disassociate package from bookings first to ensure safety against strict DB constraints
+      await db.update(bookings).set({ packageId: null }).where(eq(bookings.packageId, id));
       await db.delete(packages).where(eq(packages.id, id));
-      return true;
     } catch (e) {
       console.error('Error deleting package from DB:', e);
+      throw e;
     }
   }
   fallbackStore.packages = fallbackStore.packages.filter((p) => p.id !== id);
+  fallbackStore.bookings = fallbackStore.bookings.map((b) =>
+    b.packageId === id ? { ...b, packageId: null } : b
+  );
   return true;
 }
 
@@ -145,9 +150,9 @@ export async function deleteGalleryItem(id: number) {
   if (db) {
     try {
       await db.delete(gallery).where(eq(gallery.id, id));
-      return true;
     } catch (e) {
       console.error('Error deleting gallery item from DB:', e);
+      throw e;
     }
   }
   fallbackStore.gallery = fallbackStore.gallery.filter((g) => g.id !== id);
@@ -207,9 +212,9 @@ export async function deleteTestimonial(id: number) {
   if (db) {
     try {
       await db.delete(testimonials).where(eq(testimonials.id, id));
-      return true;
     } catch (e) {
       console.error('Error deleting testimonial from DB:', e);
+      throw e;
     }
   }
   fallbackStore.testimonials = fallbackStore.testimonials.filter((t) => t.id !== id);
@@ -269,9 +274,9 @@ export async function deleteFaq(id: number) {
   if (db) {
     try {
       await db.delete(faq).where(eq(faq.id, id));
-      return true;
     } catch (e) {
       console.error('Error deleting faq from DB:', e);
+      throw e;
     }
   }
   fallbackStore.faq = fallbackStore.faq.filter((f) => f.id !== id);
@@ -353,9 +358,9 @@ export async function deleteBooking(id: number) {
   if (db) {
     try {
       await db.delete(bookings).where(eq(bookings.id, id));
-      return true;
     } catch (e) {
       console.error('Error deleting booking from DB:', e);
+      throw e;
     }
   }
   fallbackStore.bookings = fallbackStore.bookings.filter((b) => b.id !== id);

@@ -89,7 +89,7 @@ export const faq = pgTable('faq', {
 export const bookings = pgTable('bookings', {
   id: serial('id').primaryKey(),
   bookingCode: text('booking_code').unique().notNull(),
-  packageId: integer('package_id').references(() => packages.id),
+  packageId: integer('package_id').references(() => packages.id, { onDelete: 'set null' }),
   packageName: text('package_name').notNull(),
   customerName: text('customer_name').notNull(),
   customerEmail: text('customer_email').notNull(),
