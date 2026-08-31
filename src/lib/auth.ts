@@ -49,11 +49,35 @@ export function parseSessionToken(token: string): AdminUser | null {
   return null;
 }
 
-export async function getAdminSession(): Promise<AdminUser | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
-  if (!sessionCookie?.value) {
-    return null;
+export async function getAdminSession(req?: Request): Promise<AdminUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+    if (sessionCookie?.value) {
+      const parsed = parseSessionToken(sessionCookie.value);
+      if (parsed) return parsed;
+    }
+  } catch (e) {
+    // context error fallback
   }
-  return parseSessionToken(sessionCookie.value);
+
+  if (req) {
+    const authHeader = req.headers.get('authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const parsed = parseSessionToken(token);
+      if (parsed) return parsed;
+    }
+
+    const cookieHeader = req.headers.get('cookie');
+    if (cookieHeader) {
+      const match = cookieHeader.match(new RegExp(`${SESSION_COOKIE_NAME}=([^;]+)`));
+      if (match && match[1]) {
+        const parsed = parseSessionToken(decodeURIComponent(match[1]));
+        if (parsed) return parsed;
+      }
+    }
+  }
+
+  return null;
 }

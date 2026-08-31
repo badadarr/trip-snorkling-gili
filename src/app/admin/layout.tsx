@@ -1,7 +1,6 @@
 import React from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { getAdminSession } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import AdminAuthGuard from '@/components/admin/AdminAuthGuard';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,8 +10,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
-      <AdminSidebar />
+    <AdminAuthGuard>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
+        <AdminSidebar />
       <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <header
           style={{
@@ -47,5 +47,6 @@ export default async function AdminLayout({
         </main>
       </div>
     </div>
+    </AdminAuthGuard>
   );
 }

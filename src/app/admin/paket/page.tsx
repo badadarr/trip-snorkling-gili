@@ -24,11 +24,13 @@ import {
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
 import ImageUpload from '@/components/admin/ImageUpload';
 import { formatIdr, formatUsd } from '@/lib/format';
 
 export default function AdminPackagesPage() {
+  const router = useRouter();
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -359,6 +361,11 @@ export default function AdminPackagesPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+        if (res.status === 401) {
+          toast.error('Sesi admin berakhir atau belum login. Mengalihkan ke login...', { id: toastId });
+          router.push('/admin/login');
+          return;
+        }
         if (!res.ok) throw new Error('Gagal memperbarui paket');
         toast.success('Paket snorkeling berhasil diperbarui!', { id: toastId });
       } else {
@@ -367,6 +374,11 @@ export default function AdminPackagesPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+        if (res.status === 401) {
+          toast.error('Sesi admin berakhir atau belum login. Mengalihkan ke login...', { id: toastId });
+          router.push('/admin/login');
+          return;
+        }
         if (!res.ok) throw new Error('Gagal menambahkan paket');
         toast.success('Paket snorkeling baru berhasil ditambahkan!', { id: toastId });
       }

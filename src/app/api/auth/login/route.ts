@@ -16,8 +16,9 @@ export async function POST(req: Request) {
     }
 
     const token = createSessionToken(user);
-    const cookieStore = await cookies();
-    cookieStore.set('snorkeling_admin_session', token, {
+    const response = NextResponse.json({ success: true, user, token });
+
+    response.cookies.set('snorkeling_admin_session', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    return NextResponse.json({ success: true, user });
+    return response;
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
