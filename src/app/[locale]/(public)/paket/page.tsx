@@ -89,7 +89,7 @@ export default async function PackagesPage() {
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
                 <a
-                  href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Trip Snorkeling Gili! Saya ingin bertanya ketersediaan paket snorkeling trip...')}`}
+                  href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello Gili Trawangan Snorkeling Trip! I would like to inquire about snorkeling package availability...')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-whatsapp btn-lg"

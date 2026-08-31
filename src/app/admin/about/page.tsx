@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Info, Save, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminAboutPage() {
   const [formData, setFormData] = useState({
@@ -147,20 +148,13 @@ export default function AdminAboutPage() {
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">URL Foto Dokumentasi Perahu / Tim</label>
-            <input
-              type="url"
-              className="form-control"
-              value={formData.imageUrl || ''}
-              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-            />
-            {formData.imageUrl && (
-              <div style={{ marginTop: '12px', height: '180px', borderRadius: '8px', overflow: 'hidden' }}>
-                <img src={formData.imageUrl} alt="About preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            )}
-          </div>
+          {/* Documentation Team / Boat Image Upload */}
+          <ImageUpload
+            label="Foto Dokumentasi Perahu / Tim"
+            value={formData.imageUrl || ''}
+            onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+            helperText="Upload foto armada kapal atau tim pemandu (JPG, PNG, WebP maks 10MB)"
+          />
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '28px' }}>
             <button

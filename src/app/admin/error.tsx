@@ -44,11 +44,11 @@ export default function AdminErrorBoundary({
       </div>
 
       <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '8px' }}>
-        Terjadi Kesalahan di Panel Admin
+        Admin Panel Error
       </h3>
 
       <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.6 }}>
-        Gagal memuat atau memproses data. Silakan klik tombol di bawah untuk mencoba kembali.
+        Failed to load or process data. Please click the button below to retry.
       </p>
 
       {error?.message && (
@@ -74,7 +74,7 @@ export default function AdminErrorBoundary({
         className="btn btn-primary"
       >
         <RefreshCw size={16} />
-        <span>Muat Ulang Komponen</span>
+        <span>Reload Component</span>
       </button>
     </div>
   );

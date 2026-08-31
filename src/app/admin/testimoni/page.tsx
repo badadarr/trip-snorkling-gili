@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageSquare, Plus, Edit3, Trash2, X, Star, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -16,17 +17,19 @@ export default function AdminTestimonialsPage() {
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const initialEmptyTestimonial = {
     name: '',
-    origin: 'Jakarta, Indonesia',
+    origin: '',
     countryCode: 'ID',
     rating: 5,
-    tripType: 'Private Glass Bottom Boat',
+    tripType: '',
     contentId: '',
     contentEn: '',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+    avatarUrl: '',
     isActive: true,
-  });
+  };
+
+  const [formData, setFormData] = useState(initialEmptyTestimonial);
 
   const fetchTestimonials = async () => {
     setLoading(true);
@@ -52,17 +55,7 @@ export default function AdminTestimonialsPage() {
 
   const openCreateModal = () => {
     setEditingId(null);
-    setFormData({
-      name: '',
-      origin: 'Jakarta, Indonesia',
-      countryCode: 'ID',
-      rating: 5,
-      tripType: 'Private Glass Bottom Boat',
-      contentId: '',
-      contentEn: '',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
-      isActive: true,
-    });
+    setFormData(initialEmptyTestimonial);
     setIsModalOpen(true);
   };
 
@@ -418,26 +411,13 @@ export default function AdminTestimonialsPage() {
                 />
               </div>
 
-              <div className="form-group" style={{ marginBottom: '20px' }}>
-                <label className="form-label">URL Foto Avatar Tamu (Opsional)</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.avatarUrl}
-                  onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                />
-                {formData.avatarUrl && (
-                  <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <img
-                      src={formData.avatarUrl}
-                      alt="Avatar preview"
-                      style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                    />
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Preview foto profil</span>
-                  </div>
-                )}
-              </div>
+              <ImageUpload
+                label="Foto Profil Tamu (Opsional)"
+                value={formData.avatarUrl}
+                onChange={(url) => setFormData({ ...formData, avatarUrl: url })}
+                required={false}
+                helperText="Upload foto profil tamu jika tersedia (JPG, PNG maks 5MB)"
+              />
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button

@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Clock, Calendar, CheckCircle2, Sparkles, ShieldCheck, Camera, MessageCircle, ChevronRight } from 'lucide-react';
 import CtaBanner from '@/components/public/CtaBanner';
+import { formatIdr, formatUsd } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -207,15 +208,15 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-                    ${pkg.priceUsd} USD
+                    {formatUsd(pkg.priceUsd)}
                   </span>
                   <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
-                    {pkg.price > 500000 ? t('packages.perBoat') : t('packages.perPerson')}
+                    {(pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000)) ? t('packages.perBoat') : t('packages.perPerson')}
                   </span>
                 </div>
 
                 <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                  approx. Rp {pkg.price.toLocaleString('id-ID')}
+                  approx. {formatIdr(pkg.price)}
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>

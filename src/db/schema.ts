@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, timestamp, date, json } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, doublePrecision, boolean, timestamp, date, json } from 'drizzle-orm/pg-core';
 
 // 1. Hero Section Content
 export const heroSection = pgTable('hero_section', {
@@ -30,7 +30,8 @@ export const packages = pgTable('packages', {
   descriptionId: text('description_id').notNull(),
   descriptionEn: text('description_en').notNull(),
   price: integer('price').notNull(), // in IDR (e.g. 150000)
-  priceUsd: integer('price_usd').notNull(), // in USD (e.g. 10)
+  priceUsd: doublePrecision('price_usd').notNull(), // in USD (e.g. 44.30 or 10)
+  priceUnit: text('price_unit').default('per_person'), // 'per_person' | 'per_boat'
   durationId: text('duration_id').default('4 - 5 Jam'),
   durationEn: text('duration_en').default('4 - 5 Hours'),
   scheduleId: text('schedule_id').default('Pagi (09:30) & Siang (13:00)'),
@@ -100,7 +101,7 @@ export const bookings = pgTable('bookings', {
   pickupLocation: text('pickup_location'),
   specialRequests: text('special_requests'),
   totalPriceIdr: integer('total_price_idr').notNull(),
-  totalPriceUsd: integer('total_price_usd'),
+  totalPriceUsd: doublePrecision('total_price_usd'),
   status: text('status').default('pending'), // pending, confirmed, completed, cancelled
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

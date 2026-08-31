@@ -9,6 +9,7 @@ interface PackageOption {
   nameId: string;
   price: number;
   priceUsd: number;
+  priceUnit?: string | null;
 }
 
 interface ManualBookingModalProps {
@@ -34,14 +35,16 @@ export default function ManualBookingModal({
   const [numberOfPeople, setNumberOfPeople] = useState<number>(2);
   const [tripDate, setTripDate] = useState<string>(todayStr);
   const [tripSession, setTripSession] = useState<string>('morning');
-  const [pickupLocation, setPickupLocation] = useState<string>('Dermaga Utama Gili Trawangan (Counter)');
-  const [specialRequests, setSpecialRequests] = useState<string>('Booking Walk-in langsung di lokasi');
+  const [pickupLocation, setPickupLocation] = useState<string>('');
+  const [specialRequests, setSpecialRequests] = useState<string>('');
   const [status, setStatus] = useState<string>('confirmed');
   const [customPrice, setCustomPrice] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const selectedPkg = packages.find((p) => p.id === selectedPackageId) || packages[0];
-  const defaultTotal = selectedPkg ? selectedPkg.price * numberOfPeople : 300000;
+  const isPerBoat = selectedPkg ? (selectedPkg.priceUnit === 'per_boat' || (!selectedPkg.priceUnit && selectedPkg.price > 500000)) : false;
+  const defaultTotal = selectedPkg ? (isPerBoat ? selectedPkg.price : selectedPkg.price * numberOfPeople) : 300000;
+  const defaultTotalUsd = selectedPkg ? (isPerBoat ? selectedPkg.priceUsd : selectedPkg.priceUsd * numberOfPeople) : 20;
   const finalTotalPrice = customPrice !== null ? customPrice : defaultTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,7 +70,7 @@ export default function ManualBookingModal({
         pickupLocation,
         specialRequests,
         totalPriceIdr: finalTotalPrice,
-        totalPriceUsd: selectedPkg ? selectedPkg.priceUsd * numberOfPeople : 20,
+        totalPriceUsd: defaultTotalUsd,
         status,
       };
 
@@ -297,6 +300,7 @@ export default function ManualBookingModal({
             <input
               type="text"
               className="form-control"
+              placeholder="contoh: Dermaga Utama Gili Trawangan / Nama Hotel"
               value={pickupLocation}
               onChange={(e) => setPickupLocation(e.target.value)}
             />
@@ -306,6 +310,7 @@ export default function ManualBookingModal({
             <label className="form-label" style={{ fontSize: '0.85rem' }}>Catatan Khusus</label>
             <textarea
               className="form-control"
+              placeholder="contoh: Permintaan pelampung anak, pakan ikan, dsb..."
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
               rows={2}

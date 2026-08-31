@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Image as ImageIcon, Plus, Trash2, X, CheckCircle2, Loader2, Filter, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminGalleryPage() {
   const [gallery, setGallery] = useState<any[]>([]);
@@ -322,22 +323,13 @@ export default function AdminGalleryPage() {
             </div>
 
             <form onSubmit={handleCreate}>
-              <div className="form-group">
-                <label className="form-label">URL Foto / Gambar *</label>
-                <input
-                  type="url"
-                  className="form-control"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  required
-                />
-                {formData.imageUrl && (
-                  <div style={{ marginTop: '10px', height: '140px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-                    <img src={formData.imageUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                )}
-              </div>
+              <ImageUpload
+                label="Unggah Foto Galeri"
+                value={formData.imageUrl}
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                required
+                helperText="Upload foto spot 3 Gili, penyu, patung bawah laut, dll (JPG, PNG, WebP maks 10MB)"
+              />
 
               <div className="form-group">
                 <label className="form-label">Judul Foto (Bahasa Indonesia) *</label>

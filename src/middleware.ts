@@ -1,12 +1,7 @@
-// Middleware disabled — no locale routing needed (Indonesian only)
-// Keep file to prevent Next.js from using default middleware behavior
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
-export function middleware(request: NextRequest) {
-  return NextResponse.next();
-}
+export default createMiddleware(routing);
 
 export const config = {
   // Match only internationalized pathnames, excluding api, admin, _next, favicon, and static files

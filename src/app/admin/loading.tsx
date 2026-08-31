@@ -26,7 +26,7 @@ export default function AdminLoading() {
           animation: 'spin 0.8s linear infinite',
         }}
       />
-      <span>Memuat data CMS...</span>
+      <span>Loading dashboard data...</span>
 
       <style jsx>{`
         @keyframes spin {

@@ -4,6 +4,7 @@ import React from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Clock, Calendar, CheckCircle2, MapPin, ArrowRight, Sparkles } from 'lucide-react';
+import { formatIdr, formatUsd } from '@/lib/format';
 
 export interface PackageData {
   id: number;
@@ -16,6 +17,7 @@ export interface PackageData {
   descriptionEn: string;
   price: number;
   priceUsd: number;
+  priceUnit?: string | null;
   durationId?: string | null;
   durationEn?: string | null;
   scheduleId?: string | null;
@@ -123,13 +125,13 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
               {t('priceStarts')}
             </span>
             <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-              ${pkg.priceUsd} USD
+              {formatUsd(pkg.priceUsd)}
             </span>
             <span style={{ fontSize: '0.8rem', color: '#caf0f8', marginLeft: '4px' }}>
-              {pkg.price > 500000 ? t('perBoat') : t('perPerson')}
+              {(pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000)) ? t('perBoat') : t('perPerson')}
             </span>
             <span style={{ display: 'block', fontSize: '0.72rem', color: '#bde0fe', marginTop: '2px' }}>
-              ~ Rp {pkg.price?.toLocaleString('id-ID')}
+              ~ {formatIdr(pkg.price)}
             </span>
           </div>
         </div>

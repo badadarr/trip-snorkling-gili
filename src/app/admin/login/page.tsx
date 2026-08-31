@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@skt.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -122,6 +122,7 @@ export default function AdminLoginPage() {
             <input
               type="email"
               className="form-control"
+              placeholder="admin@skt.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -133,6 +134,7 @@ export default function AdminLoginPage() {
             <input
               type="password"
               className="form-control"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

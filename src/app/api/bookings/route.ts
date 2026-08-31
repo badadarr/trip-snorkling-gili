@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     if (!body.customerName || !body.customerPhone || !body.tripDate) {
-      return NextResponse.json({ error: 'Data pemesanan tidak lengkap' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required reservation fields (customerName, customerPhone, tripDate)' }, { status: 400 });
     }
 
     const created = await createBooking(body);

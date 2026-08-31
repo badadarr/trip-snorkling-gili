@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Save, CheckCircle2, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminHeroPage() {
   const [formData, setFormData] = useState({
@@ -146,25 +147,13 @@ export default function AdminHeroPage() {
             </div>
           </div>
 
-          {/* Background Image URL with Live Preview */}
-          <div className="form-group">
-            <label className="form-label">URL Foto Latar Belakang (Background Image)</label>
-            <input
-              type="url"
-              className="form-control"
-              value={formData.backgroundImage || ''}
-              onChange={(e) => setFormData({ ...formData, backgroundImage: e.target.value })}
-            />
-            {formData.backgroundImage && (
-              <div style={{ marginTop: '12px', height: '180px', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-                <img
-                  src={formData.backgroundImage}
-                  alt="Preview Hero"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-            )}
-          </div>
+          {/* Background Image Upload */}
+          <ImageUpload
+            label="Foto Latar Belakang (Hero Background Image)"
+            value={formData.backgroundImage || ''}
+            onChange={(url) => setFormData({ ...formData, backgroundImage: url })}
+            helperText="Upload foto lanskap pemandangan laut / sunset 3 Gili (JPG, PNG, WebP maks 10MB)"
+          />
 
           {/* CTAs */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '24px' }}>

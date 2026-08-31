@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Home, Compass } from 'lucide-react';
+import { Home } from 'lucide-react';
 
 export default function RootNotFound() {
   return (
@@ -27,9 +27,9 @@ export default function RootNotFound() {
         }}
       >
         <h1 style={{ fontSize: '4rem', color: '#0077b6', margin: '0 0 10px 0', fontWeight: 800 }}>404</h1>
-        <h2 style={{ fontSize: '1.4rem', color: '#0a2540', marginBottom: '12px' }}>Halaman Tidak Ditemukan</h2>
+        <h2 style={{ fontSize: '1.4rem', color: '#0a2540', marginBottom: '12px' }}>Page Not Found</h2>
         <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.6 }}>
-          Halaman yang Anda tuju tidak tersedia atau tautan sudah kadaluarsa.
+          The page or snorkeling tour you are looking for is unavailable or the link has expired.
         </p>
         <Link
           href="/"
@@ -46,7 +46,7 @@ export default function RootNotFound() {
           }}
         >
           <Home size={18} />
-          <span>Kembali ke Beranda</span>
+          <span>Back to Home</span>
         </Link>
       </div>
     </div>

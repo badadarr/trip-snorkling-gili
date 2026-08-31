@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ModernDatePicker from '@/components/ui/ModernDatePicker';
 import SessionTimePicker from '@/components/ui/SessionTimePicker';
+import { formatIdr, formatUsd } from '@/lib/format';
 
 interface BookingFormProps {
   packagesList: PackageData[];
@@ -51,10 +52,11 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     setTripDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
-  // Compute estimated total
+  // Compute estimated total based on priceUnit ('per_boat' vs 'per_person')
   const computePrice = () => {
     if (!currentPackage) return { idr: 0, usd: 0 };
-    if (currentPackage.price > 500000) {
+    const isPerBoat = currentPackage.priceUnit === 'per_boat' || (!currentPackage.priceUnit && currentPackage.price > 500000);
+    if (isPerBoat) {
       return {
         idr: currentPackage.price,
         usd: currentPackage.priceUsd,
@@ -503,12 +505,12 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
-                  {currentPackage.price > 500000
+                  {(currentPackage.priceUnit === 'per_boat' || (!currentPackage.priceUnit && currentPackage.price > 500000))
                     ? 'Private Boat Rate'
                     : `Rate per Person (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                  ${currentPackage.priceUsd} USD <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>(Rp {currentPackage.price.toLocaleString('id-ID')})</span>
+                  {formatUsd(currentPackage.priceUsd)} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({formatIdr(currentPackage.price)})</span>
                 </span>
               </div>
               <div
@@ -526,10 +528,10 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
                 </span>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-ocean)', fontFamily: 'var(--font-heading)' }}>
-                    ${totals.usd} USD
+                    {formatUsd(totals.usd)}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    approx. Rp {totals.idr.toLocaleString('id-ID')}
+                    approx. {formatIdr(totals.idr)}
                   </div>
                 </div>
               </div>

@@ -42,10 +42,10 @@ export default function Loading() {
             fontFamily: 'var(--font-heading)',
           }}
         >
-          Memuat Petualangan Bahari...
+          Loading Marine Adventure...
         </h3>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Menyiapkan data trip snorkeling terbaik 3 Gili
+          Preparing the finest 3 Gili snorkeling tours for you
         </p>
       </div>
 
