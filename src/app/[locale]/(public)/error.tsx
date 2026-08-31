@@ -53,11 +53,11 @@ export default function ErrorBoundary({
         </div>
 
         <h2 style={{ fontSize: '1.6rem', color: 'var(--primary-deep)', marginBottom: '12px' }}>
-          Terjadi Kendala Memuat Data
+          Unable to Load Data
         </h2>
 
         <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '28px' }}>
-          Maaf, terjadi kesalahan teknis saat mengambil data dari server. Jangan khawatir, Anda dapat mencoba memuat ulang halaman atau kembali ke beranda.
+          We encountered an issue fetching trip data from our servers. Please try reloading the page or return to the homepage.
         </p>
 
         {error?.message && process.env.NODE_ENV === 'development' && (
@@ -86,12 +86,12 @@ export default function ErrorBoundary({
             className="btn btn-primary"
           >
             <RefreshCw size={16} />
-            <span>Coba Lagi</span>
+            <span>Try Again</span>
           </button>
 
           <Link href="/" className="btn btn-secondary">
             <Home size={16} />
-            <span>Kembali ke Beranda</span>
+            <span>Back to Home</span>
           </Link>
         </div>
       </div>

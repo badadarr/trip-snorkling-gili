@@ -33,19 +33,16 @@ export interface PackageData {
 export default function PackageCard({ pkg }: { pkg: PackageData }) {
   const t = useTranslations('packages');
 
-  const name = pkg.nameId;
-  const tag = pkg.tagId;
-  const description = pkg.descriptionId;
-  const duration = pkg.durationId;
-  const schedule = pkg.scheduleId;
-  const includes = pkg.includesId || [];
-  const spots = pkg.spotsId || [];
+  const name = pkg.nameEn || pkg.nameId;
+  const tag = pkg.tagEn || pkg.tagId;
+  const description = pkg.descriptionEn || pkg.descriptionId;
+  const duration = pkg.durationEn || pkg.durationId;
+  const schedule = pkg.scheduleEn || pkg.scheduleId;
+  const includes = (pkg.includesEn && pkg.includesEn.length > 0) ? pkg.includesEn : (pkg.includesId || []);
+  const spots = (pkg.spotsEn && pkg.spotsEn.length > 0) ? pkg.spotsEn : (pkg.spotsId || []);
 
-  const formatPrice = (amount: number, currency: 'IDR' | 'USD') => {
-    if (currency === 'USD') {
-      return `$${amount}`;
-    }
-    return `Rp ${amount.toLocaleString('id-ID')}`;
+  const formatPrice = (amountUsd: number, amountIdr: number) => {
+    return `$${amountUsd} USD`;
   };
 
   return (
@@ -126,10 +123,13 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
               {t('priceStarts')}
             </span>
             <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-              {formatPrice(pkg.price, 'IDR')}
+              ${pkg.priceUsd} USD
             </span>
             <span style={{ fontSize: '0.8rem', color: '#caf0f8', marginLeft: '4px' }}>
               {pkg.price > 500000 ? t('perBoat') : t('perPerson')}
+            </span>
+            <span style={{ display: 'block', fontSize: '0.72rem', color: '#bde0fe', marginTop: '2px' }}>
+              ~ Rp {pkg.price?.toLocaleString('id-ID')}
             </span>
           </div>
         </div>

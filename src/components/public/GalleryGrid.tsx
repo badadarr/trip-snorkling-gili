@@ -82,7 +82,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
         }}
       >
         {filteredItems.map((item, index) => {
-          const title = item.titleId;
+          const title = item.titleEn || item.titleId;
           return (
             <div
               key={item.id}
@@ -225,7 +225,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
             >
               <Image
                 src={selectedPhoto.imageUrl}
-                alt={selectedPhoto.titleId}
+                alt={selectedPhoto.titleEn || selectedPhoto.titleId}
                 fill
                 sizes="(max-width: 900px) 100vw, 900px"
                 style={{
@@ -251,7 +251,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
                     marginBottom: "4px",
                   }}
                 >
-                  {selectedPhoto.titleId}
+                  {selectedPhoto.titleEn || selectedPhoto.titleId}
                 </h4>
                 <span
                   style={{

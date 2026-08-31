@@ -13,14 +13,14 @@ export default async function AboutPage() {
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const title = about.titleId || t('about.title');
-  const subtitle = about.subtitleId || t('about.subtitle');
-  const story = about.storyId || '';
+  const title = about.titleEn || about.titleId || t('about.title');
+  const subtitle = about.subtitleEn || about.subtitleId || t('about.subtitle');
+  const story = about.storyEn || about.storyId || '';
 
   const stats = about.stats || [
     { number: '5.000+', labelId: 'Wisatawan Puas', labelEn: 'Happy Snorkelers' },
     { number: '100%', labelId: 'Spot Bergaransi Penyu', labelEn: 'Turtle Spot Guarantee' },
-    { number: '8+ Thn', labelId: 'Pengalaman Bahari', labelEn: 'Years Marine Experience' },
+    { number: '8+ Yrs', labelId: 'Pengalaman Bahari', labelEn: 'Years Marine Experience' },
     { number: '4.9/5', labelId: 'Rating Ulasan', labelEn: 'Average Guest Rating' },
   ];
 
@@ -108,7 +108,7 @@ export default async function AboutPage() {
                   {stat.number}
                 </div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-deep)', marginTop: '8px' }}>
-                  {stat.labelId}
+                  {stat.labelEn || stat.labelId}
                 </div>
               </div>
             ))}

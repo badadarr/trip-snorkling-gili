@@ -18,24 +18,24 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Trip Snorkeling Gili Trawangan | Spot Snorkeling Terbaik 3 Gili',
-  description: 'Penyedia wisata trip snorkeling berlisensi di Gili Trawangan, Gili Meno, dan Gili Air. Berenang bersama penyu di Turtle Point, patung bawah laut Bask Nest, terumbu karang Blue Coral, free foto GoPro underwater HD.',
+  title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+  description: 'Licensed premier snorkeling trip provider in Gili Trawangan, Gili Meno, and Gili Air. Swim with sea turtles at Turtle Point, underwater Bask Nest statues, Blue Coral reefs, free GoPro HD photo & video documentation.',
   keywords: [
-    'trip snorkeling gili trawangan',
+    'gili trawangan snorkeling trip',
     'snorkeling gili trawangan',
-    'snorkeling 3 gili',
+    '3 gilis snorkeling tour',
     'gili meno turtle point',
     'underwater statues gili meno',
     'private boat gili trawangan',
     'glass bottom boat gili',
     'snorkeling lombok gili',
   ],
-  authors: [{ name: 'Trip Snorkeling Gili Trawangan' }],
+  authors: [{ name: 'Gili Trawangan Snorkeling Trip' }],
   openGraph: {
-    title: 'Trip Snorkeling Gili Trawangan | Spot Snorkeling Terbaik 3 Gili',
-    description: 'Berenang bersama Penyu di Turtle Point & Patung Bawah Laut Meno. Free GoPro HD Underwater Photo & Video.',
+    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    description: 'Swim with sea turtles at Turtle Point & Underwater Statues. Free GoPro HD Underwater Photo & Video.',
     url: 'https://snorkelinggilitrawangan.vercel.app',
-    siteName: 'Trip Snorkeling Gili Trawangan',
+    siteName: 'Gili Trawangan Snorkeling Trip',
     images: [
       {
         url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
         alt: 'Snorkeling Gili Trawangan',
       },
     ],
-    locale: 'id_ID',
+    locale: 'en_US',
     type: 'website',
   },
 };
@@ -55,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${outfit.variable} ${plusJakartaSans.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${plusJakartaSans.variable}`}>
       <body>
         <AppProviders>
           {children}

@@ -36,7 +36,7 @@ export default function TestimonialsSection({ items }: { items: TestimonialItem[
         {/* Testimonials Grid */}
         <div className="grid-3">
           {items.map((item) => {
-            const review = item.contentId;
+            const review = item.contentEn || item.contentId;
             const ratingCount = item.rating || 5;
 
             return (

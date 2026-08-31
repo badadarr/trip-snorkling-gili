@@ -5,7 +5,7 @@ import { MessageCircle } from 'lucide-react';
 
 export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: string }) {
   const phone = whatsappNumber || '6287864551234';
-  const defaultText = 'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin konsultasi / reservasi paket snorkeling...';
+  const defaultText = 'Hello Gili Trawangan Snorkeling Trip! I would like to inquire about snorkeling packages & slot availability...';
   
   const waUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(defaultText)}`;
 
@@ -19,7 +19,7 @@ export default function WhatsAppButton({ whatsappNumber }: { whatsappNumber?: st
     >
       <div className="whatsapp-pulse" />
       <MessageCircle size={22} color="#ffffff" strokeWidth={2.3} />
-      <span>Chat WhatsApp</span>
+      <span>WhatsApp Us</span>
     </a>
   );
 }

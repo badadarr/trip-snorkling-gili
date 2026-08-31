@@ -24,8 +24,8 @@ export default function FaqAccordion({ items }: { items: FaqItem[] }) {
   return (
     <div style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {items.map((item, index) => {
-        const question = item.questionId;
-        const answer = item.answerId;
+        const question = item.questionEn || item.questionId;
+        const answer = item.answerEn || item.answerId;
         const isOpen = openIndex === index;
 
         return (

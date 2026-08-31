@@ -37,7 +37,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
         <div style={{ maxWidth: '780px', margin: '0 auto' }}>
           <div className="section-badge badge-gold" style={{ display: 'inline-flex', marginBottom: '18px' }}>
             <Sparkles size={14} />
-            <span>SLOT TERBATAS SETIAP HARI</span>
+            <span>LIMITED DAILY SLOTS</span>
           </div>
 
           <h2
@@ -79,7 +79,7 @@ export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string 
 
             <a
               href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                'Halo Admin Trip Snorkeling Gili Trawangan! Saya ingin tanya slot & booking...'
+                'Hello! I would like to inquire about available snorkeling tour slots & reservation.'
               )}`}
               target="_blank"
               rel="noreferrer"

@@ -26,11 +26,11 @@ interface HeroProps {
 export default function HeroSection({ heroData }: HeroProps) {
   const t = useTranslations('hero');
 
-  const badge = heroData?.badgeId || t('popularTag');
-  const title = heroData?.titleId || t('mainHeading');
-  const subtitle = heroData?.subtitleId || t('subHeading');
-  const ctaText = heroData?.ctaTextId || t('ctaBook');
-  const secondaryCtaText = heroData?.secondaryCtaId || t('ctaPackages');
+  const badge = heroData?.badgeEn || heroData?.badgeId || t('popularTag');
+  const title = heroData?.titleEn || heroData?.titleId || t('mainHeading');
+  const subtitle = heroData?.subtitleEn || heroData?.subtitleId || t('subHeading');
+  const ctaText = heroData?.ctaTextEn || heroData?.ctaTextId || t('ctaBook');
+  const secondaryCtaText = heroData?.secondaryCtaEn || heroData?.secondaryCtaId || t('ctaPackages');
   const bgImage = heroData?.backgroundImage || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop';
 
   return (

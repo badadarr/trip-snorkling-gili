@@ -23,14 +23,14 @@ export default function ModernDatePicker({
     new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
   );
 
-  const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-  const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const formatDisplay = (dateString: string) => {
-    if (!dateString) return 'Pilih tanggal trip...';
+    if (!dateString) return 'Select trip date...';
     const d = new Date(dateString + 'T00:00:00');
     if (isNaN(d.getTime())) return dateString;
-    const dayName = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()];
+    const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
     return `${dayName}, ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
   };
 
@@ -113,9 +113,9 @@ export default function ModernDatePicker({
           {/* Quick Presets */}
           <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
             {[
-              { days: 1, label: 'Besok', icon: <Zap size={12} /> },
-              { days: 2, label: 'Lusa', icon: <ArrowRight size={12} /> },
-              { days: 7, label: 'Pekan Depan', icon: <FastForward size={12} /> },
+              { days: 1, label: 'Tomorrow', icon: <Zap size={12} /> },
+              { days: 2, label: '2 Days', icon: <ArrowRight size={12} /> },
+              { days: 7, label: 'Next Week', icon: <FastForward size={12} /> },
             ].map((p) => (
               <button
                 key={p.days}

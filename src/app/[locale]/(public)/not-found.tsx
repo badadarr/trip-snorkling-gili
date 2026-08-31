@@ -37,25 +37,25 @@ export default function NotFound() {
 
         <div className="section-badge" style={{ display: 'inline-flex', marginBottom: '16px' }}>
           <Compass size={14} />
-          <span>HALAMAN TIDAK DITEMUKAN</span>
+          <span>PAGE NOT FOUND</span>
         </div>
 
         <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-deep)', marginBottom: '12px' }}>
-          Tersesat di Kepulauan Gili?
+          Lost in the Gili Islands?
         </h2>
 
         <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '30px' }}>
-          Halaman atau paket snorkeling yang Anda cari tidak ditemukan atau telah dipindahkan. Mari kembali ke beranda untuk menjelajahi spot terbaik kami.
+          The page or snorkeling tour you are looking for does not exist or has been relocated. Let's return to the home page to explore our premier spots.
         </p>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/" className="btn btn-primary">
             <Home size={16} />
-            <span>Kembali ke Beranda</span>
+            <span>Back to Home</span>
           </Link>
           <Link href="/paket" className="btn btn-secondary">
             <Sparkles size={16} />
-            <span>Lihat Paket Trip</span>
+            <span>View Snorkeling Packages</span>
           </Link>
         </div>
       </div>

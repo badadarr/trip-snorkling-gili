@@ -25,13 +25,13 @@ export default async function PackageDetailPage({ params }: PageProps) {
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const name = pkg.nameId;
-  const tag = pkg.tagId;
-  const description = pkg.descriptionId;
-  const duration = pkg.durationId || '4 - 5 Jam';
-  const schedule = pkg.scheduleId || '09:30 & 13:00';
-  const includes = pkg.includesId || [];
-  const spots = pkg.spotsId || [];
+  const name = pkg.nameEn || pkg.nameId;
+  const tag = pkg.tagEn || pkg.tagId;
+  const description = pkg.descriptionEn || pkg.descriptionId;
+  const duration = pkg.durationEn || pkg.durationId || '4 - 5 Hours';
+  const schedule = pkg.scheduleEn || pkg.scheduleId || '09:30 AM & 01:00 PM';
+  const includes = (pkg.includesEn && pkg.includesEn.length > 0) ? pkg.includesEn : (pkg.includesId || []);
+  const spots = (pkg.spotsEn && pkg.spotsEn.length > 0) ? pkg.spotsEn : (pkg.spotsId || []);
 
   return (
     <div>
@@ -76,7 +76,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
               </Link>
               <a
                 href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                  `Halo Admin! Saya tertarik dengan paket ${pkg.nameId}. Mau tanya ketersediaan jadwal...`
+                  `Hello Admin! I am interested in booking the ${name} package. Inquiring about schedule & availability...`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
@@ -207,7 +207,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-                    Rp {pkg.price.toLocaleString('id-ID')}
+                    ${pkg.priceUsd} USD
                   </span>
                   <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
                     {pkg.price > 500000 ? t('packages.perBoat') : t('packages.perPerson')}
@@ -215,7 +215,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
                 </div>
 
                 <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                  setara ~ ${pkg.priceUsd} USD
+                  approx. Rp {pkg.price.toLocaleString('id-ID')}
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
@@ -226,7 +226,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
                   <a
                     href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                      `Halo Admin! Mau booking ${pkg.nameId}...`
+                      `Hello Admin! I would like to book the ${name} package...`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

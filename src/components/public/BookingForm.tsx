@@ -74,12 +74,12 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     if (!currentPackage) return;
     setErrorMsg('');
     setIsSubmitting(true);
-    const toastId = toast.loading('Sedang memproses reservasi...');
+    const toastId = toast.loading('Processing your reservation...');
 
     try {
       const payload = {
         packageId: currentPackage.id,
-        packageName: currentPackage.nameId,
+        packageName: currentPackage.nameEn || currentPackage.nameId,
         customerName,
         customerEmail,
         customerPhone,
@@ -100,17 +100,17 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
       });
 
       if (!res.ok) {
-        throw new Error('Gagal mengirim pemesanan. Silakan coba lagi.');
+        throw new Error('Failed to submit reservation. Please try again.');
       }
 
       const data = await res.json();
       toast.success(
-        'Booking berhasil dikirim! Silakan konfirmasi via WhatsApp.',
+        'Booking submitted successfully! Please confirm via WhatsApp.',
         { id: toastId }
       );
       setSubmittedBooking(data.booking || payload);
     } catch (err: any) {
-      const msg = err.message || 'Terjadi kesalahan sistem';
+      const msg = err.message || 'An unexpected error occurred';
       setErrorMsg(msg);
       toast.error(msg, { id: toastId });
     } finally {
@@ -119,18 +119,18 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   };
 
   const getWhatsAppBookingUrl = (booking: any) => {
-    const packageName = currentPackage?.nameId;
-    const msg = `Halo Admin Trip Snorkeling Gili Trawangan!
-Saya telah melakukan booking online dengan detail:
-- Kode Booking: *${booking.bookingCode || 'ONLINE-BOOKING'}*
-- Paket: *${packageName}*
-- Nama: *${customerName}*
-- Tanggal Trip: *${tripDate}*
-- Sesi: *${tripSession}*
-- Peserta: *${numberOfPeople} Orang*
-- Total Biaya: *Rp ${totals.idr.toLocaleString('id-ID')}* (${totals.usd ? `$${totals.usd}` : ''})
-${pickupLocation ? `- Lokasi: ${pickupLocation}\n` : ''}${specialRequests ? `- Catatan: ${specialRequests}\n` : ''}
-Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
+    const packageName = currentPackage?.nameEn || currentPackage?.nameId;
+    const msg = `Hello Admin Gili Trawangan Snorkeling Trip!
+I have submitted an online booking with the following details:
+- Booking Code: *${booking.bookingCode || 'ONLINE-BOOKING'}*
+- Package: *${packageName}*
+- Name: *${customerName}*
+- Trip Date: *${tripDate}*
+- Session: *${tripSession}*
+- Guests: *${numberOfPeople} Person(s)*
+- Total Price: *${totals.usd ? `$${totals.usd} USD` : ''}* (~ Rp ${totals.idr.toLocaleString('id-ID')})
+${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ''}${specialRequests ? `- Special Request: ${specialRequests}\n` : ''}
+Please confirm slot availability and meeting point instructions. Thank you!`;
 
     return `https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`;
   };
@@ -190,11 +190,11 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
             {t('summaryTitle')}:
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.88rem' }}>
-            <div><strong>Paket:</strong> {currentPackage?.nameId}</div>
-            <div><strong>Nama:</strong> {customerName}</div>
-            <div><strong>Tanggal:</strong> {tripDate} ({tripSession})</div>
-            <div><strong>Peserta:</strong> {numberOfPeople} Orang</div>
-            <div><strong>Total Biaya:</strong> Rp {totals.idr.toLocaleString('id-ID')} (${totals.usd})</div>
+            <div><strong>Package:</strong> {currentPackage?.nameEn || currentPackage?.nameId}</div>
+            <div><strong>Name:</strong> {customerName}</div>
+            <div><strong>Date:</strong> {tripDate} ({tripSession})</div>
+            <div><strong>Guests:</strong> {numberOfPeople} Person(s)</div>
+            <div><strong>Total:</strong> ${totals.usd} USD (~ Rp {totals.idr.toLocaleString('id-ID')})</div>
           </div>
         </div>
 
@@ -305,9 +305,9 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               onChange={(val) => setSelectedPkgSlug(val)}
               options={packagesList.map((pkg) => ({
                 value: pkg.slug,
-                label: pkg.nameId,
-                subtitle: `Rp ${pkg.price.toLocaleString('id-ID')} / ${pkg.durationId || '4-5 Jam'}`,
-                badge: pkg.isFeatured ? 'Populer' : undefined,
+                label: pkg.nameEn || pkg.nameId,
+                subtitle: `$${pkg.priceUsd} USD / ${pkg.durationEn || pkg.durationId || '4-5 Hours'} (~Rp ${pkg.price.toLocaleString('id-ID')})`,
+                badge: pkg.isFeatured ? 'Popular' : undefined,
               }))}
             />
           </div>
@@ -416,7 +416,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
                 label={`${t('tripDate')} *`}
                 value={tripDate}
                 onChange={(d) => setTripDate(d)}
-                locale="id"
+                locale="en"
               />
             </div>
           </div>
@@ -427,7 +427,7 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               label={`${t('session')} *`}
               value={tripSession}
               onChange={(s) => setTripSession(s)}
-              locale="id"
+              locale="en"
             />
           </div>
 
@@ -479,16 +479,16 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div className="glass-card" style={{ padding: '28px', border: '1px solid var(--primary-turquoise)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
               <div style={{ padding: '6px 12px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>
-                RINGKASAN PAKET
+                PACKAGE SUMMARY
               </div>
             </div>
 
             <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-deep)', marginBottom: '8px' }}>
-              {currentPackage.nameId}
+              {currentPackage.nameEn || currentPackage.nameId}
             </h3>
 
             <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.5 }}>
-              {currentPackage.descriptionId}
+              {currentPackage.descriptionEn || currentPackage.descriptionId}
             </p>
 
             {/* Price Breakdown */}
@@ -504,11 +504,11 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
                   {currentPackage.price > 500000
-                    ? 'Tarif Private Boat'
-                    : `Harga per Orang (${numberOfPeople}x)`}
+                    ? 'Private Boat Rate'
+                    : `Rate per Person (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                  Rp {currentPackage.price.toLocaleString('id-ID')}
+                  ${currentPackage.priceUsd} USD <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>(Rp {currentPackage.price.toLocaleString('id-ID')})</span>
                 </span>
               </div>
               <div
@@ -526,23 +526,23 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
                 </span>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-ocean)', fontFamily: 'var(--font-heading)' }}>
-                    Rp {totals.idr.toLocaleString('id-ID')}
+                    ${totals.usd} USD
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    approx. ${totals.usd} USD
+                    approx. Rp {totals.idr.toLocaleString('id-ID')}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* What's Included */}
-            {currentPackage.includesId && (
+            {(currentPackage.includesEn || currentPackage.includesId) && (
               <div>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-navy)', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
                   {tPkg('includes')}:
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {currentPackage.includesId.slice(0, 4).map((inc, i) => (
+                  {((currentPackage.includesEn && currentPackage.includesEn.length > 0) ? currentPackage.includesEn : (currentPackage.includesId || [])).slice(0, 4).map((inc, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                       <CheckCircle2 size={14} color="var(--accent-green)" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <span>{inc}</span>
@@ -566,15 +566,15 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <MessageCircle size={22} color="#25d366" />
             <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)' }}>
-              Mau Konsultasi Dulu?
+              Prefer Quick Chat?
             </h4>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
-            Ada pertanyaan seputar cuaca, rute penjemputan dari Lombok, atau permintaan khusus? Hubungi tim kami langsung via WhatsApp.
+            Have special questions regarding weather, speedboat transfer from Lombok, or customized routes? Chat directly with our local coordinator.
           </p>
           <a
             href={`https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-              `Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi paket snorkeling...`
+              `Hello! I would like to ask some questions about your Gili snorkeling packages.`
             )}`}
             target="_blank"
             rel="noreferrer"

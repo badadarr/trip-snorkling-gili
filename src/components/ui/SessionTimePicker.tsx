@@ -18,26 +18,26 @@ export default function SessionTimePicker({
   const sessions = [
     {
       id: 'morning',
-      title: 'Sesi Pagi',
-      time: '09:30 WITA',
+      title: 'Morning Session',
+      time: '09:30 AM WITA',
       icon: <Sunrise size={18} />,
     },
     {
       id: 'afternoon',
-      title: 'Sesi Siang',
-      time: '13:00 WITA',
+      title: 'Afternoon Session',
+      time: '01:00 PM WITA',
       icon: <Sun size={18} />,
     },
     {
       id: 'sunset',
-      title: 'Sunset Trip',
-      time: '15:30 WITA',
+      title: 'Sunset Tour',
+      time: '03:30 PM WITA',
       icon: <Sunset size={18} />,
     },
     {
       id: 'flexible',
-      title: 'Fleksibel',
-      time: 'Bebas',
+      title: 'Flexible / Custom',
+      time: 'Custom Time',
       icon: <Clock size={18} />,
     },
   ];
