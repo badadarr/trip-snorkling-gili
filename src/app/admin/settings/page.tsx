@@ -20,6 +20,9 @@ import {
   Eye,
   Ship,
   UserCheck,
+  Lock,
+  Key,
+  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DEFAULT_MANIFEST_SETTINGS, generateManifestHtml } from '@/lib/manifestTemplate';
@@ -28,7 +31,15 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'contact' | 'location' | 'operations' | 'social' | 'manifest'>('contact');
+  const [activeTab, setActiveTab] = useState<'contact' | 'location' | 'operations' | 'social' | 'manifest' | 'security'>('contact');
+
+  // Security & Admin Profile State
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminName, setAdminName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [isChangingPass, setIsChangingPass] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -46,10 +57,63 @@ export default function AdminSettingsPage() {
         toast.error('Gagal memuat pengaturan website');
         setLoading(false);
       });
+
+    // Fetch current admin profile info
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setAdminEmail(data.user.email || '');
+          setAdminName(data.user.name || '');
+        }
+      })
+      .catch((e) => console.warn('Could not fetch admin profile:', e));
   }, []);
 
   const handleChange = (key: string, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUpdateSecurity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword && newPassword !== confirmNewPassword) {
+      toast.error('Konfirmasi password baru tidak cocok!');
+      return;
+    }
+    if (newPassword && newPassword.length < 6) {
+      toast.error('Password baru minimal 6 karakter!');
+      return;
+    }
+
+    setIsChangingPass(true);
+    const toastId = toast.loading('Memperbarui kredensial akun admin di database...');
+
+    try {
+      const res = await fetch('/api/auth/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword: newPassword || undefined,
+          email: adminEmail,
+          name: adminName,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal memperbarui akun');
+      }
+
+      toast.success(data.message || 'Kredensial admin berhasil diperbarui!', { id: toastId });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat memperbarui', { id: toastId });
+    } finally {
+      setIsChangingPass(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,6 +182,7 @@ export default function AdminSettingsPage() {
           { key: 'operations', label: '3. Jam & Sesi Operasional', icon: Clock },
           { key: 'social', label: '4. Sosial Media & SEO', icon: Globe },
           { key: 'manifest', label: '5. Preset & Template Laporan Manifest', icon: Printer },
+          { key: 'security', label: '6. Keamanan & Akun Admin', icon: Lock },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -753,33 +818,164 @@ export default function AdminSettingsPage() {
             </div>
           )}
 
-          {/* Submit Button */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginTop: '28px',
-              paddingTop: '20px',
-              borderTop: '1px solid var(--border-light)',
-            }}
-          >
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="btn btn-primary btn-lg"
+          {/* TAB 6: SECURITY & ADMIN ACCOUNT */}
+          {activeTab === 'security' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <ShieldCheck size={22} color="var(--primary-ocean)" />
+                <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-deep)', margin: 0 }}>
+                  Keamanan Akun & Kredensial Admin
+                </h3>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                Ubah email login, nama profil admin, serta perbarui password akun secara aman di database Neon PostgreSQL (Terenkripsi Bcrypt).
+              </p>
+
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '24px',
+                  marginBottom: '24px',
+                }}
+              >
+                <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  1. Informasi Profil Admin
+                </h4>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Nama Admin</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={adminName}
+                      onChange={(e) => setAdminName(e.target.value)}
+                      placeholder="Admin Trip Snorkeling"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Email Login Admin *</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={adminEmail}
+                      onChange={(e) => setAdminEmail(e.target.value)}
+                      placeholder="admin@skt.com"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '24px',
+                  marginBottom: '24px',
+                }}
+              >
+                <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)', marginTop: 0, marginBottom: '16px', fontWeight: 700 }}>
+                  2. Perbarui Password
+                </h4>
+
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label">Password Saat Ini (Wajib diisi untuk konfirmasi) *</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Masukkan password admin saat ini"
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Default awal: admin123
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Password Baru (Opsional)</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Minimal 6 karakter"
+                    />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Kosongkan jika hanya ingin mengubah nama/email
+                    </span>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Ulangi Password Baru</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      placeholder="Ketik ulang password baru"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '12px' }}>
+                <button
+                  type="button"
+                  onClick={handleUpdateSecurity}
+                  disabled={isChangingPass || !currentPassword}
+                  className="btn btn-primary btn-lg"
+                  style={{
+                    opacity: isChangingPass || !currentPassword ? 0.7 : 1,
+                    cursor: isChangingPass || !currentPassword ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isChangingPass ? (
+                    <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  ) : (
+                    <Lock size={18} />
+                  )}
+                  <span>{isChangingPass ? 'Memperbarui Akun...' : 'Simpan Kredensial Akun'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button for Tabs 1-5 */}
+          {activeTab !== 'security' && (
+            <div
               style={{
-                opacity: isSaving ? 0.85 : 1,
-                cursor: isSaving ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '28px',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--border-light)',
               }}
             >
-              {isSaving ? (
-                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-              ) : (
-                <Save size={18} />
-              )}
-              <span>{isSaving ? 'Menyimpan...' : 'Simpan Semua Pengaturan'}</span>
-            </button>
-          </div>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="btn btn-primary btn-lg"
+                style={{
+                  opacity: isSaving ? 0.85 : 1,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {isSaving ? (
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <Save size={18} />
+                )}
+                <span>{isSaving ? 'Menyimpan...' : 'Simpan Semua Pengaturan'}</span>
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>

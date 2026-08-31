@@ -156,10 +156,22 @@ export async function seedDatabase(dbUrl?: string) {
         });
       }
       console.log('✅ Site settings seeded');
-    } else {
-      // Sync WhatsApp number to user's config
-      const wa = process.env.NEXT_PUBLIC_DEFAULT_WHATSAPP || '6285921358615';
-      await db.update(schema.siteSettings).set({ value: wa }).where(eq(schema.siteSettings.key, 'whatsapp_number'));
+    }
+
+    // 8. Admin User
+    const adminEmail = process.env.ADMIN_DEFAULT_EMAIL || 'admin@skt.com';
+    const adminPass = process.env.ADMIN_DEFAULT_PASSWORD || 'admin123';
+    const existingAdmin = await db.select().from(schema.admins).where(eq(schema.admins.email, adminEmail.toLowerCase())).limit(1);
+    if (existingAdmin.length === 0) {
+      const bcrypt = (await import('bcryptjs')).default;
+      const passwordHash = await bcrypt.hash(adminPass, 10);
+      await db.insert(schema.admins).values({
+        email: adminEmail.toLowerCase(),
+        passwordHash,
+        name: 'Admin Trip Snorkeling',
+        role: 'superadmin',
+      });
+      console.log('✅ Superadmin user seeded into Neon database');
     }
 
     console.log('🎉 Seeding & sync completed successfully!');

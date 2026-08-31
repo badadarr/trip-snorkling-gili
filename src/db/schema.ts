@@ -141,3 +141,14 @@ export const admins = pgTable('admins', {
   lastLogin: timestamp('last_login'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// 10. Admin Sessions (Database-tracked sessions)
+export const adminSessions = pgTable('admin_sessions', {
+  id: serial('id').primaryKey(),
+  adminId: integer('admin_id').references(() => admins.id, { onDelete: 'cascade' }),
+  sessionToken: text('session_token').unique().notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
