@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
-import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass } from 'lucide-react';
 import { toast } from 'sonner';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ModernDatePicker from '@/components/ui/ModernDatePicker';
@@ -216,6 +216,60 @@ Mohon konfirmasi ketersediaan slot dan meeting point. Terima kasih!`;
           </a>
 
           <Link href="/" className="btn btn-secondary">
+            <ArrowLeft size={16} />
+            <span>{t('backHome')}</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (packagesList.length === 0) {
+    return (
+      <div
+        className="glass-card"
+        style={{
+          maxWidth: '640px',
+          margin: '0 auto',
+          padding: '48px 32px',
+          textAlign: 'center',
+          borderRadius: '24px',
+          border: '1px dashed rgba(0, 180, 216, 0.35)',
+        }}
+      >
+        <div
+          style={{
+            width: '72px',
+            height: '72px',
+            borderRadius: '50%',
+            background: 'rgba(0, 180, 216, 0.12)',
+            color: 'var(--primary-ocean)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '20px',
+          }}
+        >
+          <Compass size={36} />
+        </div>
+        <h2 style={{ fontSize: '1.45rem', color: 'var(--primary-deep)', marginBottom: '12px', fontWeight: 700 }}>
+          {tPkg('noPackagesBookingTitle')}
+        </h2>
+        <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', lineHeight: 1.65, maxWidth: '480px', margin: '0 auto 28px' }}>
+          {tPkg('noPackagesBookingSubtitle')}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '320px', margin: '0 auto' }}>
+          <a
+            href={`https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Trip Snorkeling Gili! Saya ingin berkonsultasi & memesan trip snorkeling...')}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-whatsapp btn-lg"
+            style={{ width: '100%' }}
+          >
+            <MessageCircle size={20} />
+            <span>{tPkg('contactWa')}</span>
+          </a>
+          <Link href="/" className="btn btn-secondary" style={{ width: '100%' }}>
             <ArrowLeft size={16} />
             <span>{t('backHome')}</span>
           </Link>

@@ -9,7 +9,7 @@ import CtaBanner from '@/components/public/CtaBanner';
 import { getHero, getPackagesList, getGalleryList, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
 import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,18 +46,69 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="grid-3">
-            {featuredPackages.map((pkg) => (
-              <PackageCard key={pkg.id} pkg={pkg} />
-            ))}
-          </div>
+          {featuredPackages.length > 0 ? (
+            <>
+              <div className="grid-3">
+                {featuredPackages.map((pkg) => (
+                  <PackageCard key={pkg.id} pkg={pkg} />
+                ))}
+              </div>
 
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <Link href="/paket" className="btn btn-secondary btn-lg">
-              <span>{t('packages.viewAllPackages')}</span>
-              <ArrowRight size={18} />
-            </Link>
-          </div>
+              <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                <Link href="/paket" className="btn btn-secondary btn-lg">
+                  <span>{t('packages.viewAllPackages')}</span>
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div
+              className="glass-card"
+              style={{
+                maxWidth: '680px',
+                margin: '0 auto',
+                padding: '48px 32px',
+                textAlign: 'center',
+                borderRadius: '24px',
+                border: '1px dashed rgba(0, 180, 216, 0.35)',
+                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 249, 255, 0.85) 100%)',
+                boxShadow: '0 20px 40px -15px rgba(0, 119, 182, 0.08)',
+              }}
+            >
+              <div
+                style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  background: 'rgba(0, 180, 216, 0.12)',
+                  color: 'var(--primary-ocean)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <Compass size={36} />
+              </div>
+              <h3 style={{ fontSize: '1.4rem', color: 'var(--primary-deep)', marginBottom: '12px', fontWeight: 700 }}>
+                {t('packages.noPackagesTitle')}
+              </h3>
+              <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', lineHeight: 1.65, maxWidth: '520px', margin: '0 auto 28px' }}>
+                {t('packages.noPackagesSubtitle')}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <a
+                  href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Trip Snorkeling Gili! Saya ingin bertanya ketersediaan paket trip snorkeling...')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-whatsapp btn-lg"
+                >
+                  <MessageCircle size={18} />
+                  <span>{t('packages.contactWa')}</span>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

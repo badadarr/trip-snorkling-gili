@@ -48,7 +48,12 @@
     "reserveNow": "Reservasi Sekarang",
     "safetyGuarantee": "Jaminan Keamanan & Pelampung Standar",
     "freeGoPro": "Gratis Foto & Video Underwater GoPro",
-    "friendlyGuide": "Pemandu Ramah & Helpful"
+    "friendlyGuide": "Pemandu Ramah & Helpful",
+    "noPackagesTitle": "Belum Ada Paket Tersedia",
+    "noPackagesSubtitle": "Saat ini paket tour snorkeling sedang diperbarui atau disiapkan jadwal baru. Silakan hubungi kami langsung via WhatsApp untuk pertanyaan ketersediaan slot atau reservasi custom trip.",
+    "noPackagesBookingTitle": "Paket Tour Belum Tersedia untuk Reservasi Online",
+    "noPackagesBookingSubtitle": "Saat ini belum ada paket aktif yang dapat dipesan secara online. Silakan hubungi kami langsung melalui WhatsApp untuk konsultasi dan pemesanan trip snorkeling secara fleksibel.",
+    "contactWa": "Tanya via WhatsApp"
   },
   "highlights": {
     "badge": "SPOT TERBAIK 3 GILI",

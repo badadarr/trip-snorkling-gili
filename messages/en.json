@@ -48,7 +48,12 @@
     "reserveNow": "Reserve Slot Now",
     "safetyGuarantee": "Safety Guarantee & Standard Life Jackets",
     "freeGoPro": "Free GoPro HD Underwater Photos & Video",
-    "friendlyGuide": "Helpful & Friendly Local Guides"
+    "friendlyGuide": "Helpful & Friendly Local Guides",
+    "noPackagesTitle": "No Packages Available Yet",
+    "noPackagesSubtitle": "Snorkeling trip packages are currently being updated or new schedules are being prepared. Please reach out to us directly on WhatsApp for slot availability or custom private tour inquiries.",
+    "noPackagesBookingTitle": "No Packages Available for Online Booking Yet",
+    "noPackagesBookingSubtitle": "There are currently no active packages open for online booking. Please contact our team directly via WhatsApp to inquire and book your snorkeling trip seamlessly.",
+    "contactWa": "Inquire on WhatsApp"
   },
   "highlights": {
     "badge": "3-GILI PRIME DESTINATIONS",
