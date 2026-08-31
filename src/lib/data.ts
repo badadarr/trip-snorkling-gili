@@ -41,7 +41,7 @@ export async function getPackagesList() {
   if (db) {
     try {
       const rows = await db.select().from(packages).orderBy(asc(packages.orderIndex));
-      if (rows.length > 0) return rows;
+      return rows;
     } catch (e) {
       console.error('Error fetching packages from DB:', e);
     }
@@ -54,7 +54,7 @@ export async function getPackageBySlug(slug: string) {
   if (db) {
     try {
       const rows = await db.select().from(packages).where(eq(packages.slug, slug)).limit(1);
-      if (rows.length > 0) return rows[0];
+      return rows[0] || null;
     } catch (e) {
       console.error('Error fetching package by slug from DB:', e);
     }
@@ -121,7 +121,7 @@ export async function getGalleryList() {
   if (db) {
     try {
       const rows = await db.select().from(gallery).orderBy(asc(gallery.orderIndex));
-      if (rows.length > 0) return rows;
+      return rows;
     } catch (e) {
       console.error('Error fetching gallery from DB:', e);
     }
@@ -165,7 +165,7 @@ export async function getTestimonialsList() {
   if (db) {
     try {
       const rows = await db.select().from(testimonials);
-      if (rows.length > 0) return rows;
+      return rows;
     } catch (e) {
       console.error('Error fetching testimonials from DB:', e);
     }
@@ -227,7 +227,7 @@ export async function getFaqList() {
   if (db) {
     try {
       const rows = await db.select().from(faq).orderBy(asc(faq.orderIndex));
-      if (rows.length > 0) return rows;
+      return rows;
     } catch (e) {
       console.error('Error fetching faq from DB:', e);
     }
@@ -289,7 +289,7 @@ export async function getBookingsList() {
   if (db) {
     try {
       const rows = await db.select().from(bookings).orderBy(desc(bookings.createdAt));
-      if (rows.length > 0) return rows;
+      return rows;
     } catch (e) {
       console.error('Error fetching bookings from DB:', e);
     }
