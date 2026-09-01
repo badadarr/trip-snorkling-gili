@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 function Table({ className, style, ...props }: React.ComponentProps<"table">) {
   return (
@@ -25,10 +25,14 @@ function Table({ className, style, ...props }: React.ComponentProps<"table">) {
         {...props}
       />
     </div>
-  )
+  );
 }
 
-function TableHeader({ className, style, ...props }: React.ComponentProps<"thead">) {
+function TableHeader({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
@@ -41,10 +45,14 @@ function TableHeader({ className, style, ...props }: React.ComponentProps<"thead
       className={className}
       {...props}
     />
-  )
+  );
 }
 
-function TableBody({ className, style, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
@@ -55,10 +63,14 @@ function TableBody({ className, style, ...props }: React.ComponentProps<"tbody">
       className={className}
       {...props}
     />
-  )
+  );
 }
 
-function TableFooter({ className, style, ...props }: React.ComponentProps<"tfoot">) {
+function TableFooter({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
       data-slot="table-footer"
@@ -71,7 +83,7 @@ function TableFooter({ className, style, ...props }: React.ComponentProps<"tfoot
       className={className}
       {...props}
     />
-  )
+  );
 }
 
 function TableRow({ className, style, ...props }: React.ComponentProps<"tr">) {
@@ -86,7 +98,7 @@ function TableRow({ className, style, ...props }: React.ComponentProps<"tr">) {
       className={cn("hover:bg-[#f8fafc]/90", className)}
       {...props}
     />
-  )
+  );
 }
 
 function TableHead({ className, style, ...props }: React.ComponentProps<"th">) {
@@ -107,7 +119,7 @@ function TableHead({ className, style, ...props }: React.ComponentProps<"th">) {
       className={className}
       {...props}
     />
-  )
+  );
 }
 
 function TableCell({ className, style, ...props }: React.ComponentProps<"td">) {
@@ -124,10 +136,14 @@ function TableCell({ className, style, ...props }: React.ComponentProps<"td">) {
       className={className}
       {...props}
     />
-  )
+  );
 }
 
-function TableCaption({ className, style, ...props }: React.ComponentProps<"caption">) {
+function TableCaption({
+  className,
+  style,
+  ...props
+}: React.ComponentProps<"caption">) {
   return (
     <caption
       data-slot="table-caption"
@@ -140,7 +156,7 @@ function TableCaption({ className, style, ...props }: React.ComponentProps<"capt
       className={className}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -152,4 +168,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-}
+};

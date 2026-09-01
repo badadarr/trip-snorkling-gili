@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,8 +14,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { Loader2, Search } from "lucide-react"
+} from "@tanstack/react-table";
+import { Loader2, Search } from "lucide-react";
 
 import {
   Table,
@@ -24,24 +24,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { DataTablePagination } from "@/components/admin/DataTablePagination"
-import { DataTableViewOptions } from "@/components/admin/DataTableViewOptions"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { DataTablePagination } from "@/components/admin/DataTablePagination";
+import { DataTableViewOptions } from "@/components/admin/DataTableViewOptions";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  loading?: boolean
-  searchPlaceholder?: string
-  searchColumnId?: string // If specific column search
-  globalFilterValue?: string
-  onGlobalFilterChange?: (value: string) => void
-  enableSearch?: boolean
-  columnLabels?: Record<string, string>
-  emptyMessage?: string
-  initialPageSize?: number
-  pageSizeOptions?: number[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  loading?: boolean;
+  searchPlaceholder?: string;
+  searchColumnId?: string; // If specific column search
+  globalFilterValue?: string;
+  onGlobalFilterChange?: (value: string) => void;
+  enableSearch?: boolean;
+  columnLabels?: Record<string, string>;
+  emptyMessage?: string;
+  initialPageSize?: number;
+  pageSizeOptions?: number[];
 }
 
 export function DataTable<TData, TValue>({
@@ -58,19 +58,19 @@ export function DataTable<TData, TValue>({
   initialPageSize = 10,
   pageSizeOptions = [10, 20, 30, 50],
 }: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [internalGlobalFilter, setInternalGlobalFilter] = React.useState("")
+    [],
+  );
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [internalGlobalFilter, setInternalGlobalFilter] = React.useState("");
 
   const activeGlobalFilter =
-    globalFilterValue !== undefined ? globalFilterValue : internalGlobalFilter
+    globalFilterValue !== undefined ? globalFilterValue : internalGlobalFilter;
   const handleGlobalFilterChange =
-    onGlobalFilterChange || setInternalGlobalFilter
+    onGlobalFilterChange || setInternalGlobalFilter;
 
   const table = useReactTable({
     data,
@@ -99,14 +99,24 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  })
+  });
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* Table Toolbar if enableSearch or View Options */}
       {enableSearch && !globalFilterValue && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-          <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{ position: "relative", width: "100%", maxWidth: "360px" }}
+          >
             <Search
               size={17}
               style={{
@@ -124,14 +134,18 @@ export function DataTable<TData, TValue>({
               placeholder={searchPlaceholder}
               value={
                 searchColumnId
-                  ? (table.getColumn(searchColumnId)?.getFilterValue() as string) ?? ""
+                  ? ((table
+                      .getColumn(searchColumnId)
+                      ?.getFilterValue() as string) ?? "")
                   : internalGlobalFilter
               }
               onChange={(event) => {
                 if (searchColumnId) {
-                  table.getColumn(searchColumnId)?.setFilterValue(event.target.value)
+                  table
+                    .getColumn(searchColumnId)
+                    ?.setFilterValue(event.target.value);
                 } else {
-                  setInternalGlobalFilter(event.target.value)
+                  setInternalGlobalFilter(event.target.value);
                 }
               }}
               style={{
@@ -149,12 +163,12 @@ export function DataTable<TData, TValue>({
                 transition: "border-color 0.2s ease, box-shadow 0.2s ease",
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = "var(--primary-ocean)"
-                e.target.style.boxShadow = "0 0 0 3px rgba(0, 119, 182, 0.12)"
+                e.target.style.borderColor = "var(--primary-ocean)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(0, 119, 182, 0.12)";
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = "var(--border-light)"
-                e.target.style.boxShadow = "0 1px 3px rgba(0,0,0,0.03)"
+                e.target.style.borderColor = "var(--border-light)";
+                e.target.style.boxShadow = "0 1px 3px rgba(0,0,0,0.03)";
               }}
             />
           </div>
@@ -183,10 +197,10 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -214,7 +228,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -235,9 +249,12 @@ export function DataTable<TData, TValue>({
 
         {/* Pagination bar */}
         {!loading && (
-          <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
+          <DataTablePagination
+            table={table}
+            pageSizeOptions={pageSizeOptions}
+          />
         )}
       </div>
     </div>
-  )
+  );
 }

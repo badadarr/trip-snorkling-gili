@@ -1,21 +1,20 @@
-"use client"
+"use client";
 
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
-import { Table } from "@tanstack/react-table"
-import { SlidersHorizontal } from "lucide-react"
+import { Table } from "@tanstack/react-table";
+import { SlidersHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface DataTableViewOptionsProps<TData> {
-  table: Table<TData>
-  columnLabels?: Record<string, string>
+  table: Table<TData>;
+  columnLabels?: Record<string, string>;
 }
 
 export function DataTableViewOptions<TData>({
@@ -26,40 +25,66 @@ export function DataTableViewOptions<TData>({
     .getAllColumns()
     .filter(
       (column) =>
-        typeof column.accessorFn !== "undefined" && column.getCanHide()
-    )
+        typeof column.accessorFn !== "undefined" && column.getCanHide(),
+    );
 
-  if (hideableColumns.length === 0) return null
+  if (hideableColumns.length === 0) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto hidden h-9 lg:flex border-[#e2e8f0] text-[#1e293b]"
+        <button
+          type="button"
+          style={{
+            height: "42px",
+            padding: "0 16px",
+            borderRadius: "10px",
+            border: "1.5px solid var(--border-light)",
+            backgroundColor: "#ffffff",
+            color: "var(--primary-deep)",
+            fontSize: "0.85rem",
+            fontWeight: 600,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+            transition: "all 0.2s ease",
+            whiteSpace: "nowrap",
+            outline: "none",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = "var(--primary-ocean)";
+            e.currentTarget.style.backgroundColor = "#f8fafc";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "var(--border-light)";
+            e.currentTarget.style.backgroundColor = "#ffffff";
+          }}
         >
-          <SlidersHorizontal className="mr-2 h-4 w-4 text-[#0077b6]" />
-          Tampilan Kolom
-        </Button>
+          <SlidersHorizontal size={15} color="var(--primary-ocean)" />
+          <span>Tampilan Kolom</span>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[180px]">
+      <DropdownMenuContent
+        align="end"
+        style={{ width: "210px", padding: "6px" }}
+      >
         <DropdownMenuLabel>Tampilkan Kolom</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {hideableColumns.map((column) => {
-          const label = columnLabels[column.id] || column.id
+          const label = columnLabels[column.id] || column.id;
           return (
             <DropdownMenuCheckboxItem
               key={column.id}
-              className="capitalize text-xs"
               checked={column.getIsVisible()}
               onCheckedChange={(value) => column.toggleVisibility(!!value)}
             >
-              {label}
+              <span style={{ textTransform: "capitalize" }}>{label}</span>
             </DropdownMenuCheckboxItem>
-          )
+          );
         })}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

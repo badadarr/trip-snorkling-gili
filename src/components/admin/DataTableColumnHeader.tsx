@@ -1,5 +1,5 @@
-import { Column } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react"
+import { Column } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -7,12 +7,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
-  column: Column<TData, TValue>
-  title: string
+interface DataTableColumnHeaderProps<
+  TData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
+  column: Column<TData, TValue>;
+  title: string;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
@@ -37,11 +39,14 @@ export function DataTableColumnHeader<TData, TValue>({
       >
         {title}
       </div>
-    )
+    );
   }
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", ...style }} className={className}>
+    <div
+      style={{ display: "inline-flex", alignItems: "center", ...style }}
+      className={className}
+    >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
@@ -63,8 +68,12 @@ export function DataTableColumnHeader<TData, TValue>({
               whiteSpace: "nowrap",
               transition: "background-color 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e2e8f0")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = "#e2e8f0")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = "transparent")
+            }
           >
             <span>{title}</span>
             {column.getIsSorted() === "desc" ? (
@@ -77,19 +86,37 @@ export function DataTableColumnHeader<TData, TValue>({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" style={{ minWidth: "160px" }}>
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)} style={{ cursor: "pointer", fontSize: "0.82rem" }}>
-            <ArrowUp size={14} style={{ marginRight: "8px", color: "#64748b" }} />
+          <DropdownMenuItem
+            onClick={() => column.toggleSorting(false)}
+            style={{ cursor: "pointer", fontSize: "0.82rem" }}
+          >
+            <ArrowUp
+              size={14}
+              style={{ marginRight: "8px", color: "#64748b" }}
+            />
             Urutkan Naik (Asc)
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)} style={{ cursor: "pointer", fontSize: "0.82rem" }}>
-            <ArrowDown size={14} style={{ marginRight: "8px", color: "#64748b" }} />
+          <DropdownMenuItem
+            onClick={() => column.toggleSorting(true)}
+            style={{ cursor: "pointer", fontSize: "0.82rem" }}
+          >
+            <ArrowDown
+              size={14}
+              style={{ marginRight: "8px", color: "#64748b" }}
+            />
             Urutkan Turun (Desc)
           </DropdownMenuItem>
           {column.getCanHide() && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => column.toggleVisibility(false)} style={{ cursor: "pointer", fontSize: "0.82rem" }}>
-                <EyeOff size={14} style={{ marginRight: "8px", color: "#64748b" }} />
+              <DropdownMenuItem
+                onClick={() => column.toggleVisibility(false)}
+                style={{ cursor: "pointer", fontSize: "0.82rem" }}
+              >
+                <EyeOff
+                  size={14}
+                  style={{ marginRight: "8px", color: "#64748b" }}
+                />
                 Sembunyikan Kolom
               </DropdownMenuItem>
             </>
@@ -97,5 +124,5 @@ export function DataTableColumnHeader<TData, TValue>({
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
-  )
+  );
 }

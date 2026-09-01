@@ -1,26 +1,26 @@
-import { Table } from "@tanstack/react-table"
+import { Table } from "@tanstack/react-table";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-} from "lucide-react"
+} from "lucide-react";
 
 interface DataTablePaginationProps<TData> {
-  table: Table<TData>
-  pageSizeOptions?: number[]
+  table: Table<TData>;
+  pageSizeOptions?: number[];
 }
 
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [10, 20, 30, 50],
 }: DataTablePaginationProps<TData>) {
-  const totalRows = table.getFilteredRowModel().rows.length
-  const pageIndex = table.getState().pagination.pageIndex
-  const pageSize = table.getState().pagination.pageSize
-  const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1
-  const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
-  const pageCount = table.getPageCount() === 0 ? 1 : table.getPageCount()
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const pageIndex = table.getState().pagination.pageIndex;
+  const pageSize = table.getState().pagination.pageSize;
+  const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1;
+  const endRow = Math.min((pageIndex + 1) * pageSize, totalRows);
+  const pageCount = table.getPageCount() === 0 ? 1 : table.getPageCount();
 
   return (
     <div
@@ -38,12 +38,29 @@ export function DataTablePagination<TData>({
       }}
     >
       <div>
-        Menampilkan <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{startRow}</strong> -{" "}
-        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{endRow}</strong> dari{" "}
-        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{totalRows}</strong> data
+        Menampilkan{" "}
+        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+          {startRow}
+        </strong>{" "}
+        -{" "}
+        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+          {endRow}
+        </strong>{" "}
+        dari{" "}
+        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+          {totalRows}
+        </strong>{" "}
+        data
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span>Baris per hal:</span>
           <select
@@ -71,9 +88,13 @@ export function DataTablePagination<TData>({
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <span>Halaman</span>
-          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{pageIndex + 1}</strong>
+          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+            {pageIndex + 1}
+          </strong>
           <span>dari</span>
-          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{pageCount}</strong>
+          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>
+            {pageCount}
+          </strong>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -87,7 +108,9 @@ export function DataTablePagination<TData>({
               borderRadius: "6px",
               border: "1px solid var(--border-light)",
               background: table.getCanPreviousPage() ? "#ffffff" : "#f1f5f9",
-              color: table.getCanPreviousPage() ? "var(--primary-deep)" : "#94a3b8",
+              color: table.getCanPreviousPage()
+                ? "var(--primary-deep)"
+                : "#94a3b8",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -108,7 +131,9 @@ export function DataTablePagination<TData>({
               borderRadius: "6px",
               border: "1px solid var(--border-light)",
               background: table.getCanPreviousPage() ? "#ffffff" : "#f1f5f9",
-              color: table.getCanPreviousPage() ? "var(--primary-deep)" : "#94a3b8",
+              color: table.getCanPreviousPage()
+                ? "var(--primary-deep)"
+                : "#94a3b8",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -163,5 +188,5 @@ export function DataTablePagination<TData>({
         </div>
       </div>
     </div>
-  )
+  );
 }

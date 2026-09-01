@@ -253,10 +253,23 @@ export default function AdminBookingsPage() {
         ),
         cell: ({ row }) => (
           <div style={{ minWidth: "160px" }}>
-            <strong style={{ color: "var(--primary-deep)", fontSize: "0.92rem", display: "block" }}>
+            <strong
+              style={{
+                color: "var(--primary-deep)",
+                fontSize: "0.92rem",
+                display: "block",
+              }}
+            >
               {row.getValue("customerName")}
             </strong>
-            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "block", marginTop: "3px" }}>
+            <span
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--text-muted)",
+                display: "block",
+                marginTop: "3px",
+              }}
+            >
               {row.original.customerPhone}
             </span>
           </div>
@@ -268,7 +281,16 @@ export default function AdminBookingsPage() {
           <DataTableColumnHeader column={column} title="Paket Trip" />
         ),
         cell: ({ row }) => (
-          <div style={{ minWidth: "150px", maxWidth: "220px", fontSize: "0.88rem", fontWeight: 500, color: "var(--text-main)", lineHeight: 1.4 }}>
+          <div
+            style={{
+              minWidth: "150px",
+              maxWidth: "220px",
+              fontSize: "0.88rem",
+              fontWeight: 500,
+              color: "var(--text-main)",
+              lineHeight: 1.4,
+            }}
+          >
             {row.getValue("packageName")}
           </div>
         ),
@@ -286,7 +308,10 @@ export default function AdminBookingsPage() {
                 style={{
                   fontWeight: 600,
                   fontSize: "0.88rem",
-                  color: b.tripDate === todayStr ? "var(--primary-ocean)" : "var(--primary-deep)",
+                  color:
+                    b.tripDate === todayStr
+                      ? "var(--primary-ocean)"
+                      : "var(--primary-deep)",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
@@ -294,12 +319,27 @@ export default function AdminBookingsPage() {
               >
                 <span>{b.tripDate}</span>
                 {b.tripDate === todayStr && (
-                  <span style={{ fontSize: "0.7rem", color: "#15803d", background: "#dcfce7", padding: "1px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      color: "#15803d",
+                      background: "#dcfce7",
+                      padding: "1px 6px",
+                      borderRadius: "4px",
+                      fontWeight: 700,
+                    }}
+                  >
                     Hari ini
                   </span>
                 )}
               </div>
-              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" }}>
+              <div
+                style={{
+                  fontSize: "0.78rem",
+                  color: "var(--text-muted)",
+                  marginTop: "3px",
+                }}
+              >
                 {b.tripSession === "morning"
                   ? "Pagi (09:30 WITA)"
                   : b.tripSession === "afternoon"
@@ -322,7 +362,9 @@ export default function AdminBookingsPage() {
             <strong style={{ color: "var(--primary-deep)", fontSize: "1rem" }}>
               {row.getValue("numberOfPeople")}
             </strong>{" "}
-            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Org</span>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Org
+            </span>
           </div>
         ),
       },
@@ -333,8 +375,13 @@ export default function AdminBookingsPage() {
         ),
         cell: ({ row }) => (
           <div style={{ minWidth: "130px", whiteSpace: "nowrap" }}>
-            <strong style={{ color: "var(--primary-ocean)", fontSize: "0.95rem" }}>
-              Rp {(row.getValue("totalPriceIdr") as number)?.toLocaleString("id-ID")}
+            <strong
+              style={{ color: "var(--primary-ocean)", fontSize: "0.95rem" }}
+            >
+              Rp{" "}
+              {(row.getValue("totalPriceIdr") as number)?.toLocaleString(
+                "id-ID",
+              )}
             </strong>
           </div>
         ),
@@ -397,35 +444,69 @@ export default function AdminBookingsPage() {
       {
         id: "actions",
         enableHiding: false,
-        header: () => <div style={{ textAlign: "center" }}>Aksi</div>,
+        header: () => (
+          <div
+            style={{
+              textAlign: "right",
+              paddingRight: "6px",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "#475569",
+            }}
+          >
+            Aksi
+          </div>
+        ),
         cell: ({ row }) => {
           const b = row.original;
+          const phone = (b.customerPhone || "").replace(/[^0-9]/g, "");
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", minWidth: "150px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "6px",
+                minWidth: "160px",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => openDetail(b)}
                 style={{
-                  padding: "7px 12px",
+                  height: "34px",
+                  padding: "0 12px",
                   borderRadius: "8px",
-                  background: "rgba(0, 119, 182, 0.08)",
-                  color: "var(--primary-ocean)",
-                  border: "1px solid rgba(0, 119, 182, 0.2)",
+                  background: "#f0f9ff",
+                  color: "#0077b6",
+                  border: "1px solid #bae6fd",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "6px",
                   fontSize: "0.8rem",
                   fontWeight: 600,
+                  transition: "all 0.15s ease",
+                  whiteSpace: "nowrap",
                 }}
-                title="Lihat Detail & WhatsApp"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#e0f2fe";
+                  e.currentTarget.style.borderColor = "#7dd3fc";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f0f9ff";
+                  e.currentTarget.style.borderColor = "#bae6fd";
+                }}
+                title="Lihat Detail & Konfirmasi"
               >
                 <Eye size={14} />
                 <span>Detail</span>
               </button>
 
               <a
-                href={`https://wa.me/${(b.customerPhone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                href={`https://wa.me/${phone}?text=${encodeURIComponent(
                   `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili mengonfirmasi pesanan Anda (${b.bookingCode}) pada ${b.tripDate}.`,
                 )}`}
                 target="_blank"
@@ -434,16 +515,27 @@ export default function AdminBookingsPage() {
                   width: "34px",
                   height: "34px",
                   borderRadius: "8px",
-                  background: "rgba(37, 211, 102, 0.12)",
-                  color: "#15803d",
-                  border: "1px solid rgba(37, 211, 102, 0.3)",
-                  display: "flex",
+                  background: "#f0fdf4",
+                  color: "#16a34a",
+                  border: "1px solid #bbf7d0",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  transition: "all 0.15s ease",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#dcfce7";
+                  e.currentTarget.style.borderColor = "#86efac";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f0fdf4";
+                  e.currentTarget.style.borderColor = "#bbf7d0";
                 }}
                 title="Kirim Pesan WhatsApp"
               >
-                <MessageCircle size={16} />
+                <MessageCircle size={15} />
               </a>
 
               <button
@@ -453,24 +545,34 @@ export default function AdminBookingsPage() {
                   width: "34px",
                   height: "34px",
                   borderRadius: "8px",
-                  background: "rgba(239, 68, 68, 0.08)",
-                  color: "#b91c1c",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  display: "flex",
+                  background: "#fff1f2",
+                  color: "#e11d48",
+                  border: "1px solid #fecdd3",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#ffe4e6";
+                  e.currentTarget.style.borderColor = "#fda4af";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#fff1f2";
+                  e.currentTarget.style.borderColor = "#fecdd3";
                 }}
                 title="Hapus Reservasi"
               >
-                <Trash2 size={15} />
+                <Trash2 size={14} />
               </button>
             </div>
           );
         },
       },
     ],
-    [todayStr]
+    [todayStr],
   );
 
   // Export to CSV

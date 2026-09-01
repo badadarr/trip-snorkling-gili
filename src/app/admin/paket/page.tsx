@@ -478,7 +478,14 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "220px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "14px",
+                minWidth: "220px",
+              }}
+            >
               <img
                 src={pkg.imageUrl}
                 alt={pkg.nameId}
@@ -493,8 +500,20 @@ export default function AdminPackagesPage() {
                 }}
               />
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                  <strong style={{ color: "var(--primary-deep)", fontSize: "0.92rem" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <strong
+                    style={{
+                      color: "var(--primary-deep)",
+                      fontSize: "0.92rem",
+                    }}
+                  >
                     {pkg.nameId}
                   </strong>
                   {(pkg.tagId || pkg.tagEn) && (
@@ -513,7 +532,14 @@ export default function AdminPackagesPage() {
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block", marginTop: "3px" }}>
+                <span
+                  style={{
+                    fontSize: "0.78rem",
+                    color: "var(--text-muted)",
+                    display: "block",
+                    marginTop: "3px",
+                  }}
+                >
                   {pkg.nameEn}
                 </span>
               </div>
@@ -530,8 +556,21 @@ export default function AdminPackagesPage() {
           const pkg = row.original;
           return (
             <div style={{ minWidth: "180px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <strong style={{ color: "var(--primary-ocean)", fontSize: "0.95rem", whiteSpace: "nowrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <strong
+                  style={{
+                    color: "var(--primary-ocean)",
+                    fontSize: "0.95rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   Rp {pkg.price?.toLocaleString("id-ID")}
                 </strong>
                 <span
@@ -539,22 +578,40 @@ export default function AdminPackagesPage() {
                     fontSize: "0.72rem",
                     padding: "3px 8px",
                     borderRadius: "6px",
-                    background: pkg.priceUnit === "per_boat" ? "#ede9fe" : "#e0f2fe",
+                    background:
+                      pkg.priceUnit === "per_boat" ? "#ede9fe" : "#e0f2fe",
                     color: pkg.priceUnit === "per_boat" ? "#6d28d9" : "#0369a1",
                     fontWeight: 700,
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    border: pkg.priceUnit === "per_boat" ? "1px solid #ddd6fe" : "1px solid #bae6fd",
+                    border:
+                      pkg.priceUnit === "per_boat"
+                        ? "1px solid #ddd6fe"
+                        : "1px solid #bae6fd",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {pkg.priceUnit === "per_boat" ? <Ship size={12} /> : <User size={12} />}
-                  <span>{pkg.priceUnit === "per_boat" ? "Per Boat" : "Per Orang"}</span>
+                  {pkg.priceUnit === "per_boat" ? (
+                    <Ship size={12} />
+                  ) : (
+                    <User size={12} />
+                  )}
+                  <span>
+                    {pkg.priceUnit === "per_boat" ? "Per Boat" : "Per Orang"}
+                  </span>
                 </span>
               </div>
-              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px", whiteSpace: "nowrap" }}>
-                ${pkg.priceUsd} USD {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
+              <div
+                style={{
+                  fontSize: "0.78rem",
+                  color: "var(--text-muted)",
+                  marginTop: "3px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ${pkg.priceUsd} USD{" "}
+                {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
               </div>
             </div>
           );
@@ -569,8 +626,22 @@ export default function AdminPackagesPage() {
           const pkg = row.original;
           return (
             <div style={{ minWidth: "140px" }}>
-              <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--primary-deep)" }}>{pkg.durationId}</div>
-              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" }}>
+              <div
+                style={{
+                  fontSize: "0.88rem",
+                  fontWeight: 600,
+                  color: "var(--primary-deep)",
+                }}
+              >
+                {pkg.durationId}
+              </div>
+              <div
+                style={{
+                  fontSize: "0.78rem",
+                  color: "var(--text-muted)",
+                  marginTop: "3px",
+                }}
+              >
                 {pkg.scheduleId}
               </div>
             </div>
@@ -587,10 +658,20 @@ export default function AdminPackagesPage() {
           return (
             <div style={{ minWidth: "140px" }}>
               <div style={{ fontSize: "0.82rem", color: "var(--text-main)" }}>
-                <strong style={{ color: "var(--primary-deep)" }}>{Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0} Spot</strong> Destinasi
+                <strong style={{ color: "var(--primary-deep)" }}>
+                  {Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0} Spot
+                </strong>{" "}
+                Destinasi
               </div>
-              <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginTop: "2px" }}>
-                {Array.isArray(pkg.includesId) ? pkg.includesId.length : 0} Fasilitas Include
+              <div
+                style={{
+                  fontSize: "0.76rem",
+                  color: "var(--text-muted)",
+                  marginTop: "2px",
+                }}
+              >
+                {Array.isArray(pkg.includesId) ? pkg.includesId.length : 0}{" "}
+                Fasilitas Include
               </div>
             </div>
           );
@@ -611,7 +692,9 @@ export default function AdminPackagesPage() {
                 style={{
                   background: pkg.isFeatured ? "#fef3c7" : "#f1f5f9",
                   color: pkg.isFeatured ? "#b45309" : "var(--text-muted)",
-                  border: pkg.isFeatured ? "1px solid #fde68a" : "1px solid #e2e8f0",
+                  border: pkg.isFeatured
+                    ? "1px solid #fde68a"
+                    : "1px solid #e2e8f0",
                   padding: "5px 10px",
                   borderRadius: "6px",
                   cursor: "pointer",
@@ -624,7 +707,11 @@ export default function AdminPackagesPage() {
                 }}
                 title="Klik untuk toggle Featured"
               >
-                <Star size={14} fill={pkg.isFeatured ? "#ffb703" : "none"} color={pkg.isFeatured ? "#b45309" : "#94a3b8"} />
+                <Star
+                  size={14}
+                  fill={pkg.isFeatured ? "#ffb703" : "none"}
+                  color={pkg.isFeatured ? "#b45309" : "#94a3b8"}
+                />
                 <span>{pkg.isFeatured ? "Ya" : "Tidak"}</span>
               </button>
             </div>
@@ -646,7 +733,9 @@ export default function AdminPackagesPage() {
                 style={{
                   padding: "5px 12px",
                   borderRadius: "20px",
-                  border: pkg.isActive ? "1px solid #a7f3d0" : "1px solid #fecaca",
+                  border: pkg.isActive
+                    ? "1px solid #a7f3d0"
+                    : "1px solid #fecaca",
                   fontSize: "0.78rem",
                   fontWeight: 700,
                   cursor: "pointer",
@@ -664,52 +753,94 @@ export default function AdminPackagesPage() {
       {
         id: "actions",
         enableHiding: false,
-        header: () => <div style={{ textAlign: "center" }}>Aksi</div>,
+        header: () => (
+          <div
+            style={{
+              textAlign: "right",
+              paddingRight: "6px",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "#475569",
+            }}
+          >
+            Aksi
+          </div>
+        ),
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", minWidth: "180px" }}>
-              <button
-                type="button"
-                onClick={() => handleDuplicate(pkg)}
-                style={{
-                  padding: "7px 10px",
-                  borderRadius: "8px",
-                  background: "#f1f5f9",
-                  color: "var(--text-main)",
-                  border: "1px solid var(--border-light)",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "0.78rem",
-                  fontWeight: 600,
-                }}
-                title="Duplikasi Paket Ini"
-              >
-                <Copy size={13} />
-                <span>Klon</span>
-              </button>
-
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "6px",
+                minWidth: "170px",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => openEditModal(pkg)}
                 style={{
-                  padding: "7px 12px",
+                  height: "34px",
+                  padding: "0 12px",
                   borderRadius: "8px",
-                  background: "rgba(0, 119, 182, 0.08)",
-                  color: "var(--primary-ocean)",
-                  border: "1px solid rgba(0, 119, 182, 0.2)",
+                  background: "#f0f9ff",
+                  color: "#0077b6",
+                  border: "1px solid #bae6fd",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "6px",
                   fontSize: "0.8rem",
                   fontWeight: 600,
+                  transition: "all 0.15s ease",
+                  whiteSpace: "nowrap",
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#e0f2fe";
+                  e.currentTarget.style.borderColor = "#7dd3fc";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f0f9ff";
+                  e.currentTarget.style.borderColor = "#bae6fd";
+                }}
+                title="Edit Paket"
               >
-                <Edit3 size={13} />
+                <Edit3 size={14} />
                 <span>Edit</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDuplicate(pkg)}
+                style={{
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  background: "#f8fafc",
+                  color: "#475569",
+                  border: "1px solid #e2e8f0",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f1f5f9";
+                  e.currentTarget.style.borderColor = "#cbd5e1";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f8fafc";
+                  e.currentTarget.style.borderColor = "#e2e8f0";
+                }}
+                title="Duplikasi / Klon Paket"
+              >
+                <Copy size={14} />
               </button>
 
               <button
@@ -719,24 +850,34 @@ export default function AdminPackagesPage() {
                   width: "34px",
                   height: "34px",
                   borderRadius: "8px",
-                  background: "rgba(239, 68, 68, 0.08)",
-                  color: "#b91c1c",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  display: "flex",
+                  background: "#fff1f2",
+                  color: "#e11d48",
+                  border: "1px solid #fecdd3",
+                  display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#ffe4e6";
+                  e.currentTarget.style.borderColor = "#fda4af";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#fff1f2";
+                  e.currentTarget.style.borderColor = "#fecdd3";
                 }}
                 title="Hapus Paket"
               >
-                <Trash2 size={15} />
+                <Trash2 size={14} />
               </button>
             </div>
           );
         },
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -949,7 +1090,8 @@ export default function AdminPackagesPage() {
                       const val = e.target.value;
                       const prevTagId = formData.tagId;
                       // Auto-sync tagEn if tagEn is empty or was in sync with tagId
-                      const shouldSync = !formData.tagEn || formData.tagEn === prevTagId;
+                      const shouldSync =
+                        !formData.tagEn || formData.tagEn === prevTagId;
                       setFormData({
                         ...formData,
                         tagId: val,
