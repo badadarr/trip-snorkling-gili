@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Package,
   Plus,
@@ -28,6 +28,9 @@ import { useRouter } from "next/navigation";
 import AdminConfirmModal from "@/components/admin/AdminConfirmModal";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { formatIdr, formatUsd } from "@/lib/format";
+import { DataTable } from "@/components/admin/DataTable";
+import { DataTableColumnHeader } from "@/components/admin/DataTableColumnHeader";
+import { ColumnDef } from "@tanstack/react-table";
 
 export default function AdminPackagesPage() {
   const router = useRouter();
@@ -456,6 +459,271 @@ export default function AdminPackagesPage() {
     }
   };
 
+  const columnLabels: Record<string, string> = {
+    nameId: "Paket Trip",
+    price: "Harga",
+    durationId: "Durasi & Jadwal",
+    spots: "Spot & Fasilitas",
+    isFeatured: "Featured",
+    isActive: "Status",
+  };
+
+  const columns: ColumnDef<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: "nameId",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Paket Trip" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <img
+                src={pkg.imageUrl}
+                alt={pkg.nameId}
+                style={{
+                  width: "56px",
+                  height: "42px",
+                  borderRadius: "6px",
+                  objectFit: "cover",
+                  flexShrink: 0,
+                }}
+              />
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  <strong style={{ color: "var(--primary-deep)", fontSize: "0.92rem" }}>
+                    {pkg.nameId}
+                  </strong>
+                  {(pkg.tagId || pkg.tagEn) && (
+                    <span
+                      style={{
+                        fontSize: "0.68rem",
+                        padding: "1px 6px",
+                        borderRadius: "var(--radius-full)",
+                        background: "#fef3c7",
+                        color: "#b45309",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {pkg.tagId || pkg.tagEn}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>
+                  {pkg.nameEn}
+                </span>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "price",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Harga (IDR / USD)" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                <strong style={{ color: "var(--primary-ocean)", fontSize: "0.92rem" }}>
+                  Rp {pkg.price?.toLocaleString("id-ID")}
+                </strong>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    background: pkg.priceUnit === "per_boat" ? "#ede9fe" : "#e0f2fe",
+                    color: pkg.priceUnit === "per_boat" ? "#6d28d9" : "#0369a1",
+                    fontWeight: 700,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  {pkg.priceUnit === "per_boat" ? <Ship size={12} /> : <User size={12} />}
+                  <span>{pkg.priceUnit === "per_boat" ? "Per Boat" : "Per Orang"}</span>
+                </span>
+              </div>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                ${pkg.priceUsd} USD {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "durationId",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Durasi & Jadwal" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <div>
+              <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>{pkg.durationId}</div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                {pkg.scheduleId}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        id: "spots",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Spot & Fasilitas" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <div>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-main)" }}>
+                <strong>{Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0} Spot</strong> Destinasi
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                {Array.isArray(pkg.includesId) ? pkg.includesId.length : 0} Fasilitas Include
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "isFeatured",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Featured" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <button
+              type="button"
+              onClick={() => handleQuickToggleFeatured(pkg)}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                color: pkg.isFeatured ? "#d97706" : "var(--text-muted)",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+              }}
+              title="Klik untuk toggle Featured"
+            >
+              <Star size={16} fill={pkg.isFeatured ? "#ffb703" : "none"} />
+              <span>{pkg.isFeatured ? "Ya" : "Tidak"}</span>
+            </button>
+          );
+        },
+      },
+      {
+        accessorKey: "isActive",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <button
+              type="button"
+              onClick={() => handleQuickToggleActive(pkg)}
+              style={{
+                padding: "4px 10px",
+                borderRadius: "var(--radius-full)",
+                border: "none",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                background: pkg.isActive ? "#d1fae5" : "#fee2e2",
+                color: pkg.isActive ? "#065f46" : "#b91c1c",
+              }}
+            >
+              {pkg.isActive ? "● Aktif" : "○ Nonaktif"}
+            </button>
+          );
+        },
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        header: () => <div style={{ textAlign: "center" }}>Aksi</div>,
+        cell: ({ row }) => {
+          const pkg = row.original;
+          return (
+            <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+              <button
+                type="button"
+                onClick={() => handleDuplicate(pkg)}
+                style={{
+                  padding: "6px 8px",
+                  borderRadius: "6px",
+                  background: "#f1f5f9",
+                  color: "var(--text-main)",
+                  border: "1px solid var(--border-light)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "0.78rem",
+                }}
+                title="Duplikasi Paket Ini"
+              >
+                <Copy size={13} />
+                <span>Klon</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openEditModal(pkg)}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  background: "var(--primary-surface)",
+                  color: "var(--primary-ocean)",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                }}
+              >
+                <Edit3 size={13} />
+                <span>Edit</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(pkg)}
+                style={{
+                  padding: "6px",
+                  borderRadius: "6px",
+                  background: "#fee2e2",
+                  color: "#b91c1c",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Hapus Paket"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
   return (
     <div>
       {/* Page Header */}
@@ -495,348 +763,16 @@ export default function AdminPackagesPage() {
         </button>
       </div>
 
-      {/* Packages Table */}
-      <div
-        className="glass-card"
-        style={{ padding: "0", background: "#ffffff", overflow: "hidden" }}
-      >
-        <div style={{ overflowX: "auto" }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Paket Trip</th>
-                <th>Harga (IDR / USD)</th>
-                <th>Durasi & Jadwal</th>
-                <th>Spot & Fasilitas</th>
-                <th>Featured</th>
-                <th>Status</th>
-                <th style={{ textAlign: "center" }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{ textAlign: "center", padding: "40px" }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        color: "var(--primary-ocean)",
-                      }}
-                    >
-                      <Loader2
-                        size={20}
-                        style={{ animation: "spin 1s linear infinite" }}
-                      />
-                      <span>Memuat data paket trip...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : packages.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Belum ada paket snorkeling. Klik "Tambah Paket Baru" untuk
-                    membuat.
-                  </td>
-                </tr>
-              ) : (
-                packages.map((pkg) => (
-                  <tr key={pkg.id}>
-                    <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "12px",
-                        }}
-                      >
-                        <img
-                          src={pkg.imageUrl}
-                          alt={pkg.nameId}
-                          style={{
-                            width: "56px",
-                            height: "42px",
-                            borderRadius: "6px",
-                            objectFit: "cover",
-                            flexShrink: 0,
-                          }}
-                        />
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                            <strong
-                              style={{
-                                color: "var(--primary-deep)",
-                                fontSize: "0.92rem",
-                              }}
-                            >
-                              {pkg.nameId}
-                            </strong>
-                            {(pkg.tagId || pkg.tagEn) && (
-                              <span
-                                style={{
-                                  fontSize: "0.68rem",
-                                  padding: "1px 6px",
-                                  borderRadius: "var(--radius-full)",
-                                  background: "#fef3c7",
-                                  color: "#b45309",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {pkg.tagId || pkg.tagEn}
-                              </span>
-                            )}
-                          </div>
-                          <span
-                            style={{
-                              fontSize: "0.78rem",
-                              color: "var(--text-muted)",
-                              display: "block",
-                            }}
-                          >
-                            {pkg.nameEn}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <strong
-                          style={{
-                            color: "var(--primary-ocean)",
-                            fontSize: "0.92rem",
-                          }}
-                        >
-                          Rp {pkg.price?.toLocaleString("id-ID")}
-                        </strong>
-                        <span
-                          style={{
-                            fontSize: "0.72rem",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            background:
-                              pkg.priceUnit === "per_boat"
-                                ? "#ede9fe"
-                                : "#e0f2fe",
-                            color:
-                              pkg.priceUnit === "per_boat"
-                                ? "#6d28d9"
-                                : "#0369a1",
-                            fontWeight: 700,
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          {pkg.priceUnit === "per_boat" ? (
-                            <Ship size={12} />
-                          ) : (
-                            <User size={12} />
-                          )}
-                          <span>
-                            {pkg.priceUnit === "per_boat"
-                              ? "Per Boat"
-                              : "Per Orang"}
-                          </span>
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "var(--text-muted)",
-                          marginTop: "2px",
-                        }}
-                      >
-                        ${pkg.priceUsd} USD{" "}
-                        {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>
-                        {pkg.durationId}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {pkg.scheduleId}
-                      </div>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "var(--text-main)",
-                        }}
-                      >
-                        <strong>
-                          {Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0}{" "}
-                          Spot
-                        </strong>{" "}
-                        Destinasi
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {Array.isArray(pkg.includesId)
-                          ? pkg.includesId.length
-                          : 0}{" "}
-                        Fasilitas Include
-                      </div>
-                    </td>
-
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickToggleFeatured(pkg)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          color: pkg.isFeatured
-                            ? "#d97706"
-                            : "var(--text-muted)",
-                          fontSize: "0.8rem",
-                          fontWeight: 600,
-                        }}
-                        title="Klik untuk toggle Featured"
-                      >
-                        <Star
-                          size={16}
-                          fill={pkg.isFeatured ? "#ffb703" : "none"}
-                        />
-                        <span>{pkg.isFeatured ? "Ya" : "Tidak"}</span>
-                      </button>
-                    </td>
-
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => handleQuickToggleActive(pkg)}
-                        style={{
-                          padding: "4px 10px",
-                          borderRadius: "var(--radius-full)",
-                          border: "none",
-                          fontSize: "0.78rem",
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          background: pkg.isActive ? "#d1fae5" : "#fee2e2",
-                          color: pkg.isActive ? "#065f46" : "#b91c1c",
-                        }}
-                      >
-                        {pkg.isActive ? "● Aktif" : "○ Nonaktif"}
-                      </button>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "6px",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {/* Duplicate */}
-                        <button
-                          type="button"
-                          onClick={() => handleDuplicate(pkg)}
-                          style={{
-                            padding: "6px 8px",
-                            borderRadius: "6px",
-                            background: "#f1f5f9",
-                            color: "var(--text-main)",
-                            border: "1px solid var(--border-light)",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "0.78rem",
-                          }}
-                          title="Duplikasi Paket Ini"
-                        >
-                          <Copy size={13} />
-                          <span>Klon</span>
-                        </button>
-
-                        {/* Edit */}
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(pkg)}
-                          style={{
-                            padding: "6px 10px",
-                            borderRadius: "6px",
-                            background: "var(--primary-surface)",
-                            color: "var(--primary-ocean)",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "0.78rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          <Edit3 size={13} />
-                          <span>Edit</span>
-                        </button>
-
-                        {/* Delete */}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(pkg)}
-                          style={{
-                            padding: "6px",
-                            borderRadius: "6px",
-                            background: "#fee2e2",
-                            color: "#b91c1c",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          title="Hapus Paket"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Packages DataTable */}
+      <DataTable
+        columns={columns}
+        data={packages}
+        loading={loading}
+        searchPlaceholder="Cari nama paket, durasi..."
+        columnLabels={columnLabels}
+        emptyMessage="Belum ada paket snorkeling. Klik 'Tambah Paket Baru' untuk membuat."
+        initialPageSize={10}
+      />
 
       {/* Create / Edit Modal */}
       {isModalOpen && (

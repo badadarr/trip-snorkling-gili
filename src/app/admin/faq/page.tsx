@@ -4,6 +4,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { HelpCircle, Plus, Edit3, Trash2, X, Loader2, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
+import { DataTable } from '@/components/admin/DataTable';
+import { DataTableColumnHeader } from '@/components/admin/DataTableColumnHeader';
+import { ColumnDef } from '@tanstack/react-table';
 
 export default function AdminFaqPage() {
   const [faqs, setFaqs] = useState<any[]>([]);
@@ -144,9 +147,116 @@ export default function AdminFaqPage() {
     }
   };
 
+  const columnLabels: Record<string, string> = {
+    questionId: 'Pertanyaan',
+    answerId: 'Jawaban',
+    category: 'Kategori',
+  };
+
+  const columns: ColumnDef<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'questionId',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Pertanyaan" />
+        ),
+        cell: ({ row }) => {
+          const f = row.original;
+          return (
+            <div style={{ maxWidth: '300px' }}>
+              <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem', display: 'block' }}>
+                {f.questionId}
+              </strong>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{f.questionEn}</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'answerId',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Jawaban" />
+        ),
+        cell: ({ row }) => {
+          const ans = (row.getValue('answerId') as string) || '';
+          return (
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.45, maxWidth: '360px' }}>
+              {ans.length > 100 ? ans.slice(0, 100) + '...' : ans}
+            </p>
+          );
+        },
+      },
+      {
+        accessorKey: 'category',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Kategori" />
+        ),
+        cell: ({ row }) => {
+          const cat = (row.getValue('category') as string) || 'General';
+          return (
+            <span className="section-badge" style={{ fontSize: '0.72rem', padding: '3px 8px', margin: 0, textTransform: 'capitalize' }}>
+              {cat}
+            </span>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        enableHiding: false,
+        header: () => <div style={{ textAlign: 'center' }}>Aksi</div>,
+        cell: ({ row }) => {
+          const f = row.original;
+          return (
+            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => openEditModal(f)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  background: 'var(--primary-surface)',
+                  color: 'var(--primary-ocean)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                }}
+              >
+                <Edit3 size={13} />
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(f)}
+                style={{
+                  padding: '6px',
+                  borderRadius: '6px',
+                  background: '#fee2e2',
+                  color: '#b91c1c',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="Hapus FAQ"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
   return (
     <div>
-      {/* Header */}
+      {/* Page Header */}
       <div
         style={{
           display: 'flex',
@@ -162,7 +272,7 @@ export default function AdminFaqPage() {
             Kelola Tanya Jawab (FAQ)
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            Daftar pertanyaan yang sering diajukan wisatawan terkait rute snorkeling, alat, dan prosedur trip.
+            Kelola daftar pertanyaan dan jawaban seputar trip snorkeling 3 Gili.
           </p>
         </div>
 
@@ -173,7 +283,7 @@ export default function AdminFaqPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
         {categories.map((c) => (
           <button
             key={c.key}
@@ -195,105 +305,16 @@ export default function AdminFaqPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="glass-card" style={{ padding: '0', background: '#ffffff', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Pertanyaan</th>
-                <th>Jawaban</th>
-                <th>Kategori</th>
-                <th style={{ textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '40px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--primary-ocean)' }}>
-                      <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                      <span>Memuat daftar FAQ...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredFaqs.length === 0 ? (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                    Tidak ada FAQ pada kategori ini.
-                  </td>
-                </tr>
-              ) : (
-                filteredFaqs.map((f) => (
-                  <tr key={f.id}>
-                    <td style={{ maxWidth: '300px' }}>
-                      <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem', display: 'block' }}>
-                        {f.questionId}
-                      </strong>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{f.questionEn}</span>
-                    </td>
-
-                    <td style={{ maxWidth: '360px' }}>
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.45 }}>
-                        {f.answerId.length > 100 ? f.answerId.slice(0, 100) + '...' : f.answerId}
-                      </p>
-                    </td>
-
-                    <td>
-                      <span className="section-badge" style={{ fontSize: '0.72rem', padding: '3px 8px', margin: 0 }}>
-                        {f.category || 'General'}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(f)}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            background: 'var(--primary-surface)',
-                            color: 'var(--primary-ocean)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                          }}
-                        >
-                          <Edit3 size={13} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(f)}
-                          style={{
-                            padding: '6px',
-                            borderRadius: '6px',
-                            background: '#fee2e2',
-                            color: '#b91c1c',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          title="Hapus FAQ"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* FAQ DataTable */}
+      <DataTable
+        columns={columns}
+        data={filteredFaqs}
+        loading={loading}
+        searchPlaceholder="Cari pertanyaan atau jawaban..."
+        columnLabels={columnLabels}
+        emptyMessage="Tidak ada FAQ pada kategori ini."
+        initialPageSize={10}
+      />
 
       {/* Modal FAQ */}
       {isModalOpen && (

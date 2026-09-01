@@ -53,18 +53,24 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   }, []);
 
   // Compute estimated total based on priceUnit ('per_boat' vs 'per_person')
+  // For 'per_boat', 1 boat holds up to 10 persons.
   const computePrice = () => {
-    if (!currentPackage) return { idr: 0, usd: 0 };
+    if (!currentPackage) return { idr: 0, usd: 0, boatsCount: 1, isPerBoat: false };
     const isPerBoat = currentPackage.priceUnit === 'per_boat' || (!currentPackage.priceUnit && currentPackage.price > 500000);
+    const boatsCount = isPerBoat ? Math.max(1, Math.ceil(numberOfPeople / 10)) : 1;
     if (isPerBoat) {
       return {
-        idr: currentPackage.price,
-        usd: currentPackage.priceUsd,
+        idr: currentPackage.price * boatsCount,
+        usd: Number((currentPackage.priceUsd * boatsCount).toFixed(2)),
+        boatsCount,
+        isPerBoat,
       };
     } else {
       return {
         idr: currentPackage.price * numberOfPeople,
-        usd: currentPackage.priceUsd * numberOfPeople,
+        usd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
+        boatsCount: 1,
+        isPerBoat: false,
       };
     }
   };
@@ -129,7 +135,7 @@ I have submitted an online booking with the following details:
 - Name: *${customerName}*
 - Trip Date: *${tripDate}*
 - Session: *${tripSession}*
-- Guests: *${numberOfPeople} Person(s)*
+- Guests: *${numberOfPeople} Person(s)${totals.isPerBoat ? ` (${totals.boatsCount} Boat${totals.boatsCount > 1 ? 's' : ''})` : ''}*
 - Total Price: *${totals.usd ? `$${totals.usd} USD` : ''}* (~ Rp ${totals.idr.toLocaleString('id-ID')})
 ${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ''}${specialRequests ? `- Special Request: ${specialRequests}\n` : ''}
 Please confirm slot availability and meeting point instructions. Thank you!`;
@@ -195,7 +201,7 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
             <div><strong>Package:</strong> {currentPackage?.nameEn || currentPackage?.nameId}</div>
             <div><strong>Name:</strong> {customerName}</div>
             <div><strong>Date:</strong> {tripDate} ({tripSession})</div>
-            <div><strong>Guests:</strong> {numberOfPeople} Person(s)</div>
+            <div><strong>Guests:</strong> {numberOfPeople} Person(s) {totals.isPerBoat ? `(${totals.boatsCount} Boat${totals.boatsCount > 1 ? 's' : ''})` : ''}</div>
             <div><strong>Total:</strong> ${totals.usd} USD (~ Rp {totals.idr.toLocaleString('id-ID')})</div>
           </div>
         </div>
@@ -411,6 +417,27 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
                   +
                 </button>
               </div>
+              {totals.isPerBoat && (
+                <div
+                  style={{
+                    marginTop: '6px',
+                    fontSize: '0.75rem',
+                    color: 'var(--primary-ocean)',
+                    background: 'var(--primary-surface)',
+                    padding: '4px 8px',
+                    borderRadius: 'var(--radius-sm)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    border: '1px solid rgba(0, 180, 216, 0.2)',
+                  }}
+                >
+                  <Compass size={12} />
+                  <span>
+                    1 Kapal = maks 10 org (Dibutuhkan <strong>{totals.boatsCount} Perahu</strong> untuk {numberOfPeople} peserta)
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -505,14 +532,19 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
-                  {(currentPackage.priceUnit === 'per_boat' || (!currentPackage.priceUnit && currentPackage.price > 500000))
-                    ? 'Private Boat Rate'
+                  {totals.isPerBoat
+                    ? `Private Boat (${totals.boatsCount}x Boat${totals.boatsCount > 1 ? 's' : ''})`
                     : `Rate per Person (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
-                  {formatUsd(currentPackage.priceUsd)} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({formatIdr(currentPackage.price)})</span>
+                  {formatUsd(totals.usd)} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({formatIdr(totals.idr)})</span>
                 </span>
               </div>
+              {totals.isPerBoat && (
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '8px', fontStyle: 'italic' }}>
+                  {totals.boatsCount} boat{totals.boatsCount > 1 ? 's' : ''} for {numberOfPeople} guest{numberOfPeople > 1 ? 's' : ''} (@ {formatIdr(currentPackage.price)} / boat max 10 pax)
+                </div>
+              )}
               <div
                 style={{
                   borderTop: '1px dashed var(--border-light)',

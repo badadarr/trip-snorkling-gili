@@ -43,8 +43,9 @@ export default function ManualBookingModal({
 
   const selectedPkg = packages.find((p) => p.id === selectedPackageId) || packages[0];
   const isPerBoat = selectedPkg ? (selectedPkg.priceUnit === 'per_boat' || (!selectedPkg.priceUnit && selectedPkg.price > 500000)) : false;
-  const defaultTotal = selectedPkg ? (isPerBoat ? selectedPkg.price : selectedPkg.price * numberOfPeople) : 300000;
-  const defaultTotalUsd = selectedPkg ? (isPerBoat ? selectedPkg.priceUsd : selectedPkg.priceUsd * numberOfPeople) : 20;
+  const boatsCount = isPerBoat ? Math.max(1, Math.ceil(numberOfPeople / 10)) : 1;
+  const defaultTotal = selectedPkg ? (isPerBoat ? selectedPkg.price * boatsCount : selectedPkg.price * numberOfPeople) : 300000;
+  const defaultTotalUsd = selectedPkg ? (isPerBoat ? Number((selectedPkg.priceUsd * boatsCount).toFixed(2)) : Number((selectedPkg.priceUsd * numberOfPeople).toFixed(2))) : 20;
   const finalTotalPrice = customPrice !== null ? customPrice : defaultTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -277,7 +278,9 @@ export default function ManualBookingModal({
                 onChange={(e) => setCustomPrice(parseInt(e.target.value) || 0)}
               />
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                Default: {numberOfPeople} org x Rp {selectedPkg?.price.toLocaleString('id-ID')}
+                {isPerBoat
+                  ? `Default: ${boatsCount} Perahu (${numberOfPeople} org, maks 10 org/perahu) x Rp ${selectedPkg?.price.toLocaleString('id-ID')}`
+                  : `Default: ${numberOfPeople} org x Rp ${selectedPkg?.price.toLocaleString('id-ID')}`}
               </span>
             </div>
             <div className="form-group" style={{ margin: 0 }}>

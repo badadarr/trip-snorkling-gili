@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MessageSquare, Plus, Edit3, Trash2, X, Star, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
 import ImageUpload from '@/components/admin/ImageUpload';
+import { DataTable } from '@/components/admin/DataTable';
+import { DataTableColumnHeader } from '@/components/admin/DataTableColumnHeader';
+import { ColumnDef } from '@tanstack/react-table';
 
 export default function AdminTestimonialsPage() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -129,6 +132,147 @@ export default function AdminTestimonialsPage() {
     }
   };
 
+  const columnLabels: Record<string, string> = {
+    name: 'Nama Tamu',
+    tripType: 'Asal & Paket',
+    rating: 'Rating',
+    contentId: 'Ulasan',
+  };
+
+  const columns: ColumnDef<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'name',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Nama Tamu" />
+        ),
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {item.avatarUrl ? (
+                <img
+                  src={item.avatarUrl}
+                  alt={item.name}
+                  style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    background: 'var(--primary-surface)',
+                    color: 'var(--primary-ocean)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                  }}
+                >
+                  {item.name ? item.name.charAt(0) : '?'}
+                </div>
+              )}
+              <div>
+                <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem' }}>{item.name}</strong>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.origin}</div>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: 'tripType',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Asal & Paket" />
+        ),
+        cell: ({ row }) => (
+          <span style={{ fontSize: '0.82rem', color: 'var(--primary-ocean)', fontWeight: 600 }}>
+            {row.getValue('tripType') || 'Snorkeling Trip'}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'rating',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Rating" />
+        ),
+        cell: ({ row }) => (
+          <div style={{ display: 'flex', gap: '2px' }}>
+            {[...Array(Number(row.getValue('rating')) || 5)].map((_, i) => (
+              <Star key={i} size={14} fill="var(--accent-gold)" color="var(--accent-gold)" />
+            ))}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'contentId',
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Ulasan" />
+        ),
+        cell: ({ row }) => {
+          const text = (row.getValue('contentId') as string) || '';
+          return (
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4, maxWidth: '320px' }}>
+              "{text.length > 90 ? text.slice(0, 90) + '...' : text}"
+            </p>
+          );
+        },
+      },
+      {
+        id: 'actions',
+        enableHiding: false,
+        header: () => <div style={{ textAlign: 'center' }}>Aksi</div>,
+        cell: ({ row }) => {
+          const item = row.original;
+          return (
+            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => openEditModal(item)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  background: 'var(--primary-surface)',
+                  color: 'var(--primary-ocean)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                }}
+              >
+                <Edit3 size={13} />
+                <span>Edit</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(item)}
+                style={{
+                  padding: '6px',
+                  borderRadius: '6px',
+                  background: '#fee2e2',
+                  color: '#b91c1c',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title="Hapus Testimoni"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
   return (
     <div>
       {/* Page Header */}
@@ -157,139 +301,16 @@ export default function AdminTestimonialsPage() {
         </button>
       </div>
 
-      {/* Table */}
-      <div className="glass-card" style={{ padding: '0', background: '#ffffff', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Nama Tamu</th>
-                <th>Asal & Paket</th>
-                <th>Rating</th>
-                <th>Ulasan</th>
-                <th style={{ textAlign: 'center' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--primary-ocean)' }}>
-                      <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-                      <span>Memuat testimoni...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : testimonials.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                    Belum ada testimoni. Klik "Tambah Testimoni Baru" untuk menambahkan ulasan.
-                  </td>
-                </tr>
-              ) : (
-                testimonials.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {item.avatarUrl ? (
-                          <img
-                            src={item.avatarUrl}
-                            alt={item.name}
-                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <div
-                            style={{
-                              width: '38px',
-                              height: '38px',
-                              borderRadius: '50%',
-                              background: 'var(--primary-surface)',
-                              color: 'var(--primary-ocean)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 700,
-                            }}
-                          >
-                            {item.name.charAt(0)}
-                          </div>
-                        )}
-                        <div>
-                          <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem' }}>{item.name}</strong>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.origin}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--primary-ocean)', fontWeight: 600 }}>
-                        {item.tripType || 'Snorkeling Trip'}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div style={{ display: 'flex', gap: '2px' }}>
-                        {[...Array(item.rating || 5)].map((_, i) => (
-                          <Star key={i} size={14} fill="var(--accent-gold)" color="var(--accent-gold)" />
-                        ))}
-                      </div>
-                    </td>
-
-                    <td style={{ maxWidth: '320px' }}>
-                      <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4 }}>
-                        "{item.contentId.length > 90 ? item.contentId.slice(0, 90) + '...' : item.contentId}"
-                      </p>
-                    </td>
-
-                    <td>
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(item)}
-                          style={{
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            background: 'var(--primary-surface)',
-                            color: 'var(--primary-ocean)',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '0.78rem',
-                            fontWeight: 600,
-                          }}
-                        >
-                          <Edit3 size={13} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(item)}
-                          style={{
-                            padding: '6px',
-                            borderRadius: '6px',
-                            background: '#fee2e2',
-                            color: '#b91c1c',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          title="Hapus Testimoni"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Testimonials DataTable */}
+      <DataTable
+        columns={columns}
+        data={testimonials}
+        loading={loading}
+        searchPlaceholder="Cari nama tamu, asal, ulasan..."
+        columnLabels={columnLabels}
+        emptyMessage="Belum ada testimoni. Klik 'Tambah Testimoni Baru' untuk menambahkan ulasan."
+        initialPageSize={10}
+      />
 
       {/* Modal Add / Edit */}
       {isModalOpen && (

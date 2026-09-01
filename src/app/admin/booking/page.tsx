@@ -17,6 +17,9 @@ import AdminConfirmModal from "@/components/admin/AdminConfirmModal";
 import BookingDetailModal from "@/components/admin/BookingDetailModal";
 import ManualBookingModal from "@/components/admin/ManualBookingModal";
 import ManifestModal from "@/components/admin/ManifestModal";
+import { DataTable } from "@/components/admin/DataTable";
+import { DataTableColumnHeader } from "@/components/admin/DataTableColumnHeader";
+import { ColumnDef } from "@tanstack/react-table";
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -203,6 +206,251 @@ export default function AdminBookingsPage() {
     todayStr,
     tomorrowStr,
   ]);
+
+  const columnLabels: Record<string, string> = {
+    bookingCode: "Kode Booking",
+    customerName: "Nama Pelanggan",
+    packageName: "Paket Trip",
+    tripDate: "Tgl & Sesi",
+    numberOfPeople: "Peserta",
+    totalPriceIdr: "Total Biaya",
+    status: "Status",
+  };
+
+  const columns: ColumnDef<any>[] = useMemo(
+    () => [
+      {
+        accessorKey: "bookingCode",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Kode" />
+        ),
+        cell: ({ row }) => (
+          <button
+            type="button"
+            onClick={() => openDetail(row.original)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--primary-ocean)",
+              fontSize: "0.88rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              textAlign: "left",
+              padding: 0,
+              textDecoration: "underline",
+            }}
+          >
+            {row.getValue("bookingCode")}
+          </button>
+        ),
+      },
+      {
+        accessorKey: "customerName",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Nama Pelanggan" />
+        ),
+        cell: ({ row }) => (
+          <div>
+            <div style={{ fontWeight: 600, color: "var(--primary-deep)" }}>
+              {row.getValue("customerName")}
+            </div>
+            <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+              {row.original.customerPhone}
+            </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "packageName",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Paket Trip" />
+        ),
+        cell: ({ row }) => (
+          <span style={{ fontSize: "0.85rem", color: "var(--text-main)", maxWidth: "180px", display: "inline-block" }}>
+            {row.getValue("packageName")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "tripDate",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Tgl & Sesi" />
+        ),
+        cell: ({ row }) => {
+          const b = row.original;
+          return (
+            <div>
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  color: b.tripDate === todayStr ? "var(--primary-ocean)" : "var(--text-main)",
+                }}
+              >
+                {b.tripDate}{" "}
+                {b.tripDate === todayStr && (
+                  <span style={{ fontSize: "0.7rem", color: "#15803d", fontWeight: 700 }}>
+                    (Hari ini)
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "capitalize" }}>
+                {b.tripSession === "morning"
+                  ? "Pagi (09:30)"
+                  : b.tripSession === "afternoon"
+                    ? "Siang (13:00)"
+                    : b.tripSession === "sunset"
+                      ? "Sunset (16:00)"
+                      : b.tripSession}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "numberOfPeople",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Peserta" />
+        ),
+        cell: ({ row }) => (
+          <span>
+            <strong style={{ color: "var(--primary-deep)" }}>
+              {row.getValue("numberOfPeople")}
+            </strong>{" "}
+            Org
+          </span>
+        ),
+      },
+      {
+        accessorKey: "totalPriceIdr",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Total Biaya" />
+        ),
+        cell: ({ row }) => (
+          <strong style={{ color: "var(--primary-ocean)", fontSize: "0.88rem" }}>
+            Rp {(row.getValue("totalPriceIdr") as number)?.toLocaleString("id-ID")}
+          </strong>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Status" />
+        ),
+        cell: ({ row }) => {
+          const b = row.original;
+          return (
+            <select
+              value={b.status}
+              onChange={(e) => handleUpdateStatus(b.id, e.target.value)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                border: "1px solid var(--border-light)",
+                background:
+                  b.status === "confirmed"
+                    ? "#d1fae5"
+                    : b.status === "pending"
+                      ? "#fef3c7"
+                      : b.status === "completed"
+                        ? "#e0f2fe"
+                        : "#fee2e2",
+                color:
+                  b.status === "confirmed"
+                    ? "#065f46"
+                    : b.status === "pending"
+                      ? "#b45309"
+                      : b.status === "completed"
+                        ? "#0369a1"
+                        : "#b91c1c",
+                cursor: "pointer",
+              }}
+            >
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          );
+        },
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        header: () => <div style={{ textAlign: "center" }}>Aksi</div>,
+        cell: ({ row }) => {
+          const b = row.original;
+          return (
+            <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+              <button
+                type="button"
+                onClick={() => openDetail(b)}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  background: "var(--primary-surface)",
+                  color: "var(--primary-ocean)",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                }}
+                title="Lihat Detail & WhatsApp"
+              >
+                <Eye size={14} />
+                <span>Detail</span>
+              </button>
+
+              <a
+                href={`https://wa.me/${(b.customerPhone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                  `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili mengonfirmasi pesanan Anda (${b.bookingCode}) pada ${b.tripDate}.`,
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  padding: "6px",
+                  borderRadius: "6px",
+                  background: "rgba(37, 211, 102, 0.15)",
+                  color: "#15803d",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Kirim Pesan WhatsApp"
+              >
+                <MessageCircle size={15} />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(b)}
+                style={{
+                  padding: "6px",
+                  borderRadius: "6px",
+                  background: "#fee2e2",
+                  color: "#b91c1c",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Hapus Reservasi"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    [todayStr]
+  );
 
   // Export to CSV
   const handleExportCSV = () => {
@@ -585,292 +833,16 @@ export default function AdminBookingsPage() {
         </div>
       </div>
 
-      {/* Main Bookings Table */}
-      <div
-        className="glass-card"
-        style={{ padding: "0", background: "#ffffff", overflow: "hidden" }}
-      >
-        <div style={{ overflowX: "auto" }}>
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Kode</th>
-                <th>Nama Pelanggan</th>
-                <th>Paket Trip</th>
-                <th>Tgl & Sesi</th>
-                <th>Peserta</th>
-                <th>Total Biaya</th>
-                <th>Status</th>
-                <th style={{ textAlign: "center" }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={8}
-                    style={{ textAlign: "center", padding: "40px" }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        color: "var(--primary-ocean)",
-                      }}
-                    >
-                      <Loader2
-                        size={20}
-                        style={{ animation: "spin 1s linear infinite" }}
-                      />
-                      <span>Memuat data reservasi...</span>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredBookings.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={8}
-                    style={{
-                      textAlign: "center",
-                      padding: "40px",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Tidak ada data reservasi yang sesuai dengan filter.
-                  </td>
-                </tr>
-              ) : (
-                filteredBookings.map((b) => (
-                  <tr key={b.id}>
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => openDetail(b)}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "var(--primary-ocean)",
-                          fontSize: "0.88rem",
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          textAlign: "left",
-                          padding: 0,
-                          textDecoration: "underline",
-                        }}
-                      >
-                        {b.bookingCode}
-                      </button>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color: "var(--primary-deep)",
-                        }}
-                      >
-                        {b.customerName}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {b.customerPhone}
-                      </div>
-                    </td>
-
-                    <td style={{ maxWidth: "180px" }}>
-                      <span
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "var(--text-main)",
-                        }}
-                      >
-                        {b.packageName}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          fontSize: "0.85rem",
-                          color:
-                            b.tripDate === todayStr
-                              ? "var(--primary-ocean)"
-                              : "var(--text-main)",
-                        }}
-                      >
-                        {b.tripDate}{" "}
-                        {b.tripDate === todayStr && (
-                          <span
-                            style={{
-                              fontSize: "0.7rem",
-                              color: "#15803d",
-                              fontWeight: 700,
-                            }}
-                          >
-                            (Hari ini)
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "0.75rem",
-                          color: "var(--text-muted)",
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        {b.tripSession === "morning"
-                          ? "Pagi (09:30)"
-                          : b.tripSession === "afternoon"
-                            ? "Siang (13:00)"
-                            : b.tripSession === "sunset"
-                              ? "Sunset (16:00)"
-                              : b.tripSession}
-                      </div>
-                    </td>
-
-                    <td>
-                      <strong style={{ color: "var(--primary-deep)" }}>
-                        {b.numberOfPeople}
-                      </strong>{" "}
-                      Org
-                    </td>
-
-                    <td>
-                      <strong
-                        style={{
-                          color: "var(--primary-ocean)",
-                          fontSize: "0.88rem",
-                        }}
-                      >
-                        Rp {b.totalPriceIdr?.toLocaleString("id-ID")}
-                      </strong>
-                    </td>
-
-                    <td>
-                      <select
-                        value={b.status}
-                        onChange={(e) =>
-                          handleUpdateStatus(b.id, e.target.value)
-                        }
-                        style={{
-                          padding: "4px 8px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: "0.78rem",
-                          fontWeight: 700,
-                          border: "1px solid var(--border-light)",
-                          background:
-                            b.status === "confirmed"
-                              ? "#d1fae5"
-                              : b.status === "pending"
-                                ? "#fef3c7"
-                                : b.status === "completed"
-                                  ? "#e0f2fe"
-                                  : "#fee2e2",
-                          color:
-                            b.status === "confirmed"
-                              ? "#065f46"
-                              : b.status === "pending"
-                                ? "#b45309"
-                                : b.status === "completed"
-                                  ? "#0369a1"
-                                  : "#b91c1c",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    </td>
-
-                    <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "6px",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {/* Detail Button */}
-                        <button
-                          type="button"
-                          onClick={() => openDetail(b)}
-                          style={{
-                            padding: "6px 10px",
-                            borderRadius: "6px",
-                            background: "var(--primary-surface)",
-                            color: "var(--primary-ocean)",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "0.78rem",
-                            fontWeight: 600,
-                          }}
-                          title="Lihat Detail & WhatsApp"
-                        >
-                          <Eye size={14} />
-                          <span>Detail</span>
-                        </button>
-
-                        {/* WhatsApp Quick Action */}
-                        <a
-                          href={`https://wa.me/${(b.customerPhone || "").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                            `Halo ${b.customerName}! Kami dari Trip Snorkeling Gili mengonfirmasi pesanan Anda (${b.bookingCode}) pada ${b.tripDate}.`,
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            padding: "6px",
-                            borderRadius: "6px",
-                            background: "rgba(37, 211, 102, 0.15)",
-                            color: "#15803d",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          title="Kirim Pesan WhatsApp"
-                        >
-                          <MessageCircle size={15} />
-                        </a>
-
-                        {/* Delete Button */}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(b)}
-                          style={{
-                            padding: "6px",
-                            borderRadius: "6px",
-                            background: "#fee2e2",
-                            color: "#b91c1c",
-                            border: "none",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          title="Hapus Reservasi"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Main Bookings DataTable */}
+      <DataTable
+        columns={columns}
+        data={filteredBookings}
+        loading={loading}
+        enableSearch={false}
+        columnLabels={columnLabels}
+        emptyMessage="Tidak ada data reservasi yang sesuai dengan filter."
+        initialPageSize={10}
+      />
 
       {/* Booking Detail Modal */}
       {isDetailModalOpen && (
