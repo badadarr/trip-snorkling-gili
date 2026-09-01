@@ -222,22 +222,24 @@ export default function AdminBookingsPage() {
       {
         accessorKey: "bookingCode",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Kode" />
+          <DataTableColumnHeader column={column} title="Kode Booking" />
         ),
         cell: ({ row }) => (
           <button
             type="button"
             onClick={() => openDetail(row.original)}
             style={{
-              background: "transparent",
-              border: "none",
+              padding: "6px 12px",
+              background: "rgba(0, 119, 182, 0.08)",
               color: "var(--primary-ocean)",
-              fontSize: "0.88rem",
+              borderRadius: "8px",
               fontWeight: 700,
+              fontFamily: "monospace",
+              fontSize: "0.84rem",
+              border: "1px solid rgba(0, 119, 182, 0.2)",
               cursor: "pointer",
-              textAlign: "left",
-              padding: 0,
-              textDecoration: "underline",
+              whiteSpace: "nowrap",
+              display: "inline-block",
             }}
           >
             {row.getValue("bookingCode")}
@@ -250,13 +252,13 @@ export default function AdminBookingsPage() {
           <DataTableColumnHeader column={column} title="Nama Pelanggan" />
         ),
         cell: ({ row }) => (
-          <div>
-            <div style={{ fontWeight: 600, color: "var(--primary-deep)" }}>
+          <div style={{ minWidth: "160px" }}>
+            <strong style={{ color: "var(--primary-deep)", fontSize: "0.92rem", display: "block" }}>
               {row.getValue("customerName")}
-            </div>
-            <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+            </strong>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "block", marginTop: "3px" }}>
               {row.original.customerPhone}
-            </div>
+            </span>
           </div>
         ),
       },
@@ -266,9 +268,9 @@ export default function AdminBookingsPage() {
           <DataTableColumnHeader column={column} title="Paket Trip" />
         ),
         cell: ({ row }) => (
-          <span style={{ fontSize: "0.85rem", color: "var(--text-main)", maxWidth: "180px", display: "inline-block" }}>
+          <div style={{ minWidth: "150px", maxWidth: "220px", fontSize: "0.88rem", fontWeight: 500, color: "var(--text-main)", lineHeight: 1.4 }}>
             {row.getValue("packageName")}
-          </span>
+          </div>
         ),
       },
       {
@@ -279,28 +281,31 @@ export default function AdminBookingsPage() {
         cell: ({ row }) => {
           const b = row.original;
           return (
-            <div>
+            <div style={{ minWidth: "140px" }}>
               <div
                 style={{
                   fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color: b.tripDate === todayStr ? "var(--primary-ocean)" : "var(--text-main)",
+                  fontSize: "0.88rem",
+                  color: b.tripDate === todayStr ? "var(--primary-ocean)" : "var(--primary-deep)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
                 }}
               >
-                {b.tripDate}{" "}
+                <span>{b.tripDate}</span>
                 {b.tripDate === todayStr && (
-                  <span style={{ fontSize: "0.7rem", color: "#15803d", fontWeight: 700 }}>
-                    (Hari ini)
+                  <span style={{ fontSize: "0.7rem", color: "#15803d", background: "#dcfce7", padding: "1px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                    Hari ini
                   </span>
                 )}
               </div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "capitalize" }}>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" }}>
                 {b.tripSession === "morning"
-                  ? "Pagi (09:30)"
+                  ? "Pagi (09:30 WITA)"
                   : b.tripSession === "afternoon"
-                    ? "Siang (13:00)"
+                    ? "Siang (13:00 WITA)"
                     : b.tripSession === "sunset"
-                      ? "Sunset (16:00)"
+                      ? "Sunset (16:00 WITA)"
                       : b.tripSession}
               </div>
             </div>
@@ -313,12 +318,12 @@ export default function AdminBookingsPage() {
           <DataTableColumnHeader column={column} title="Peserta" />
         ),
         cell: ({ row }) => (
-          <span>
-            <strong style={{ color: "var(--primary-deep)" }}>
+          <div style={{ minWidth: "80px" }}>
+            <strong style={{ color: "var(--primary-deep)", fontSize: "1rem" }}>
               {row.getValue("numberOfPeople")}
             </strong>{" "}
-            Org
-          </span>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Org</span>
+          </div>
         ),
       },
       {
@@ -327,9 +332,11 @@ export default function AdminBookingsPage() {
           <DataTableColumnHeader column={column} title="Total Biaya" />
         ),
         cell: ({ row }) => (
-          <strong style={{ color: "var(--primary-ocean)", fontSize: "0.88rem" }}>
-            Rp {(row.getValue("totalPriceIdr") as number)?.toLocaleString("id-ID")}
-          </strong>
+          <div style={{ minWidth: "130px", whiteSpace: "nowrap" }}>
+            <strong style={{ color: "var(--primary-ocean)", fontSize: "0.95rem" }}>
+              Rp {(row.getValue("totalPriceIdr") as number)?.toLocaleString("id-ID")}
+            </strong>
+          </div>
         ),
       },
       {
@@ -340,39 +347,50 @@ export default function AdminBookingsPage() {
         cell: ({ row }) => {
           const b = row.original;
           return (
-            <select
-              value={b.status}
-              onChange={(e) => handleUpdateStatus(b.id, e.target.value)}
-              style={{
-                padding: "4px 8px",
-                borderRadius: "var(--radius-sm)",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                border: "1px solid var(--border-light)",
-                background:
-                  b.status === "confirmed"
-                    ? "#d1fae5"
-                    : b.status === "pending"
-                      ? "#fef3c7"
-                      : b.status === "completed"
-                        ? "#e0f2fe"
-                        : "#fee2e2",
-                color:
-                  b.status === "confirmed"
-                    ? "#065f46"
-                    : b.status === "pending"
-                      ? "#b45309"
-                      : b.status === "completed"
-                        ? "#0369a1"
-                        : "#b91c1c",
-                cursor: "pointer",
-              }}
-            >
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+            <div style={{ minWidth: "120px" }}>
+              <select
+                value={b.status}
+                onChange={(e) => handleUpdateStatus(b.id, e.target.value)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "20px",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  border: "1.5px solid transparent",
+                  cursor: "pointer",
+                  outline: "none",
+                  background:
+                    b.status === "confirmed"
+                      ? "#d1fae5"
+                      : b.status === "pending"
+                        ? "#fef3c7"
+                        : b.status === "completed"
+                          ? "#e0f2fe"
+                          : "#fee2e2",
+                  color:
+                    b.status === "confirmed"
+                      ? "#065f46"
+                      : b.status === "pending"
+                        ? "#b45309"
+                        : b.status === "completed"
+                          ? "#0369a1"
+                          : "#b91c1c",
+                  borderColor:
+                    b.status === "confirmed"
+                      ? "#a7f3d0"
+                      : b.status === "pending"
+                        ? "#fde68a"
+                        : b.status === "completed"
+                          ? "#bae6fd"
+                          : "#fecaca",
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
           );
         },
       },
@@ -383,21 +401,21 @@ export default function AdminBookingsPage() {
         cell: ({ row }) => {
           const b = row.original;
           return (
-            <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", minWidth: "150px" }}>
               <button
                 type="button"
                 onClick={() => openDetail(b)}
                 style={{
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  background: "var(--primary-surface)",
+                  padding: "7px 12px",
+                  borderRadius: "8px",
+                  background: "rgba(0, 119, 182, 0.08)",
                   color: "var(--primary-ocean)",
-                  border: "none",
+                  border: "1px solid rgba(0, 119, 182, 0.2)",
                   cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "4px",
-                  fontSize: "0.78rem",
+                  gap: "6px",
+                  fontSize: "0.8rem",
                   fontWeight: 600,
                 }}
                 title="Lihat Detail & WhatsApp"
@@ -413,36 +431,39 @@ export default function AdminBookingsPage() {
                 target="_blank"
                 rel="noreferrer"
                 style={{
-                  padding: "6px",
-                  borderRadius: "6px",
-                  background: "rgba(37, 211, 102, 0.15)",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  background: "rgba(37, 211, 102, 0.12)",
                   color: "#15803d",
+                  border: "1px solid rgba(37, 211, 102, 0.3)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
                 title="Kirim Pesan WhatsApp"
               >
-                <MessageCircle size={15} />
+                <MessageCircle size={16} />
               </a>
 
               <button
                 type="button"
                 onClick={() => setDeleteTarget(b)}
                 style={{
-                  padding: "6px",
-                  borderRadius: "6px",
-                  background: "#fee2e2",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  background: "rgba(239, 68, 68, 0.08)",
                   color: "#b91c1c",
-                  border: "none",
-                  cursor: "pointer",
+                  border: "1px solid rgba(239, 68, 68, 0.2)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  cursor: "pointer",
                 }}
                 title="Hapus Reservasi"
               >
-                <Trash2 size={14} />
+                <Trash2 size={15} />
               </button>
             </div>
           );

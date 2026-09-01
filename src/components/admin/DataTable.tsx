@@ -102,13 +102,25 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* Table Toolbar if enableSearch or View Options */}
       {enableSearch && !globalFilterValue && (
-        <div className="flex items-center justify-between gap-3">
-          <div className="relative max-w-sm flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94a3b8]" />
-            <Input
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+          <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
+            <Search
+              size={17}
+              style={{
+                position: "absolute",
+                left: "14px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#94a3b8",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            />
+            <input
+              type="text"
               placeholder={searchPlaceholder}
               value={
                 searchColumnId
@@ -122,7 +134,28 @@ export function DataTable<TData, TValue>({
                   setInternalGlobalFilter(event.target.value)
                 }
               }}
-              className="pl-9 h-9 text-xs sm:text-sm bg-white"
+              style={{
+                width: "100%",
+                height: "42px",
+                paddingLeft: "42px",
+                paddingRight: "14px",
+                fontSize: "0.88rem",
+                backgroundColor: "#ffffff",
+                border: "1.5px solid var(--border-light)",
+                borderRadius: "10px",
+                outline: "none",
+                color: "var(--text-main)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+                transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "var(--primary-ocean)"
+                e.target.style.boxShadow = "0 0 0 3px rgba(0, 119, 182, 0.12)"
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "var(--border-light)"
+                e.target.style.boxShadow = "0 1px 3px rgba(0,0,0,0.03)"
+              }}
             />
           </div>
           <DataTableViewOptions table={table} columnLabels={columnLabels} />
@@ -130,7 +163,15 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Main Table Container */}
-      <div className="rounded-xl border border-[#e2e8f0] bg-white shadow-sm overflow-hidden">
+      <div
+        style={{
+          borderRadius: "14px",
+          border: "1.5px solid var(--border-light)",
+          backgroundColor: "#ffffff",
+          boxShadow: "0 4px 20px rgba(0, 50, 100, 0.04)",
+          overflow: "hidden",
+        }}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -155,9 +196,9 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center"
+                  className="h-40 text-center"
                 >
-                  <div className="flex items-center justify-center gap-2 text-[#0077b6]">
+                  <div className="flex items-center justify-center gap-2.5 text-[#0077b6]">
                     <Loader2 className="h-5 w-5 animate-spin" />
                     <span className="text-sm font-medium">Memuat data...</span>
                   </div>
@@ -183,7 +224,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-32 text-center text-[#64748b] text-sm"
+                  className="h-40 text-center text-slate-500 text-sm"
                 >
                   {emptyMessage}
                 </TableCell>

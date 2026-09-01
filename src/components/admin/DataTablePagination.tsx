@@ -6,15 +6,6 @@ import {
   ChevronsRight,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
   pageSizeOptions?: number[]
@@ -29,82 +20,146 @@ export function DataTablePagination<TData>({
   const pageSize = table.getState().pagination.pageSize
   const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1
   const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
+  const pageCount = table.getPageCount() === 0 ? 1 : table.getPageCount()
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-4 border-t border-[#e2e8f0] bg-white">
-      <div className="text-xs text-[#64748b]">
-        Menampilkan <strong className="text-[#0a2540]">{startRow}</strong> -{" "}
-        <strong className="text-[#0a2540]">{endRow}</strong> dari{" "}
-        <strong className="text-[#0a2540]">{totalRows}</strong> data
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "16px 24px",
+        borderTop: "1.5px solid var(--border-light)",
+        backgroundColor: "#f8fafc",
+        flexWrap: "wrap",
+        gap: "16px",
+        fontSize: "0.82rem",
+        color: "var(--text-muted)",
+      }}
+    >
+      <div>
+        Menampilkan <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{startRow}</strong> -{" "}
+        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{endRow}</strong> dari{" "}
+        <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{totalRows}</strong> data
       </div>
-      <div className="flex items-center gap-4 sm:gap-6">
-        <div className="flex items-center space-x-2">
-          <p className="text-xs text-[#64748b] whitespace-nowrap">Baris per hal:</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
+
+      <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span>Baris per hal:</span>
+          <select
+            value={pageSize}
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            style={{
+              padding: "5px 10px",
+              borderRadius: "6px",
+              border: "1px solid var(--border-light)",
+              background: "#ffffff",
+              fontSize: "0.82rem",
+              fontWeight: 600,
+              color: "var(--primary-deep)",
+              cursor: "pointer",
+              outline: "none",
             }}
           >
-            <SelectTrigger className="h-8 w-[70px] text-xs">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={`${size}`} className="text-xs">
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {pageSizeOptions.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex items-center text-xs text-[#64748b] whitespace-nowrap">
-          Hal <strong className="text-[#0a2540] mx-1">{pageIndex + 1}</strong> dari{" "}
-          <strong className="text-[#0a2540] ml-1">
-            {table.getPageCount() === 0 ? 1 : table.getPageCount()}
-          </strong>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span>Halaman</span>
+          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{pageIndex + 1}</strong>
+          <span>dari</span>
+          <strong style={{ color: "var(--primary-deep)", fontWeight: 700 }}>{pageCount}</strong>
         </div>
-        <div className="flex items-center space-x-1">
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <button
+            type="button"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              border: "1px solid var(--border-light)",
+              background: table.getCanPreviousPage() ? "#ffffff" : "#f1f5f9",
+              color: table.getCanPreviousPage() ? "var(--primary-deep)" : "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: table.getCanPreviousPage() ? "pointer" : "not-allowed",
+            }}
             title="Halaman Pertama"
           >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
+            <ChevronsLeft size={16} />
+          </button>
+
+          <button
+            type="button"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              border: "1px solid var(--border-light)",
+              background: table.getCanPreviousPage() ? "#ffffff" : "#f1f5f9",
+              color: table.getCanPreviousPage() ? "var(--primary-deep)" : "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: table.getCanPreviousPage() ? "pointer" : "not-allowed",
+            }}
             title="Halaman Sebelumnya"
           >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
+            <ChevronLeft size={16} />
+          </button>
+
+          <button
+            type="button"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              border: "1px solid var(--border-light)",
+              background: table.getCanNextPage() ? "#ffffff" : "#f1f5f9",
+              color: table.getCanNextPage() ? "var(--primary-deep)" : "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: table.getCanNextPage() ? "pointer" : "not-allowed",
+            }}
             title="Halaman Berikutnya"
           >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            <ChevronRight size={16} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => table.setPageIndex(pageCount - 1)}
             disabled={!table.getCanNextPage()}
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "6px",
+              border: "1px solid var(--border-light)",
+              background: table.getCanNextPage() ? "#ffffff" : "#f1f5f9",
+              color: table.getCanNextPage() ? "var(--primary-deep)" : "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: table.getCanNextPage() ? "pointer" : "not-allowed",
+            }}
             title="Halaman Terakhir"
           >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="h-4 w-4" />
-          </Button>
+            <ChevronsRight size={16} />
+          </button>
         </div>
       </div>
     </div>

@@ -149,33 +149,36 @@ export default function AdminTestimonialsPage() {
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '200px' }}>
               {item.avatarUrl ? (
                 <img
                   src={item.avatarUrl}
                   alt={item.name}
-                  style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                  style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border-light)' }}
                 />
               ) : (
                 <div
                   style={{
-                    width: '38px',
-                    height: '38px',
+                    width: '42px',
+                    height: '42px',
                     borderRadius: '50%',
-                    background: 'var(--primary-surface)',
+                    background: 'rgba(0, 119, 182, 0.08)',
                     color: 'var(--primary-ocean)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 700,
+                    fontSize: '1rem',
+                    flexShrink: 0,
+                    border: '1px solid rgba(0, 119, 182, 0.2)',
                   }}
                 >
-                  {item.name ? item.name.charAt(0) : '?'}
+                  {item.name ? item.name.charAt(0).toUpperCase() : '?'}
                 </div>
               )}
               <div>
-                <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem' }}>{item.name}</strong>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.origin}</div>
+                <strong style={{ color: 'var(--primary-deep)', fontSize: '0.92rem', display: 'block' }}>{item.name}</strong>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>{item.origin}</div>
               </div>
             </div>
           );
@@ -187,9 +190,22 @@ export default function AdminTestimonialsPage() {
           <DataTableColumnHeader column={column} title="Asal & Paket" />
         ),
         cell: ({ row }) => (
-          <span style={{ fontSize: '0.82rem', color: 'var(--primary-ocean)', fontWeight: 600 }}>
-            {row.getValue('tripType') || 'Snorkeling Trip'}
-          </span>
+          <div style={{ minWidth: '160px' }}>
+            <span
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                color: 'var(--primary-ocean)',
+                background: 'rgba(0, 119, 182, 0.06)',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px solid rgba(0, 119, 182, 0.15)',
+                display: 'inline-block',
+              }}
+            >
+              {row.getValue('tripType') || 'Snorkeling Trip'}
+            </span>
+          </div>
         ),
       },
       {
@@ -198,9 +214,9 @@ export default function AdminTestimonialsPage() {
           <DataTableColumnHeader column={column} title="Rating" />
         ),
         cell: ({ row }) => (
-          <div style={{ display: 'flex', gap: '2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '3px', minWidth: '120px' }}>
             {[...Array(Number(row.getValue('rating')) || 5)].map((_, i) => (
-              <Star key={i} size={14} fill="var(--accent-gold)" color="var(--accent-gold)" />
+              <Star key={i} size={15} fill="#ffb703" color="#ffb703" />
             ))}
           </div>
         ),
@@ -213,9 +229,11 @@ export default function AdminTestimonialsPage() {
         cell: ({ row }) => {
           const text = (row.getValue('contentId') as string) || '';
           return (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4, maxWidth: '320px' }}>
-              "{text.length > 90 ? text.slice(0, 90) + '...' : text}"
-            </p>
+            <div style={{ minWidth: '300px', maxWidth: '460px' }}>
+              <p style={{ fontSize: '0.86rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.55, fontStyle: 'italic' }}>
+                "{text}"
+              </p>
+            </div>
           );
         },
       },
@@ -226,21 +244,21 @@ export default function AdminTestimonialsPage() {
         cell: ({ row }) => {
           const item = row.original;
           return (
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', minWidth: '130px' }}>
               <button
                 type="button"
                 onClick={() => openEditModal(item)}
                 style={{
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  background: 'var(--primary-surface)',
+                  padding: '7px 12px',
+                  borderRadius: '8px',
+                  background: 'rgba(0, 119, 182, 0.08)',
                   color: 'var(--primary-ocean)',
-                  border: 'none',
+                  border: '1px solid rgba(0, 119, 182, 0.2)',
                   cursor: 'pointer',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '0.78rem',
+                  gap: '6px',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                 }}
               >
@@ -251,19 +269,20 @@ export default function AdminTestimonialsPage() {
                 type="button"
                 onClick={() => setDeleteTarget(item)}
                 style={{
-                  padding: '6px',
-                  borderRadius: '6px',
-                  background: '#fee2e2',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.08)',
                   color: '#b91c1c',
-                  border: 'none',
-                  cursor: 'pointer',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  cursor: 'pointer',
                 }}
                 title="Hapus Testimoni"
               >
-                <Trash2 size={14} />
+                <Trash2 size={15} />
               </button>
             </div>
           );

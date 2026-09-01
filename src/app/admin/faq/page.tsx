@@ -163,11 +163,13 @@ export default function AdminFaqPage() {
         cell: ({ row }) => {
           const f = row.original;
           return (
-            <div style={{ maxWidth: '300px' }}>
-              <strong style={{ color: 'var(--primary-deep)', fontSize: '0.9rem', display: 'block' }}>
+            <div style={{ minWidth: "260px", maxWidth: "340px" }}>
+              <strong style={{ color: "var(--primary-deep)", fontSize: "0.92rem", display: "block", lineHeight: 1.45 }}>
                 {f.questionId}
               </strong>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{f.questionEn}</span>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block", marginTop: "4px", lineHeight: 1.4 }}>
+                {f.questionEn}
+              </span>
             </div>
           );
         },
@@ -180,9 +182,11 @@ export default function AdminFaqPage() {
         cell: ({ row }) => {
           const ans = (row.getValue('answerId') as string) || '';
           return (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.45, maxWidth: '360px' }}>
-              {ans.length > 100 ? ans.slice(0, 100) + '...' : ans}
-            </p>
+            <div style={{ minWidth: "320px", maxWidth: "480px" }}>
+              <p style={{ fontSize: "0.86rem", color: "var(--text-main)", margin: 0, lineHeight: 1.55 }}>
+                {ans}
+              </p>
+            </div>
           );
         },
       },
@@ -194,9 +198,24 @@ export default function AdminFaqPage() {
         cell: ({ row }) => {
           const cat = (row.getValue('category') as string) || 'General';
           return (
-            <span className="section-badge" style={{ fontSize: '0.72rem', padding: '3px 8px', margin: 0, textTransform: 'capitalize' }}>
-              {cat}
-            </span>
+            <div style={{ minWidth: "120px" }}>
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  padding: "4px 10px",
+                  borderRadius: "12px",
+                  background: "rgba(0, 119, 182, 0.08)",
+                  color: "var(--primary-ocean)",
+                  border: "1px solid rgba(0, 119, 182, 0.2)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                  display: "inline-block",
+                }}
+              >
+                {cat}
+              </span>
+            </div>
           );
         },
       },
@@ -207,21 +226,21 @@ export default function AdminFaqPage() {
         cell: ({ row }) => {
           const f = row.original;
           return (
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', minWidth: '130px' }}>
               <button
                 type="button"
                 onClick={() => openEditModal(f)}
                 style={{
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  background: 'var(--primary-surface)',
+                  padding: '7px 12px',
+                  borderRadius: '8px',
+                  background: 'rgba(0, 119, 182, 0.08)',
                   color: 'var(--primary-ocean)',
-                  border: 'none',
+                  border: '1px solid rgba(0, 119, 182, 0.2)',
                   cursor: 'pointer',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '0.78rem',
+                  gap: '6px',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                 }}
               >
@@ -232,19 +251,20 @@ export default function AdminFaqPage() {
                 type="button"
                 onClick={() => setDeleteTarget(f)}
                 style={{
-                  padding: '6px',
-                  borderRadius: '6px',
-                  background: '#fee2e2',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.08)',
                   color: '#b91c1c',
-                  border: 'none',
-                  cursor: 'pointer',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  cursor: 'pointer',
                 }}
                 title="Hapus FAQ"
               >
-                <Trash2 size={14} />
+                <Trash2 size={15} />
               </button>
             </div>
           );

@@ -478,16 +478,18 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "220px" }}>
               <img
                 src={pkg.imageUrl}
                 alt={pkg.nameId}
                 style={{
-                  width: "56px",
-                  height: "42px",
-                  borderRadius: "6px",
+                  width: "64px",
+                  height: "46px",
+                  borderRadius: "8px",
                   objectFit: "cover",
                   flexShrink: 0,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                  border: "1px solid var(--border-light)",
                 }}
               />
               <div>
@@ -499,18 +501,19 @@ export default function AdminPackagesPage() {
                     <span
                       style={{
                         fontSize: "0.68rem",
-                        padding: "1px 6px",
-                        borderRadius: "var(--radius-full)",
+                        padding: "2px 8px",
+                        borderRadius: "12px",
                         background: "#fef3c7",
                         color: "#b45309",
                         fontWeight: 700,
+                        border: "1px solid #fde68a",
                       }}
                     >
                       {pkg.tagId || pkg.tagEn}
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block" }}>
+                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", display: "block", marginTop: "3px" }}>
                   {pkg.nameEn}
                 </span>
               </div>
@@ -526,29 +529,31 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                <strong style={{ color: "var(--primary-ocean)", fontSize: "0.92rem" }}>
+            <div style={{ minWidth: "180px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <strong style={{ color: "var(--primary-ocean)", fontSize: "0.95rem", whiteSpace: "nowrap" }}>
                   Rp {pkg.price?.toLocaleString("id-ID")}
                 </strong>
                 <span
                   style={{
                     fontSize: "0.72rem",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
+                    padding: "3px 8px",
+                    borderRadius: "6px",
                     background: pkg.priceUnit === "per_boat" ? "#ede9fe" : "#e0f2fe",
                     color: pkg.priceUnit === "per_boat" ? "#6d28d9" : "#0369a1",
                     fontWeight: 700,
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
+                    border: pkg.priceUnit === "per_boat" ? "1px solid #ddd6fe" : "1px solid #bae6fd",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {pkg.priceUnit === "per_boat" ? <Ship size={12} /> : <User size={12} />}
                   <span>{pkg.priceUnit === "per_boat" ? "Per Boat" : "Per Orang"}</span>
                 </span>
               </div>
-              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "2px" }}>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px", whiteSpace: "nowrap" }}>
                 ${pkg.priceUsd} USD {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
               </div>
             </div>
@@ -563,9 +568,9 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div>
-              <div style={{ fontSize: "0.85rem", fontWeight: 600 }}>{pkg.durationId}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+            <div style={{ minWidth: "140px" }}>
+              <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--primary-deep)" }}>{pkg.durationId}</div>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "3px" }}>
                 {pkg.scheduleId}
               </div>
             </div>
@@ -580,11 +585,11 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div>
-              <div style={{ fontSize: "0.78rem", color: "var(--text-main)" }}>
-                <strong>{Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0} Spot</strong> Destinasi
+            <div style={{ minWidth: "140px" }}>
+              <div style={{ fontSize: "0.82rem", color: "var(--text-main)" }}>
+                <strong style={{ color: "var(--primary-deep)" }}>{Array.isArray(pkg.spotsId) ? pkg.spotsId.length : 0} Spot</strong> Destinasi
               </div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+              <div style={{ fontSize: "0.76rem", color: "var(--text-muted)", marginTop: "2px" }}>
                 {Array.isArray(pkg.includesId) ? pkg.includesId.length : 0} Fasilitas Include
               </div>
             </div>
@@ -599,25 +604,30 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <button
-              type="button"
-              onClick={() => handleQuickToggleFeatured(pkg)}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                color: pkg.isFeatured ? "#d97706" : "var(--text-muted)",
-                fontSize: "0.8rem",
-                fontWeight: 600,
-              }}
-              title="Klik untuk toggle Featured"
-            >
-              <Star size={16} fill={pkg.isFeatured ? "#ffb703" : "none"} />
-              <span>{pkg.isFeatured ? "Ya" : "Tidak"}</span>
-            </button>
+            <div style={{ minWidth: "90px" }}>
+              <button
+                type="button"
+                onClick={() => handleQuickToggleFeatured(pkg)}
+                style={{
+                  background: pkg.isFeatured ? "#fef3c7" : "#f1f5f9",
+                  color: pkg.isFeatured ? "#b45309" : "var(--text-muted)",
+                  border: pkg.isFeatured ? "1px solid #fde68a" : "1px solid #e2e8f0",
+                  padding: "5px 10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                }}
+                title="Klik untuk toggle Featured"
+              >
+                <Star size={14} fill={pkg.isFeatured ? "#ffb703" : "none"} color={pkg.isFeatured ? "#b45309" : "#94a3b8"} />
+                <span>{pkg.isFeatured ? "Ya" : "Tidak"}</span>
+              </button>
+            </div>
           );
         },
       },
@@ -629,22 +639,25 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <button
-              type="button"
-              onClick={() => handleQuickToggleActive(pkg)}
-              style={{
-                padding: "4px 10px",
-                borderRadius: "var(--radius-full)",
-                border: "none",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                cursor: "pointer",
-                background: pkg.isActive ? "#d1fae5" : "#fee2e2",
-                color: pkg.isActive ? "#065f46" : "#b91c1c",
-              }}
-            >
-              {pkg.isActive ? "● Aktif" : "○ Nonaktif"}
-            </button>
+            <div style={{ minWidth: "100px" }}>
+              <button
+                type="button"
+                onClick={() => handleQuickToggleActive(pkg)}
+                style={{
+                  padding: "5px 12px",
+                  borderRadius: "20px",
+                  border: pkg.isActive ? "1px solid #a7f3d0" : "1px solid #fecaca",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  background: pkg.isActive ? "#d1fae5" : "#fee2e2",
+                  color: pkg.isActive ? "#065f46" : "#b91c1c",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {pkg.isActive ? "● Aktif" : "○ Nonaktif"}
+              </button>
+            </div>
           );
         },
       },
@@ -655,21 +668,22 @@ export default function AdminPackagesPage() {
         cell: ({ row }) => {
           const pkg = row.original;
           return (
-            <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", minWidth: "180px" }}>
               <button
                 type="button"
                 onClick={() => handleDuplicate(pkg)}
                 style={{
-                  padding: "6px 8px",
-                  borderRadius: "6px",
+                  padding: "7px 10px",
+                  borderRadius: "8px",
                   background: "#f1f5f9",
                   color: "var(--text-main)",
                   border: "1px solid var(--border-light)",
                   cursor: "pointer",
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
                   gap: "4px",
                   fontSize: "0.78rem",
+                  fontWeight: 600,
                 }}
                 title="Duplikasi Paket Ini"
               >
@@ -681,16 +695,16 @@ export default function AdminPackagesPage() {
                 type="button"
                 onClick={() => openEditModal(pkg)}
                 style={{
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  background: "var(--primary-surface)",
+                  padding: "7px 12px",
+                  borderRadius: "8px",
+                  background: "rgba(0, 119, 182, 0.08)",
                   color: "var(--primary-ocean)",
-                  border: "none",
+                  border: "1px solid rgba(0, 119, 182, 0.2)",
                   cursor: "pointer",
-                  display: "flex",
+                  display: "inline-flex",
                   alignItems: "center",
-                  gap: "4px",
-                  fontSize: "0.78rem",
+                  gap: "6px",
+                  fontSize: "0.8rem",
                   fontWeight: 600,
                 }}
               >
@@ -702,19 +716,20 @@ export default function AdminPackagesPage() {
                 type="button"
                 onClick={() => setDeleteTarget(pkg)}
                 style={{
-                  padding: "6px",
-                  borderRadius: "6px",
-                  background: "#fee2e2",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "8px",
+                  background: "rgba(239, 68, 68, 0.08)",
                   color: "#b91c1c",
-                  border: "none",
-                  cursor: "pointer",
+                  border: "1px solid rgba(239, 68, 68, 0.2)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  cursor: "pointer",
                 }}
                 title="Hapus Paket"
               >
-                <Trash2 size={14} />
+                <Trash2 size={15} />
               </button>
             </div>
           );
