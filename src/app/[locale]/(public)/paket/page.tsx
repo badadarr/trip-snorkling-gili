@@ -4,7 +4,7 @@ import CtaBanner from '@/components/public/CtaBanner';
 import { getPackagesList, getSettings } from '@/lib/data';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { Waves, Compass, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Waves, Compass, MessageCircle, ArrowLeft, Users, Ship, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +16,12 @@ export default async function PackagesPage() {
   const whatsappNumber = waSetting?.value || '6287864551234';
 
   const activePackages = allPackages.filter((p) => p.isActive);
+
+  const isPrivate = (pkg: any) =>
+    pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000);
+
+  const publicPackages = activePackages.filter((p) => !isPrivate(p));
+  const privatePackages = activePackages.filter((p) => isPrivate(p));
 
   return (
     <div>
@@ -43,14 +49,86 @@ export default async function PackagesPage() {
         </div>
       </section>
 
-      {/* Packages Grid or Empty State */}
+      {/* Packages Section */}
       <section className="section">
         <div className="container">
           {activePackages.length > 0 ? (
-            <div className="grid-3">
-              {activePackages.map((pkg) => (
-                <PackageCard key={pkg.id} pkg={pkg} />
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '64px' }}>
+              {/* 1. Public Packages Section */}
+              {publicPackages.length > 0 && (
+                <div>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--primary-surface)',
+                        color: 'var(--primary-ocean)',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        marginBottom: '12px',
+                        border: '1px solid rgba(0, 180, 216, 0.25)',
+                      }}
+                    >
+                      <Users size={14} />
+                      <span>{t('packages.publicBadge')}</span>
+                    </div>
+                    <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--primary-deep)', marginBottom: '8px' }}>
+                      {t('packages.publicSectionTitle')}
+                    </h2>
+                    <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '620px', lineHeight: 1.6 }}>
+                      {t('packages.publicSectionSubtitle')}
+                    </p>
+                  </div>
+
+                  <div className="grid-3">
+                    {publicPackages.map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Private Packages Section */}
+              {privatePackages.length > 0 && (
+                <div>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: 'var(--radius-full)',
+                        background: '#fef3c7',
+                        color: '#b45309',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        marginBottom: '12px',
+                        border: '1px solid #fde68a',
+                      }}
+                    >
+                      <Ship size={14} />
+                      <span>{t('packages.privateBadge')}</span>
+                    </div>
+                    <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--primary-deep)', marginBottom: '8px' }}>
+                      {t('packages.privateSectionTitle')}
+                    </h2>
+                    <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '620px', lineHeight: 1.6 }}>
+                      {t('packages.privateSectionSubtitle')}
+                    </p>
+                  </div>
+
+                  <div className="grid-3">
+                    {privatePackages.map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div

@@ -623,7 +623,7 @@ export default function AdminPackagesPage() {
                     <User size={12} />
                   )}
                   <span>
-                    {pkg.priceUnit === "per_boat" ? "Per Boat" : "Per Orang"}
+                    {pkg.priceUnit === "per_boat" ? "Private (Maks 4)" : "Per Orang"}
                   </span>
                 </span>
               </div>
@@ -636,7 +636,7 @@ export default function AdminPackagesPage() {
                 }}
               >
                 ${pkg.priceUsd} USD{" "}
-                {pkg.priceUnit === "per_boat" ? "/ boat" : "/ person"}
+                {pkg.priceUnit === "per_boat" ? "/ private" : "/ person"}
               </div>
             </div>
           );
@@ -1397,7 +1397,7 @@ export default function AdminPackagesPage() {
                           marginTop: "2px",
                         }}
                       >
-                        Tarif dikalikan jumlah peserta (Public Sharing Trip).
+                        Tarif per orang, Public Sharing Trip (Jadwal Pagi/Siang).
                       </span>
                     </div>
                   </label>
@@ -1441,7 +1441,7 @@ export default function AdminPackagesPage() {
                         }}
                       >
                         <Ship size={15} color="var(--primary-ocean)" />
-                        <span>Per Perahu (Per Boat / Private)</span>
+                        <span>Private Trip (Maks. 4 Pax)</span>
                       </strong>
                       <span
                         style={{
@@ -1452,7 +1452,7 @@ export default function AdminPackagesPage() {
                           marginTop: "2px",
                         }}
                       >
-                        Harga flat rombongan satu perahu (Private Boat).
+                        Harga flat private trip (maksimal 4 orang, extra charge jika lebih).
                       </span>
                     </div>
                   </label>

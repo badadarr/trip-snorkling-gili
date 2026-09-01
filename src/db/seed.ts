@@ -69,6 +69,7 @@ export async function seedDatabase(dbUrl?: string) {
           spotsId: pkg.spotsId,
           spotsEn: pkg.spotsEn,
           imageUrl: pkg.imageUrl,
+          priceUnit: (pkg as any).priceUnit || 'per_person',
           isFeatured: pkg.isFeatured,
           isActive: pkg.isActive,
           orderIndex: pkg.orderIndex,

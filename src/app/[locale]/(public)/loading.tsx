@@ -45,7 +45,7 @@ export default function Loading() {
           Loading Marine Adventure...
         </h3>
         <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-          Preparing the finest 3 Gili snorkeling tours for you
+          Preparing the finest 3 Gili package tours for you
         </p>
       </div>
 

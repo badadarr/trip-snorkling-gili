@@ -9,7 +9,7 @@ import CtaBanner from '@/components/public/CtaBanner';
 import { getHero, getPackagesList, getGalleryList, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
 import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
-import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle, Ship, CheckCircle2, Clock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +25,20 @@ export default async function HomePage() {
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6287864551234';
 
-  const featuredPackages = allPackages.filter((p) => p.isActive);
+  const activePackages = allPackages.filter((p) => p.isActive);
+
+  const isPrivate = (pkg: any) =>
+    pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000);
+
+  const publicPackages = activePackages.filter((p) => !isPrivate(p));
+  const privatePackages = activePackages.filter((p) => isPrivate(p));
 
   return (
     <>
       {/* 1. Hero Section */}
       <HeroSection heroData={heroData} />
 
-      {/* 2. Featured Packages Section */}
+      {/* 2. Featured Packages Section with Public & Private Categories */}
       <section className="section" id="packages">
         <div className="container">
           <div className="section-header">
@@ -46,21 +52,95 @@ export default async function HomePage() {
             </p>
           </div>
 
-          {featuredPackages.length > 0 ? (
-            <>
-              <div className="grid-3">
-                {featuredPackages.map((pkg) => (
-                  <PackageCard key={pkg.id} pkg={pkg} />
-                ))}
-              </div>
+          {activePackages.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
+              {/* Public Packages */}
+              {publicPackages.length > 0 && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 12px',
+                          borderRadius: 'var(--radius-full)',
+                          background: 'var(--primary-surface)',
+                          color: 'var(--primary-ocean)',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          marginBottom: '8px',
+                          border: '1px solid rgba(0, 180, 216, 0.25)',
+                        }}
+                      >
+                        <Users size={13} />
+                        <span>{t('packages.publicBadge')}</span>
+                      </div>
+                      <h3 style={{ fontSize: '1.45rem', color: 'var(--primary-deep)', margin: 0 }}>
+                        {t('packages.publicSectionTitle')}
+                      </h3>
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      Fixed schedule: Morning & Afternoon
+                    </span>
+                  </div>
 
-              <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                  <div className="grid-3">
+                    {publicPackages.slice(0, 3).map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Private Packages */}
+              {privatePackages.length > 0 && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 12px',
+                          borderRadius: 'var(--radius-full)',
+                          background: '#fef3c7',
+                          color: '#b45309',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          marginBottom: '8px',
+                          border: '1px solid #fde68a',
+                        }}
+                      >
+                        <Ship size={13} />
+                        <span>{t('packages.privateBadge')}</span>
+                      </div>
+                      <h3 style={{ fontSize: '1.45rem', color: 'var(--primary-deep)', margin: 0 }}>
+                        {t('packages.privateSectionTitle')}
+                      </h3>
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
+                      Max. 4 Pax • Flexible Schedule
+                    </span>
+                  </div>
+
+                  <div className="grid-3">
+                    {privatePackages.slice(0, 3).map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
                 <Link href="/paket" className="btn btn-secondary btn-lg">
                   <span>{t('packages.viewAllPackages')}</span>
                   <ArrowRight size={18} />
                 </Link>
               </div>
-            </>
+            </div>
           ) : (
             <div
               className="glass-card"
@@ -109,6 +189,111 @@ export default async function HomePage() {
               </div>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* 2b. Public vs Private Comparison Section */}
+      <section className="section section-alt" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
+        <div className="container">
+          <div className="section-header">
+            <div className="section-badge">
+              <Compass size={14} />
+              <span>GUIDE</span>
+            </div>
+            <h2 className="section-title">{t('packages.privateVsPublicTitle')}</h2>
+            <p className="section-subtitle">
+              {t('packages.privateVsPublicSubtitle')}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
+            {/* Public Option */}
+            <div
+              className="glass-card"
+              style={{
+                padding: '32px 28px',
+                border: '1px solid var(--border-light)',
+                borderRadius: 'var(--radius-lg)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Users size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', margin: 0 }}>
+                    {t('packages.compPublicTitle')}
+                  </h3>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--primary-ocean)', fontWeight: 600 }}>
+                    Budget-Friendly & Social
+                  </span>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '20px' }}>
+                {t('packages.compPublicDesc')}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: 'var(--text-main)', marginTop: 'auto', paddingTop: '16px', borderTop: '1px dashed var(--border-light)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Affordable rate charged per person</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Fixed schedule: Morning & Afternoon</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Ideal for solo travelers & couples</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Private Option */}
+            <div
+              className="glass-card"
+              style={{
+                padding: '32px 28px',
+                border: '2px solid #fde68a',
+                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(254, 243, 199, 0.25) 100%)',
+                borderRadius: 'var(--radius-lg)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ship size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', color: 'var(--primary-deep)', margin: 0 }}>
+                    {t('packages.compPrivateTitle')}
+                  </h3>
+                  <span style={{ fontSize: '0.8rem', color: '#b45309', fontWeight: 600 }}>
+                    Exclusive & Flexible
+                  </span>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '20px' }}>
+                {t('packages.compPrivateDesc')}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: 'var(--text-main)', marginTop: 'auto', paddingTop: '16px', borderTop: '1px dashed #fde68a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Exclusive private boat (Max. 4 Pax)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Custom & flexible departure timing</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span>Ideal for families & private groups</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

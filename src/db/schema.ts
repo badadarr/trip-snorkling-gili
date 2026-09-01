@@ -102,6 +102,8 @@ export const bookings = pgTable('bookings', {
   specialRequests: text('special_requests'),
   totalPriceIdr: integer('total_price_idr').notNull(),
   totalPriceUsd: doublePrecision('total_price_usd'),
+  paymentMethod: text('payment_method'), // 'qris' | 'bank_transfer'
+  paymentProofUrl: text('payment_proof_url'),
   status: text('status').default('pending'), // pending, confirmed, completed, cancelled
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

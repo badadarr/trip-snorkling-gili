@@ -33,6 +33,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
   const schedule = pkg.scheduleEn || pkg.scheduleId || '09:30 AM & 01:00 PM';
   const includes = (pkg.includesEn && pkg.includesEn.length > 0) ? pkg.includesEn : (pkg.includesId || []);
   const spots = (pkg.spotsEn && pkg.spotsEn.length > 0) ? pkg.spotsEn : (pkg.spotsId || []);
+  const isPrivate = pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000);
 
   return (
     <div>
@@ -57,12 +58,30 @@ export default async function PackageDetailPage({ params }: PageProps) {
           </div>
 
           <div style={{ maxWidth: '820px' }}>
-            {tag && (
-              <div className="section-badge badge-gold" style={{ display: 'inline-flex', marginBottom: '16px' }}>
-                <Sparkles size={14} />
-                <span>{tag}</span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-full)',
+                  background: isPrivate ? '#fef3c7' : 'rgba(255, 255, 255, 0.2)',
+                  color: isPrivate ? '#92400e' : '#ffffff',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  backdropFilter: 'blur(4px)',
+                }}
+              >
+                <span>{isPrivate ? t('packages.privateBadge') : t('packages.publicBadge')}</span>
               </div>
-            )}
+              {tag && (
+                <div className="section-badge badge-gold" style={{ display: 'inline-flex' }}>
+                  <Sparkles size={14} />
+                  <span>{tag}</span>
+                </div>
+              )}
+            </div>
             <h1 style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)', color: '#ffffff', lineHeight: 1.2, marginBottom: '16px' }}>
               {name}
             </h1>
@@ -215,9 +234,26 @@ export default async function PackageDetailPage({ params }: PageProps) {
                   </span>
                 </div>
 
-                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: isPrivate ? '10px' : '24px' }}>
                   approx. {formatIdr(pkg.price)}
                 </div>
+
+                {isPrivate && (
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      background: '#fffbeb',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid #fde68a',
+                      fontSize: '0.78rem',
+                      color: '#b45309',
+                      marginBottom: '20px',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    💡 Max. 4 Pax. Additional charges apply for more than 4 guests.
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
                   <Link href={`/booking?package=${pkg.slug}`} className="btn btn-primary btn-lg" style={{ width: '100%' }}>

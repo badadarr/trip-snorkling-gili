@@ -22,7 +22,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trip-snorkling-gil
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    default: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Package Tours',
     template: '%s | Gili Trawangan Snorkeling Trip',
   },
   description: 'Licensed premier snorkeling trip provider in Gili Trawangan, Gili Meno, and Gili Air. Swim with sea turtles at Turtle Point, underwater Bask Nest statues, Blue Coral reefs, free GoPro HD photo & video documentation.',
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Package Tours',
     description: 'Swim with sea turtles at Turtle Point & underwater Bask Nest statues. Free GoPro HD photos & videos included.',
     url: SITE_URL,
     siteName: 'Gili Trawangan Snorkeling Trip',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Snorkeling Tours',
+    title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Package Tours',
     description: 'Swim with sea turtles at Turtle Point & underwater statues. Free GoPro HD photos & videos.',
     images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop'],
   },

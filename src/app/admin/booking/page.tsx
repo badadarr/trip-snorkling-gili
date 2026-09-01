@@ -373,18 +373,53 @@ export default function AdminBookingsPage() {
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Total Biaya" />
         ),
-        cell: ({ row }) => (
-          <div style={{ minWidth: "130px", whiteSpace: "nowrap" }}>
-            <strong
-              style={{ color: "var(--primary-ocean)", fontSize: "0.95rem" }}
-            >
-              Rp{" "}
-              {(row.getValue("totalPriceIdr") as number)?.toLocaleString(
-                "id-ID",
-              )}
-            </strong>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const b = row.original;
+          return (
+            <div style={{ minWidth: "130px", whiteSpace: "nowrap" }}>
+              <strong
+                style={{ color: "var(--primary-ocean)", fontSize: "0.95rem" }}
+              >
+                Rp{" "}
+                {(row.getValue("totalPriceIdr") as number)?.toLocaleString(
+                  "id-ID",
+                )}
+              </strong>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  marginTop: "3px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "var(--text-muted)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {b.paymentMethod === "bank_transfer" ? "Bank Transfer" : "QRIS"}
+                </span>
+                {b.paymentProofUrl && (
+                  <span
+                    style={{
+                      fontSize: "0.68rem",
+                      background: "#dcfce7",
+                      color: "#15803d",
+                      padding: "1px 5px",
+                      borderRadius: "4px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Bukti ✓
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "status",

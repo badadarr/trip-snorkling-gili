@@ -55,7 +55,7 @@ export default function NotFound() {
           </Link>
           <Link href="/paket" className="btn btn-secondary">
             <Sparkles size={16} />
-            <span>View Snorkeling Packages</span>
+            <span>View Tour Packages</span>
           </Link>
         </div>
       </div>

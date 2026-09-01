@@ -13,6 +13,11 @@ import {
   Edit2,
   Loader2,
   RotateCcw,
+  CreditCard,
+  QrCode,
+  Building2,
+  ExternalLink,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,6 +36,8 @@ interface BookingItem {
   specialRequests?: string;
   totalPriceIdr: number;
   totalPriceUsd?: number;
+  paymentMethod?: string;
+  paymentProofUrl?: string;
   status: string;
   createdAt?: string;
 }
@@ -529,6 +536,131 @@ export default function BookingDetailModal({
                   >
                     Rp {booking.totalPriceIdr?.toLocaleString("id-ID")}
                   </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method & Proof of Transfer Card */}
+            <div
+              className="glass-card"
+              style={{ padding: "18px", background: "#ffffff" }}
+            >
+              <h4
+                style={{
+                  fontSize: "0.92rem",
+                  color: "var(--primary-deep)",
+                  marginBottom: "12px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <CreditCard size={16} color="var(--primary-ocean)" />
+                <span>Metode & Bukti Pembayaran</span>
+              </h4>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  fontSize: "0.88rem",
+                }}
+              >
+                <div
+                  style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                >
+                  <span style={{ color: "var(--text-muted)" }}>Metode:</span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "3px 10px",
+                      borderRadius: "6px",
+                      background: booking.paymentMethod === "bank_transfer" ? "#ede9fe" : "#fef3c7",
+                      color: booking.paymentMethod === "bank_transfer" ? "#6d28d9" : "#b45309",
+                      fontWeight: 700,
+                      fontSize: "0.8rem",
+                    }}
+                  >
+                    {booking.paymentMethod === "bank_transfer" ? (
+                      <>
+                        <Building2 size={13} />
+                        <span>Bank Transfer</span>
+                      </>
+                    ) : (
+                      <>
+                        <QrCode size={13} />
+                        <span>QRIS</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                <div>
+                  <span style={{ color: "var(--text-muted)", display: "block", marginBottom: "6px" }}>
+                    Bukti Transfer / Bayar:
+                  </span>
+                  {booking.paymentProofUrl ? (
+                    <div>
+                      <a
+                        href={booking.paymentProofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          display: "inline-block",
+                          position: "relative",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid var(--border-light)",
+                        }}
+                      >
+                        <img
+                          src={booking.paymentProofUrl}
+                          alt="Bukti pembayaran"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "180px",
+                            objectFit: "contain",
+                            display: "block",
+                          }}
+                        />
+                      </a>
+                      <a
+                        href={booking.paymentProofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          fontSize: "0.78rem",
+                          color: "var(--primary-ocean)",
+                          marginTop: "6px",
+                          fontWeight: 600,
+                        }}
+                      >
+                        <ExternalLink size={12} />
+                        <span>Buka Gambar Ukuran Penuh</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        padding: "10px",
+                        borderRadius: "6px",
+                        background: "#f8fafc",
+                        border: "1px dashed var(--border-light)",
+                        color: "var(--text-muted)",
+                        fontSize: "0.8rem",
+                        fontStyle: "italic",
+                        textAlign: "center",
+                      }}
+                    >
+                      Belum ada bukti pembayaran yang diunggah
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
