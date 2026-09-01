@@ -193,8 +193,11 @@ export default function AdminPackagesPage() {
     fetchPackages();
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const openCreateModal = () => {
     setEditingId(null);
+    setErrors({});
     setFormData({
       ...initialEmptyPackage,
     });
@@ -213,6 +216,7 @@ export default function AdminPackagesPage() {
 
   const openEditModal = (pkg: any) => {
     setEditingId(pkg.id);
+    setErrors({});
     const spots = Array.isArray(pkg.spotsId)
       ? pkg.spotsId
       : typeof pkg.spotsId === "string"
@@ -268,6 +272,7 @@ export default function AdminPackagesPage() {
 
   const handleDuplicate = (pkg: any) => {
     setEditingId(null);
+    setErrors({});
     const spots = Array.isArray(pkg.spotsId) ? pkg.spotsId : [];
     const includes = Array.isArray(pkg.includesId) ? pkg.includesId : [];
 
@@ -375,6 +380,26 @@ export default function AdminPackagesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: Record<string, string> = {};
+    if (!formData.nameId.trim()) newErrors.nameId = "Nama paket (Bahasa Indonesia) wajib diisi";
+    if (!formData.nameEn.trim()) newErrors.nameEn = "Nama paket (English) wajib diisi";
+    if (!formData.slug.trim()) newErrors.slug = "Slug URL wajib diisi";
+    if (!formData.price || formData.price <= 0) newErrors.price = "Harga IDR wajib diisi";
+    if (!formData.priceUsd || formData.priceUsd <= 0) newErrors.priceUsd = "Harga USD wajib diisi";
+    if (!formData.durationId.trim()) newErrors.durationId = "Durasi trip wajib diisi/dipilih";
+    if (!formData.scheduleId.trim()) newErrors.scheduleId = "Jadwal jam keberangkatan wajib diisi/dipilih";
+    if (!formData.descriptionId.trim()) newErrors.descriptionId = "Deskripsi singkat (Bahasa Indonesia) wajib diisi";
+    if (!formData.descriptionEn.trim()) newErrors.descriptionEn = "Deskripsi singkat (English) wajib diisi";
+    if (!formData.imageUrl.trim()) newErrors.imageUrl = "Foto / Thumbnail paket wajib diunggah";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap lengkapi semua kolom bertanda merah (*)");
+      return;
+    }
+
+    setErrors({});
     setIsSaving(true);
     const toastId = toast.loading(
       editingId ? "Menyimpan perubahan paket..." : "Menambahkan paket baru...",
@@ -1025,47 +1050,69 @@ export default function AdminPackagesPage() {
               >
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">
-                    Nama Paket (Bahasa Indonesia) *
+                    Nama Paket (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                   </label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Contoh: Snorkeling Sharing Glass Bottom Boat"
                     value={formData.nameId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nameId: e.target.value })
-                    }
-                    required
+                    onChange={(e) => {
+                      setFormData({ ...formData, nameId: e.target.value });
+                      if (errors.nameId) setErrors((prev) => ({ ...prev, nameId: "" }));
+                    }}
+                    style={errors.nameId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                   />
+                  {errors.nameId && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.nameId}
+                    </span>
+                  )}
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Nama Paket (English) *</label>
+                  <label className="form-label">
+                    Nama Paket (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="e.g. Public Glass Bottom Boat Snorkeling Tour"
                     value={formData.nameEn}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nameEn: e.target.value })
-                    }
-                    required
+                    onChange={(e) => {
+                      setFormData({ ...formData, nameEn: e.target.value });
+                      if (errors.nameEn) setErrors((prev) => ({ ...prev, nameEn: "" }));
+                    }}
+                    style={errors.nameEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                   />
+                  {errors.nameEn && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.nameEn}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Slug URL */}
               <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">Slug URL (Unik) *</label>
+                <label className="form-label">
+                  Slug URL (Unik) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                </label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="contoh: zubaidah-trip-snorkling"
                   value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  required
+                  onChange={(e) => {
+                    setFormData({ ...formData, slug: e.target.value });
+                    if (errors.slug) setErrors((prev) => ({ ...prev, slug: "" }));
+                  }}
+                  style={errors.slug ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                 />
+                {errors.slug && (
+                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                    {errors.slug}
+                  </span>
+                )}
               </div>
 
               {/* Tag / Badge ID & EN */}
@@ -1133,7 +1180,7 @@ export default function AdminPackagesPage() {
                     }}
                   >
                     <label className="form-label" style={{ margin: 0 }}>
-                      Harga IDR (Rupiah) *
+                      Harga IDR (Rupiah) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                     </label>
                     {formData.price > 0 && (
                       <span
@@ -1164,7 +1211,11 @@ export default function AdminPackagesPage() {
                     <input
                       type="text"
                       className="form-control"
-                      style={{ paddingLeft: "38px", fontWeight: 600 }}
+                      style={{
+                        paddingLeft: "38px",
+                        fontWeight: 600,
+                        ...(errors.price ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}),
+                      }}
                       placeholder="150.000"
                       value={
                         formData.price
@@ -1190,10 +1241,17 @@ export default function AdminPackagesPage() {
                           price: num,
                           priceUsd: newUsd,
                         });
+                        if (errors.price && num > 0) {
+                          setErrors((prev) => ({ ...prev, price: "" }));
+                        }
                       }}
-                      required
                     />
                   </div>
+                  {errors.price && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.price}
+                    </span>
+                  )}
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
@@ -1206,7 +1264,7 @@ export default function AdminPackagesPage() {
                     }}
                   >
                     <label className="form-label" style={{ margin: 0 }}>
-                      Harga USD ($) *
+                      Harga USD ($) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                     </label>
                     {formData.priceUsd > 0 && (
                       <span
@@ -1237,7 +1295,11 @@ export default function AdminPackagesPage() {
                     <input
                       type="text"
                       className="form-control"
-                      style={{ paddingLeft: "28px", fontWeight: 600 }}
+                      style={{
+                        paddingLeft: "28px",
+                        fontWeight: 600,
+                        ...(errors.priceUsd ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}),
+                      }}
                       placeholder="44.30"
                       value={usdInputStr}
                       onChange={(e) => {
@@ -1259,17 +1321,24 @@ export default function AdminPackagesPage() {
                           ...formData,
                           priceUsd: isNaN(parsed) ? 0 : parsed,
                         });
+                        if (errors.priceUsd && !isNaN(parsed) && parsed > 0) {
+                          setErrors((prev) => ({ ...prev, priceUsd: "" }));
+                        }
                       }}
-                      required
                     />
                   </div>
+                  {errors.priceUsd && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.priceUsd}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Pricing Unit (Per Person vs Per Boat) */}
               <div className="form-group" style={{ marginBottom: "18px" }}>
                 <label className="form-label" style={{ fontWeight: 700 }}>
-                  Satuan Tarif / Skema Perhitungan Harga *
+                  Satuan Tarif / Skema Perhitungan Harga <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <div
                   style={{
@@ -1394,7 +1463,7 @@ export default function AdminPackagesPage() {
               <div
                 style={{
                   background: "#f8fafc",
-                  border: "1px solid var(--border-light)",
+                  border: errors.durationId || errors.scheduleId ? "1.5px solid #ef4444" : "1px solid var(--border-light)",
                   borderRadius: "var(--radius-md)",
                   padding: "16px",
                   marginBottom: "18px",
@@ -1421,7 +1490,7 @@ export default function AdminPackagesPage() {
                       }}
                     >
                       <Clock size={15} color="var(--primary-ocean)" />
-                      <span>Durasi Trip Snorkeling *</span>
+                      <span>Durasi Trip Snorkeling <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span></span>
                     </label>
                     {formData.durationId && (
                       <span
@@ -1482,6 +1551,7 @@ export default function AdminPackagesPage() {
                             preset.max,
                             preset.flex,
                           );
+                          if (errors.durationId) setErrors((prev) => ({ ...prev, durationId: "" }));
                         }}
                         style={{
                           padding: "5px 10px",
@@ -1546,6 +1616,7 @@ export default function AdminPackagesPage() {
                           durationHoursMax,
                           durationIsFlexible,
                         );
+                        if (errors.durationId) setErrors((prev) => ({ ...prev, durationId: "" }));
                       }}
                     />
                     <span
@@ -1573,6 +1644,7 @@ export default function AdminPackagesPage() {
                           val,
                           durationIsFlexible,
                         );
+                        if (errors.durationId) setErrors((prev) => ({ ...prev, durationId: "" }));
                       }}
                     />
                     <span style={{ fontSize: "0.8rem", fontWeight: 600 }}>
@@ -1599,11 +1671,17 @@ export default function AdminPackagesPage() {
                             durationHoursMax,
                             e.target.checked,
                           );
+                          if (errors.durationId) setErrors((prev) => ({ ...prev, durationId: "" }));
                         }}
                       />
                       <span>+ Opsi Fleksibel</span>
                     </label>
                   </div>
+                  {errors.durationId && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.durationId}
+                    </span>
+                  )}
                 </div>
 
                 {/* 2. Jadwal Keberangkatan (Time Picker) Section */}
@@ -1627,7 +1705,7 @@ export default function AdminPackagesPage() {
                       }}
                     >
                       <Calendar size={15} color="var(--primary-ocean)" />
-                      <span>Jadwal Jam Keberangkatan *</span>
+                      <span>Jadwal Jam Keberangkatan <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span></span>
                     </label>
                     {formData.scheduleId && (
                       <span
@@ -1712,6 +1790,7 @@ export default function AdminPackagesPage() {
                             preset.has2,
                             preset.flex,
                           );
+                          if (errors.scheduleId) setErrors((prev) => ({ ...prev, scheduleId: "" }));
                         }}
                         style={{
                           padding: "5px 10px",
@@ -1783,6 +1862,7 @@ export default function AdminPackagesPage() {
                               hasSecondSlot,
                               false,
                             );
+                            if (errors.scheduleId) setErrors((prev) => ({ ...prev, scheduleId: "" }));
                           }}
                         />
                       </div>
@@ -1816,6 +1896,7 @@ export default function AdminPackagesPage() {
                                 true,
                                 false,
                               );
+                              if (errors.scheduleId) setErrors((prev) => ({ ...prev, scheduleId: "" }));
                             }}
                           />
                         </div>
@@ -1842,6 +1923,7 @@ export default function AdminPackagesPage() {
                             next,
                             false,
                           );
+                          if (errors.scheduleId) setErrors((prev) => ({ ...prev, scheduleId: "" }));
                         }}
                         style={{
                           marginLeft: "auto",
@@ -1876,6 +1958,11 @@ export default function AdminPackagesPage() {
                       Waktu Keberangkatan Bebas & Fleksibel (Private Boat
                       On-Demand)
                     </div>
+                  )}
+                  {errors.scheduleId && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.scheduleId}
+                    </span>
                   )}
                 </div>
               </div>
@@ -2121,50 +2208,72 @@ export default function AdminPackagesPage() {
               >
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">
-                    Deskripsi Singkat (Bahasa Indonesia) *
+                    Deskripsi Singkat (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                   </label>
                   <textarea
                     className="form-control"
                     placeholder="Contoh: Paket hemat snorkeling sharing 3 Gili mengunjungi patung bawah air..."
                     value={formData.descriptionId}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         descriptionId: e.target.value,
-                      })
-                    }
+                      });
+                      if (errors.descriptionId) setErrors((prev) => ({ ...prev, descriptionId: "" }));
+                    }}
                     rows={2}
-                    required
+                    style={errors.descriptionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                   />
+                  {errors.descriptionId && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.descriptionId}
+                    </span>
+                  )}
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">
-                    Deskripsi Singkat (English) *
+                    Deskripsi Singkat (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                   </label>
                   <textarea
                     className="form-control"
                     placeholder="e.g. Budget-friendly public sharing boat trip visiting underwater statues..."
                     value={formData.descriptionEn}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         descriptionEn: e.target.value,
-                      })
-                    }
+                      });
+                      if (errors.descriptionEn) setErrors((prev) => ({ ...prev, descriptionEn: "" }));
+                    }}
                     rows={2}
-                    required
+                    style={errors.descriptionEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                   />
+                  {errors.descriptionEn && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.descriptionEn}
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Image Upload with live preview & drag-drop */}
-              <ImageUpload
-                label="Foto / Thumbnail Paket Snorkeling"
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                required
-                helperText="Upload foto pemandangan trip atau perahu (JPG, PNG, WebP maks 10MB)"
-              />
+              <div className="form-group" style={{ marginBottom: "14px" }}>
+                <ImageUpload
+                  label="Foto / Thumbnail Paket Snorkeling"
+                  value={formData.imageUrl}
+                  onChange={(url) => {
+                    setFormData({ ...formData, imageUrl: url });
+                    if (errors.imageUrl) setErrors((prev) => ({ ...prev, imageUrl: "" }));
+                  }}
+                  required
+                  helperText="Upload foto pemandangan trip atau perahu (JPG, PNG, WebP maks 10MB)"
+                />
+                {errors.imageUrl && (
+                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                    {errors.imageUrl}
+                  </span>
+                )}
+              </div>
 
               {/* Checkboxes for featured & active */}
               <div style={{ display: "flex", gap: "24px", margin: "20px 0" }}>

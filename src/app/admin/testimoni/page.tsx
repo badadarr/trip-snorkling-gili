@@ -64,14 +64,18 @@ export default function AdminTestimonialsPage() {
     fetchTestimonials();
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const openCreateModal = () => {
     setEditingId(null);
+    setErrors({});
     setFormData(initialEmptyTestimonial);
     setIsModalOpen(true);
   };
 
   const openEditModal = (item: any) => {
     setEditingId(item.id);
+    setErrors({});
     setFormData({
       name: item.name,
       origin: item.origin || "",
@@ -88,11 +92,18 @@ export default function AdminTestimonialsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.contentId) {
-      toast.error("Nama dan isi testimoni wajib diisi!");
+
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = "Nama tamu wajib diisi";
+    if (!formData.contentId.trim()) newErrors.contentId = "Isi ulasan (Bahasa Indonesia) wajib diisi";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap lengkapi semua kolom bertanda merah (*)");
       return;
     }
 
+    setErrors({});
     setIsSaving(true);
     const toastId = toast.loading(
       editingId
@@ -523,17 +534,25 @@ export default function AdminTestimonialsPage() {
                 }}
               >
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Nama Tamu *</label>
+                  <label className="form-label">
+                    Nama Tamu <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Contoh: Rian & Amanda"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (errors.name) setErrors((prev) => ({ ...prev, name: "" }));
+                    }}
+                    style={errors.name ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                   />
+                  {errors.name && (
+                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                      {errors.name}
+                    </span>
+                  )}
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Kota / Negara Asal</label>
@@ -592,18 +611,24 @@ export default function AdminTestimonialsPage() {
 
               <div className="form-group" style={{ marginBottom: "14px" }}>
                 <label className="form-label">
-                  Isi Ulasan (Bahasa Indonesia) *
+                  Isi Ulasan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <textarea
                   className="form-control"
                   placeholder="Cerita pengalaman tamu..."
                   value={formData.contentId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contentId: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, contentId: e.target.value });
+                    if (errors.contentId) setErrors((prev) => ({ ...prev, contentId: "" }));
+                  }}
                   rows={3}
-                  required
+                  style={errors.contentId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                 />
+                {errors.contentId && (
+                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                    {errors.contentId}
+                  </span>
+                )}
               </div>
 
               <div className="form-group" style={{ marginBottom: "14px" }}>

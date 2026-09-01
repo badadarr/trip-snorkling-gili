@@ -61,13 +61,23 @@ export default function AdminGalleryPage() {
     return gallery.filter((item) => item.category === categoryFilter);
   }, [gallery, categoryFilter]);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.imageUrl || !formData.titleId) {
-      toast.error('URL foto dan judul wajib diisi!');
+
+    const newErrors: Record<string, string> = {};
+    if (!formData.imageUrl.trim()) newErrors.imageUrl = 'Unggah foto galeri wajib diisi';
+    if (!formData.titleId.trim()) newErrors.titleId = 'Judul foto (Bahasa Indonesia) wajib diisi';
+    if (!formData.titleEn.trim()) newErrors.titleEn = 'Judul foto (English) wajib diisi';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error('Harap lengkapi semua kolom bertanda merah (*)');
       return;
     }
 
+    setErrors({});
     setIsSaving(true);
     const toastId = toast.loading('Menambahkan foto ke galeri...');
     try {
@@ -323,40 +333,72 @@ export default function AdminGalleryPage() {
             </div>
 
             <form onSubmit={handleCreate}>
-              <ImageUpload
-                label="Unggah Foto Galeri"
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                required
-                helperText="Upload foto spot 3 Gili, penyu, patung bawah laut, dll (JPG, PNG, WebP maks 10MB)"
-              />
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <ImageUpload
+                  label="Unggah Foto Galeri"
+                  value={formData.imageUrl}
+                  onChange={(url) => {
+                    setFormData({ ...formData, imageUrl: url });
+                    if (errors.imageUrl) setErrors((prev) => ({ ...prev, imageUrl: '' }));
+                  }}
+                  required
+                  helperText="Upload foto spot 3 Gili, penyu, patung bawah laut, dll (JPG, PNG, WebP maks 10MB)"
+                />
+                {errors.imageUrl && (
+                  <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+                    {errors.imageUrl}
+                  </span>
+                )}
+              </div>
 
-              <div className="form-group">
-                <label className="form-label">Judul Foto (Bahasa Indonesia) *</label>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label">
+                  Judul Foto (Bahasa Indonesia) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Contoh: Berenang Bersama Penyu di Gili Meno"
                   value={formData.titleId}
-                  onChange={(e) => setFormData({ ...formData, titleId: e.target.value })}
-                  required
+                  onChange={(e) => {
+                    setFormData({ ...formData, titleId: e.target.value });
+                    if (errors.titleId) setErrors((prev) => ({ ...prev, titleId: '' }));
+                  }}
+                  style={errors.titleId ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
                 />
+                {errors.titleId && (
+                  <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+                    {errors.titleId}
+                  </span>
+                )}
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Judul Foto (English) *</label>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label">
+                  Judul Foto (English) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="e.g. Swimming with Wild Turtles at Gili Meno"
                   value={formData.titleEn}
-                  onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
-                  required
+                  onChange={(e) => {
+                    setFormData({ ...formData, titleEn: e.target.value });
+                    if (errors.titleEn) setErrors((prev) => ({ ...prev, titleEn: '' }));
+                  }}
+                  style={errors.titleEn ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
                 />
+                {errors.titleEn && (
+                  <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+                    {errors.titleEn}
+                  </span>
+                )}
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Kategori Foto</label>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label className="form-label">
+                  Kategori Foto <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
                 <select
                   className="form-control"
                   value={formData.category}

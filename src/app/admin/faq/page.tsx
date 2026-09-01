@@ -73,8 +73,11 @@ export default function AdminFaqPage() {
     return faqs.filter((f) => f.category === categoryFilter);
   }, [faqs, categoryFilter]);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const openCreateModal = () => {
     setEditingId(null);
+    setErrors({});
     setFormData({
       questionId: "",
       questionEn: "",
@@ -89,6 +92,7 @@ export default function AdminFaqPage() {
 
   const openEditModal = (item: any) => {
     setEditingId(item.id);
+    setErrors({});
     setFormData({
       questionId: item.questionId,
       questionEn: item.questionEn || "",
@@ -103,11 +107,18 @@ export default function AdminFaqPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.questionId || !formData.answerId) {
-      toast.error("Pertanyaan dan jawaban wajib diisi!");
+
+    const newErrors: Record<string, string> = {};
+    if (!formData.questionId.trim()) newErrors.questionId = "Pertanyaan (Bahasa Indonesia) wajib diisi";
+    if (!formData.answerId.trim()) newErrors.answerId = "Jawaban (Bahasa Indonesia) wajib diisi";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap lengkapi semua kolom bertanda merah (*)");
       return;
     }
 
+    setErrors({});
     setIsSaving(true);
     const toastId = toast.loading(
       editingId ? "Menyimpan perubahan FAQ..." : "Menambahkan FAQ baru...",
@@ -503,7 +514,9 @@ export default function AdminFaqPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">Kategori Pertanyaan</label>
+                <label className="form-label">
+                  Kategori Pertanyaan <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                </label>
                 <select
                   className="form-control"
                   value={formData.category}
@@ -524,18 +537,24 @@ export default function AdminFaqPage() {
 
               <div className="form-group" style={{ marginBottom: "14px" }}>
                 <label className="form-label">
-                  Pertanyaan (Bahasa Indonesia) *
+                  Pertanyaan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Contoh: Apakah pemula yang tidak bisa berenang bisa ikut?"
                   value={formData.questionId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, questionId: e.target.value })
-                  }
-                  required
+                  onChange={(e) => {
+                    setFormData({ ...formData, questionId: e.target.value });
+                    if (errors.questionId) setErrors((prev) => ({ ...prev, questionId: "" }));
+                  }}
+                  style={errors.questionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                 />
+                {errors.questionId && (
+                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                    {errors.questionId}
+                  </span>
+                )}
               </div>
 
               <div className="form-group" style={{ marginBottom: "14px" }}>
@@ -553,18 +572,24 @@ export default function AdminFaqPage() {
 
               <div className="form-group" style={{ marginBottom: "14px" }}>
                 <label className="form-label">
-                  Jawaban (Bahasa Indonesia) *
+                  Jawaban (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <textarea
                   className="form-control"
                   placeholder="Penjelasan lengkap..."
                   value={formData.answerId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, answerId: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setFormData({ ...formData, answerId: e.target.value });
+                    if (errors.answerId) setErrors((prev) => ({ ...prev, answerId: "" }));
+                  }}
                   rows={3}
-                  required
+                  style={errors.answerId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
                 />
+                {errors.answerId && (
+                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                    {errors.answerId}
+                  </span>
+                )}
               </div>
 
               <div className="form-group" style={{ marginBottom: "20px" }}>
