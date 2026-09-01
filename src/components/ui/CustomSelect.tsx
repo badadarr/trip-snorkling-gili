@@ -15,7 +15,8 @@ interface CustomSelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  label?: string;
+  label?: React.ReactNode;
+  error?: string;
 }
 
 export default function CustomSelect({
@@ -24,6 +25,7 @@ export default function CustomSelect({
   onChange,
   placeholder = 'Pilih opsi...',
   label,
+  error,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,8 +57,12 @@ export default function CustomSelect({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '12px 16px',
-          background: '#ffffff',
-          border: isOpen ? '1.5px solid var(--primary-ocean)' : '1px solid var(--border-light)',
+          background: error ? '#fffbfa' : '#ffffff',
+          border: error
+            ? '1.5px solid #ef4444'
+            : isOpen
+              ? '1.5px solid var(--primary-ocean)'
+              : '1px solid var(--border-light)',
           borderRadius: 'var(--radius-sm)',
           color: selectedOption ? 'var(--primary-deep)' : 'var(--text-muted)',
           fontSize: '0.95rem',
@@ -78,15 +84,21 @@ export default function CustomSelect({
 
         <ChevronDown
           size={18}
-          color="var(--text-muted)"
+          color={error ? '#ef4444' : 'var(--text-muted)'}
           style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
             flexShrink: 0,
             marginLeft: '8px',
-            transition: 'transform 0.15s ease',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           }}
         />
       </button>
+
+      {error && (
+        <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+          {error}
+        </span>
+      )}
 
       {isOpen && (
         <div

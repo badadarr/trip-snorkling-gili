@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
-import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass } from 'lucide-react';
+import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ModernDatePicker from '@/components/ui/ModernDatePicker';
@@ -38,6 +38,7 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedBooking, setSubmittedBooking] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Find currently selected package
   const currentPackage = packagesList.find((p) => p.slug === selectedPkgSlug) || packagesList[0];
@@ -79,23 +80,49 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: Record<string, string> = {};
+    if (!selectedPkgSlug) newErrors.package = 'Harap pilih salah satu paket snorkeling / Please select a package';
+    if (!customerName.trim()) newErrors.customerName = 'Nama lengkap wajib diisi / Full name is required';
+    if (!customerEmail.trim()) {
+      newErrors.customerEmail = 'Alamat email wajib diisi / Email address is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail.trim())) {
+      newErrors.customerEmail = 'Format email tidak valid / Invalid email address';
+    }
+    if (!customerPhone.trim()) {
+      newErrors.customerPhone = 'Nomor WhatsApp wajib diisi / WhatsApp number is required';
+    } else if (customerPhone.replace(/[^0-9]/g, '').length < 7) {
+      newErrors.customerPhone = 'Nomor telepon minimal 7 digit / Phone number min. 7 digits';
+    }
+    if (!tripDate) newErrors.tripDate = 'Tanggal keberangkatan wajib dipilih / Trip date is required';
+    if (!tripSession) newErrors.tripSession = 'Sesi waktu trip wajib dipilih / Session is required';
+    if (numberOfPeople < 1) newErrors.numberOfPeople = 'Jumlah peserta minimal 1 orang / Min. 1 guest';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setErrorMsg('Harap lengkapi semua kolom wajib bertanda merah (*)');
+      toast.error('Harap lengkapi semua kolom bertanda merah (*)!');
+      return;
+    }
+
     if (!currentPackage) return;
+    setErrors({});
     setErrorMsg('');
     setIsSubmitting(true);
-    const toastId = toast.loading('Processing your reservation...');
+    const toastId = toast.loading('Memproses reservasi Anda / Processing reservation...');
 
     try {
       const payload = {
         packageId: currentPackage.id,
         packageName: currentPackage.nameEn || currentPackage.nameId,
-        customerName,
-        customerEmail,
-        customerPhone,
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim(),
         numberOfPeople: Number(numberOfPeople),
         tripDate,
         tripSession,
-        pickupLocation,
-        specialRequests,
+        pickupLocation: pickupLocation.trim(),
+        specialRequests: specialRequests.trim(),
         totalPriceIdr: totals.idr,
         totalPriceUsd: totals.usd,
         status: 'pending',
@@ -108,7 +135,8 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
       });
 
       if (!res.ok) {
-        throw new Error('Failed to submit reservation. Please try again.');
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || 'Failed to submit reservation. Please try again.');
       }
 
       const data = await res.json();
@@ -308,9 +336,17 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
           {/* 1. Custom Package Dropdown */}
           <div className="form-group">
             <CustomSelect
-              label={`${t('selectPackage')} *`}
+              label={
+                <>
+                  {t('selectPackage')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </>
+              }
               value={selectedPkgSlug}
-              onChange={(val) => setSelectedPkgSlug(val)}
+              onChange={(val) => {
+                setSelectedPkgSlug(val);
+                if (errors.package) setErrors((prev) => ({ ...prev, package: '' }));
+              }}
+              error={errors.package}
               options={packagesList.map((pkg) => ({
                 value: pkg.slug,
                 label: pkg.nameEn || pkg.nameId,
@@ -322,53 +358,94 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
 
           {/* 2. Customer Name */}
           <div className="form-group">
-            <label className="form-label">{t('fullName')} *</label>
+            <label className="form-label">
+              {t('fullName')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+            </label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 className="form-control"
                 placeholder={t('fullNamePlaceholder')}
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                required
+                onChange={(e) => {
+                  setCustomerName(e.target.value);
+                  if (errors.customerName) setErrors((prev) => ({ ...prev, customerName: '' }));
+                }}
+                style={errors.customerName ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
               />
             </div>
+            {errors.customerName && (
+              <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                <AlertCircle size={12} />
+                {errors.customerName}
+              </span>
+            )}
           </div>
 
           {/* 3. Customer Email & Phone */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
             <div className="form-group">
-              <label className="form-label">{t('email')} *</label>
+              <label className="form-label">
+                {t('email')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+              </label>
               <input
                 type="email"
                 className="form-control"
                 placeholder={t('emailPlaceholder')}
                 value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                required
+                onChange={(e) => {
+                  setCustomerEmail(e.target.value);
+                  if (errors.customerEmail) setErrors((prev) => ({ ...prev, customerEmail: '' }));
+                }}
+                style={errors.customerEmail ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
               />
+              {errors.customerEmail && (
+                <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                  <AlertCircle size={12} />
+                  {errors.customerEmail}
+                </span>
+              )}
             </div>
             <div className="form-group">
-              <label className="form-label">{t('phone')} *</label>
+              <label className="form-label">
+                {t('phone')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+              </label>
               <input
                 type="tel"
                 className="form-control"
                 placeholder={t('phonePlaceholder')}
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                required
+                onChange={(e) => {
+                  setCustomerPhone(e.target.value);
+                  if (errors.customerPhone) setErrors((prev) => ({ ...prev, customerPhone: '' }));
+                }}
+                style={errors.customerPhone ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
               />
+              {errors.customerPhone && (
+                <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                  <AlertCircle size={12} />
+                  {errors.customerPhone}
+                </span>
+              )}
             </div>
           </div>
 
           {/* 4. Number of People & Modern Date Picker */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
             <div className="form-group">
-              <label className="form-label">{t('pax')} *</label>
+              <label className="form-label">
+                {t('pax')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+              </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   type="button"
-                  onClick={() => setNumberOfPeople((prev) => Math.max(1, prev - 1))}
+                  onClick={() => {
+                    setNumberOfPeople((prev) => {
+                      const nextVal = Math.max(1, prev - 1);
+                      if (errors.numberOfPeople) setErrors((err) => ({ ...err, numberOfPeople: '' }));
+                      return nextVal;
+                    });
+                  }}
                   style={{
                     width: '42px',
                     height: '42px',
@@ -392,13 +469,25 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
                   max="50"
                   className="form-control"
                   value={numberOfPeople}
-                  onChange={(e) => setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1))}
-                  style={{ textAlign: 'center', fontWeight: 700 }}
-                  required
+                  onChange={(e) => {
+                    setNumberOfPeople(Math.max(1, parseInt(e.target.value) || 1));
+                    if (errors.numberOfPeople) setErrors((prev) => ({ ...prev, numberOfPeople: '' }));
+                  }}
+                  style={{
+                    textAlign: 'center',
+                    fontWeight: 700,
+                    ...(errors.numberOfPeople ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}),
+                  }}
                 />
                 <button
                   type="button"
-                  onClick={() => setNumberOfPeople((prev) => Math.min(50, prev + 1))}
+                  onClick={() => {
+                    setNumberOfPeople((prev) => {
+                      const nextVal = Math.min(50, prev + 1);
+                      if (errors.numberOfPeople) setErrors((err) => ({ ...err, numberOfPeople: '' }));
+                      return nextVal;
+                    });
+                  }}
                   style={{
                     width: '42px',
                     height: '42px',
@@ -417,6 +506,12 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
                   +
                 </button>
               </div>
+              {errors.numberOfPeople && (
+                <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                  <AlertCircle size={12} />
+                  {errors.numberOfPeople}
+                </span>
+              )}
               {totals.isPerBoat && (
                 <div
                   style={{
@@ -442,9 +537,17 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
 
             <div className="form-group">
               <ModernDatePicker
-                label={`${t('tripDate')} *`}
+                label={
+                  <>
+                    {t('tripDate')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                  </>
+                }
                 value={tripDate}
-                onChange={(d) => setTripDate(d)}
+                onChange={(d) => {
+                  setTripDate(d);
+                  if (errors.tripDate) setErrors((prev) => ({ ...prev, tripDate: '' }));
+                }}
+                error={errors.tripDate}
                 locale="en"
               />
             </div>
@@ -453,9 +556,17 @@ Please confirm slot availability and meeting point instructions. Thank you!`;
           {/* 5. Session Time Selection Cards */}
           <div className="form-group">
             <SessionTimePicker
-              label={`${t('session')} *`}
+              label={
+                <>
+                  {t('session')} <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </>
+              }
               value={tripSession}
-              onChange={(s) => setTripSession(s)}
+              onChange={(s) => {
+                setTripSession(s);
+                if (errors.tripSession) setErrors((prev) => ({ ...prev, tripSession: '' }));
+              }}
+              error={errors.tripSession}
               locale="en"
             />
           </div>

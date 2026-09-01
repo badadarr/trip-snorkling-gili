@@ -6,14 +6,16 @@ import { Sunrise, Sun, Sunset, Clock, Check } from 'lucide-react';
 interface SessionTimePickerProps {
   value: string;
   onChange: (val: string) => void;
-  label?: string;
+  label?: React.ReactNode;
   locale?: string;
+  error?: string;
 }
 
 export default function SessionTimePicker({
   value,
   onChange,
   label,
+  error,
 }: SessionTimePickerProps) {
   const sessions = [
     {
@@ -62,13 +64,19 @@ export default function SessionTimePicker({
               style={{
                 padding: '12px',
                 borderRadius: 'var(--radius-sm)',
-                border: isSelected ? '2px solid var(--primary-ocean)' : '1px solid var(--border-light)',
-                background: isSelected ? 'var(--primary-surface)' : '#ffffff',
+                border: isSelected
+                  ? '2px solid var(--primary-ocean)'
+                  : error
+                    ? '1.5px solid #ef4444'
+                    : '1px solid var(--border-light)',
+                background: isSelected ? 'var(--primary-surface)' : error ? '#fffbfa' : '#ffffff',
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
                 textAlign: 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                position: 'relative',
+                transition: 'all 0.2s ease',
               }}
             >
               <div
@@ -106,6 +114,11 @@ export default function SessionTimePicker({
           );
         })}
       </div>
+      {error && (
+        <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+          {error}
+        </span>
+      )}
     </div>
   );
 }

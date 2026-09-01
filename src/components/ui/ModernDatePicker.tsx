@@ -6,14 +6,16 @@ import { Calendar, ChevronLeft, ChevronRight, Zap, ArrowRight, FastForward } fro
 interface ModernDatePickerProps {
   value: string;
   onChange: (dateStr: string) => void;
-  label?: string;
+  label?: React.ReactNode;
   locale?: string;
+  error?: string;
 }
 
 export default function ModernDatePicker({
   value,
   onChange,
   label,
+  error,
 }: ModernDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,8 +83,12 @@ export default function ModernDatePicker({
           alignItems: 'center',
           gap: '10px',
           padding: '12px 16px',
-          background: '#ffffff',
-          border: isOpen ? '1.5px solid var(--primary-ocean)' : '1px solid var(--border-light)',
+          background: error ? '#fffbfa' : '#ffffff',
+          border: error
+            ? '1.5px solid #ef4444'
+            : isOpen
+              ? '1.5px solid var(--primary-ocean)'
+              : '1px solid var(--border-light)',
           borderRadius: 'var(--radius-sm)',
           fontSize: '0.95rem',
           color: value ? 'var(--primary-deep)' : 'var(--text-muted)',
@@ -91,9 +97,15 @@ export default function ModernDatePicker({
           textAlign: 'left',
         }}
       >
-        <Calendar size={18} color="var(--primary-ocean)" style={{ flexShrink: 0 }} />
+        <Calendar size={18} color={error ? '#ef4444' : 'var(--primary-ocean)'} style={{ flexShrink: 0 }} />
         <span>{formatDisplay(value)}</span>
       </button>
+
+      {error && (
+        <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+          {error}
+        </span>
+      )}
 
       {isOpen && (
         <div
