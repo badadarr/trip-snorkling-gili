@@ -251,7 +251,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
                       lineHeight: 1.4,
                     }}
                   >
-                    💡 Max. 4 Pax. Additional charges apply for more than 4 guests.
+                    Max. 4 Pax. Additional charges apply for more than 4 guests.
                   </div>
                 )}
 

@@ -61,13 +61,13 @@ export default function LanguageSwitcher() {
       code: 'id',
       label: 'Bahasa Indonesia',
       short: 'ID',
-      flag: '🇮🇩',
+      flag: '',
     },
     {
       code: 'en',
       label: 'English',
       short: 'EN',
-      flag: '🇬🇧',
+      flag: '',
     },
   ];
 
@@ -186,9 +186,7 @@ export default function LanguageSwitcher() {
               }}
             />
           ) : (
-            <span style={{ fontSize: '1rem', lineHeight: 1 }}>
-              {currentLang.flag}
-            </span>
+            <Globe size={14} color="var(--primary-ocean)" />
           )}
 
           <span style={{ letterSpacing: '0.02em' }}>{currentLang.short}</span>
@@ -269,7 +267,7 @@ export default function LanguageSwitcher() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '1.05rem' }}>{lang.flag}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-ocean)' }}>{lang.short}</span>
                     <span>{lang.label}</span>
                   </div>
 

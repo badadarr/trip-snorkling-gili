@@ -235,7 +235,7 @@ I have submitted an online booking with the following details:
 - Guests: *${numberOfPeople} Person(s)*
 - Payment Method: *${paymentMethod === 'qris' ? 'QRIS' : 'Bank Transfer'}*
 - Total Price: *${totals.usd ? `$${totals.usd} USD` : ''}* (~ Rp ${totals.idr.toLocaleString('id-ID')})
-${numberOfPeople > PRIVATE_MAX_PAX && isPrivatePackage ? `⚠️ Note: ${numberOfPeople} guests (exceeds max 4 pax, additional charges may apply)\n` : ''}${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ''}${specialRequests ? `- Special Request: ${specialRequests}\n` : ''}
+${numberOfPeople > PRIVATE_MAX_PAX && isPrivatePackage ? `Note: ${numberOfPeople} guests (exceeds max 4 pax, additional charges may apply)\n` : ''}${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ''}${specialRequests ? `- Special Request: ${specialRequests}\n` : ''}
 Please confirm slot availability and payment details. Thank you!`;
 
     return `https://wa.me/${phoneTarget.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`;
@@ -299,7 +299,7 @@ Please confirm slot availability and payment details. Thank you!`;
             <div><strong>Package:</strong> {currentPackage?.nameEn || currentPackage?.nameId} ({isPrivatePackage ? 'Private' : 'Public'})</div>
             <div><strong>Name:</strong> {customerName}</div>
             <div><strong>Date:</strong> {tripDate} ({tripSession})</div>
-            <div><strong>Guests:</strong> {numberOfPeople} Person(s) {isPrivatePackage && numberOfPeople > PRIVATE_MAX_PAX ? '⚠️ Extra charge applies' : ''}</div>
+            <div><strong>Guests:</strong> {numberOfPeople} Person(s) {isPrivatePackage && numberOfPeople > PRIVATE_MAX_PAX ? '(Extra charge applies)' : ''}</div>
             <div><strong>Payment:</strong> {paymentMethod === 'qris' ? 'QRIS' : 'Bank Transfer'}</div>
             <div><strong>Total:</strong> ${totals.usd} USD (~ Rp {totals.idr.toLocaleString('id-ID')})</div>
           </div>
@@ -602,8 +602,8 @@ Please confirm slot availability and payment details. Thank you!`;
               <Info size={14} />
               <span>
                 {isPrivatePackage
-                  ? `🔒 Private Trip — Max. ${PRIVATE_MAX_PAX} Pax • Flexible Schedule`
-                  : '👥 Public Shared Trip — Per Person • Fixed Schedule'}
+                  ? `Private Trip — Max. ${PRIVATE_MAX_PAX} Pax • Flexible Schedule`
+                  : 'Public Shared Trip — Per Person • Fixed Schedule'}
               </span>
             </div>
           )}
@@ -944,7 +944,7 @@ Please confirm slot availability and payment details. Thank you!`;
                   border: isPrivatePackage ? '1px solid #fde68a' : '1px solid #93c5fd',
                 }}
               >
-                {isPrivatePackage ? '🔒 PRIVATE' : '👥 PUBLIC'}
+                {isPrivatePackage ? 'PRIVATE' : 'PUBLIC'}
               </div>
             </div>
 
