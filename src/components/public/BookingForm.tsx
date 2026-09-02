@@ -242,17 +242,35 @@ export default function BookingForm({
     }
   }, [tripDate]);
 
-  // Compute estimated total based on priceUnit
+  // Compute estimated total based on priceUnit + Rp 200.000 / $13 per extra person above 4 pax for private trip
   const computePrice = () => {
     if (!currentPackage)
-      return { idr: 0, usd: 0, boatsCount: 1, isPerBoat: false };
+      return {
+        idr: 0,
+        usd: 0,
+        boatsCount: 1,
+        isPerBoat: false,
+        baseIdr: 0,
+        baseUsd: 0,
+        extraPaxCount: 0,
+        extraPaxIdr: 0,
+        extraPaxUsd: 0,
+      };
     const isPerBoat = isPrivatePackage;
     if (isPerBoat) {
+      const extraPaxCount = Math.max(0, numberOfPeople - PRIVATE_MAX_PAX);
+      const extraPaxIdr = extraPaxCount * 200000;
+      const extraPaxUsd = extraPaxCount * 13;
       return {
-        idr: currentPackage.price,
-        usd: Number(currentPackage.priceUsd.toFixed(2)),
+        idr: currentPackage.price + extraPaxIdr,
+        usd: Number((currentPackage.priceUsd + extraPaxUsd).toFixed(2)),
         boatsCount: 1,
         isPerBoat: true,
+        baseIdr: currentPackage.price,
+        baseUsd: currentPackage.priceUsd,
+        extraPaxCount,
+        extraPaxIdr,
+        extraPaxUsd,
       };
     } else {
       return {
@@ -260,6 +278,11 @@ export default function BookingForm({
         usd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
         boatsCount: 1,
         isPerBoat: false,
+        baseIdr: currentPackage.price * numberOfPeople,
+        baseUsd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
+        extraPaxCount: 0,
+        extraPaxIdr: 0,
+        extraPaxUsd: 0,
       };
     }
   };
@@ -512,6 +535,11 @@ export default function BookingForm({
       ? "✅ Receipt Uploaded on Website"
       : "⏳ Receipt will be sent via WhatsApp";
 
+    const extraPaxText =
+      isPrivatePackage && totals.extraPaxCount > 0
+        ? ` (Base 4 pax + ${totals.extraPaxCount} extra pax @ Rp 200.000 / $13)`
+        : "";
+
     const msg = `Hello Admin Gili Trawangan Snorkeling Trip!
 I have submitted an online booking with the following details:
 - Booking Code: *${bCode}*
@@ -519,11 +547,11 @@ I have submitted an online booking with the following details:
 - Name: *${customerName}*
 - Trip Date: *${tripDate}*
 - Session & Schedule: *${getFormattedSession()}*
-- Guests: *${numberOfPeople} Person(s)*
+- Guests: *${numberOfPeople} Person(s)*${extraPaxText}
 - Payment Method: *${payLabel}*
 - Payment Proof: *${proofStatus}*
 - Total Price: *${totals.usd ? `$${totals.usd} USD` : ""}* (~ Rp ${totals.idr.toLocaleString("id-ID")})
-${numberOfPeople > PRIVATE_MAX_PAX && isPrivatePackage ? `Note: ${numberOfPeople} guests (exceeds base 4 pax limit, additional charges may apply)\n` : ""}${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ""}${specialRequests ? `- Special Request: ${specialRequests}\n` : ""}
+${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ""}${specialRequests ? `- Special Request: ${specialRequests}\n` : ""}
 Please confirm slot availability and payment receipt. Thank you!`;
 
     return `https://wa.me/${phoneTarget.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(msg)}`;
@@ -1192,11 +1220,11 @@ Please confirm slot availability and payment receipt. Thank you!`;
                         fontSize: "0.75rem",
                         color:
                           numberOfPeople > PRIVATE_MAX_PAX
-                            ? "#b45309"
+                            ? "#0369a1"
                             : "#475569",
                         background:
                           numberOfPeople > PRIVATE_MAX_PAX
-                            ? "#fffbeb"
+                            ? "#f0f9ff"
                             : "#f8fafc",
                         padding: "8px 10px",
                         borderRadius: "var(--radius-sm)",
@@ -1205,7 +1233,7 @@ Please confirm slot availability and payment receipt. Thank you!`;
                         gap: "6px",
                         border:
                           numberOfPeople > PRIVATE_MAX_PAX
-                            ? "1px solid #fde68a"
+                            ? "1px solid #bae6fd"
                             : "1px solid var(--border-light)",
                         lineHeight: 1.4,
                       }}
@@ -1214,8 +1242,8 @@ Please confirm slot availability and payment receipt. Thank you!`;
                         size={14}
                         color={
                           numberOfPeople > PRIVATE_MAX_PAX
-                            ? "#b45309"
-                            : "#0284c7"
+                            ? "#0284c7"
+                            : "#64748b"
                         }
                         style={{ flexShrink: 0, marginTop: "2px" }}
                       />
@@ -1223,17 +1251,13 @@ Please confirm slot availability and payment receipt. Thank you!`;
                         {numberOfPeople > PRIVATE_MAX_PAX ? (
                           <>
                             <strong>
-                              {numberOfPeople} Guests selected (
-                              {numberOfPeople - PRIVATE_MAX_PAX} extra).
+                              {numberOfPeople} Guests ({numberOfPeople - PRIVATE_MAX_PAX} extra pax):
                             </strong>{" "}
-                            Standard private trip rate covers up to{" "}
-                            {PRIVATE_MAX_PAX} pax. Additional charges apply for
-                            extra guests.
+                            Standard private boat rate includes up to {PRIVATE_MAX_PAX} pax. Extra fee +Rp 200.000 (~$13 USD)/person is automatically included in the total.
                           </>
                         ) : (
                           <>
-                            Max. {PRIVATE_MAX_PAX} Pax included in base private
-                            trip. <strong>{t("extraChargeWarning")}</strong>.
+                            Standard private boat covers <strong>1 - {PRIVATE_MAX_PAX} pax</strong>. Additional guests above {PRIVATE_MAX_PAX} pax are +Rp 200.000 (~$13 USD)/person.
                           </>
                         )}
                       </span>
@@ -1448,39 +1472,42 @@ Please confirm slot availability and payment receipt. Thank you!`;
                   >
                     <span style={{ color: "var(--text-muted)" }}>
                       {isPrivatePackage
-                        ? "Base Private Trip (1-4 Pax)"
+                        ? "Base Private Boat (1-4 Pax)"
                         : `Rate per Person (${numberOfPeople}x)`}
                     </span>
                     <span
                       style={{ fontWeight: 600, color: "var(--text-main)" }}
                     >
-                      {formatUsd(totals.usd)}{" "}
+                      {formatUsd(totals.baseUsd)}{" "}
                       <span
                         style={{
                           fontSize: "0.78rem",
                           color: "var(--text-muted)",
                         }}
                       >
-                        ({formatIdr(totals.idr)})
+                        ({formatIdr(totals.baseIdr)})
                       </span>
                     </span>
                   </div>
 
-                  {isPrivatePackage && numberOfPeople > PRIVATE_MAX_PAX && (
+                  {isPrivatePackage && totals.extraPaxCount > 0 && (
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
                         marginBottom: "8px",
-                        fontSize: "0.82rem",
-                        color: "#b45309",
+                        fontSize: "0.85rem",
+                        color: "#0284c7",
                       }}
                     >
                       <span>
-                        Extra Guests (+{numberOfPeople - PRIVATE_MAX_PAX} Pax):
+                        Extra Guests (+{totals.extraPaxCount} Pax @ Rp 200.000):
                       </span>
-                      <span style={{ fontWeight: 600 }}>
-                        Additional charge applies
+                      <span style={{ fontWeight: 700 }}>
+                        +{formatUsd(totals.extraPaxUsd)}{" "}
+                        <span style={{ fontSize: "0.78rem", fontWeight: 500 }}>
+                          (+{formatIdr(totals.extraPaxIdr)})
+                        </span>
                       </span>
                     </div>
                   )}

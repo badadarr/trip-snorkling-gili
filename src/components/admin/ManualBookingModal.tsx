@@ -50,9 +50,9 @@ export default function ManualBookingModal({
 
   const selectedPkg = packages.find((p) => p.id === selectedPackageId) || packages[0];
   const isPerBoat = selectedPkg ? (selectedPkg.priceUnit === 'per_boat' || (!selectedPkg.priceUnit && selectedPkg.price > 500000)) : false;
-  const boatsCount = isPerBoat ? Math.max(1, Math.ceil(numberOfPeople / 10)) : 1;
-  const defaultTotal = selectedPkg ? (isPerBoat ? selectedPkg.price * boatsCount : selectedPkg.price * numberOfPeople) : 300000;
-  const defaultTotalUsd = selectedPkg ? (isPerBoat ? Number((selectedPkg.priceUsd * boatsCount).toFixed(2)) : Number((selectedPkg.priceUsd * numberOfPeople).toFixed(2))) : 20;
+  const extraPax = isPerBoat ? Math.max(0, numberOfPeople - 4) : 0;
+  const defaultTotal = selectedPkg ? (isPerBoat ? selectedPkg.price + (extraPax * 200000) : selectedPkg.price * numberOfPeople) : 300000;
+  const defaultTotalUsd = selectedPkg ? (isPerBoat ? Number((selectedPkg.priceUsd + (extraPax * 13)).toFixed(2)) : Number((selectedPkg.priceUsd * numberOfPeople).toFixed(2))) : 20;
   const finalTotalPrice = customPrice !== null ? customPrice : defaultTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -405,7 +405,7 @@ export default function ManualBookingModal({
           >
             <div>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
-                Kalkulasi Tarif {isPerBoat ? `(${boatsCount} Perahu × Rp ${selectedPkg?.price.toLocaleString('id-ID')})` : `(${numberOfPeople} Orang × Rp ${selectedPkg?.price.toLocaleString('id-ID')})`}:
+                Kalkulasi Tarif {isPerBoat ? `(Base 4 Pax Rp ${selectedPkg?.price.toLocaleString('id-ID')}${extraPax > 0 ? ` + ${extraPax} Extra Pax × Rp 200.000` : ''})` : `(${numberOfPeople} Orang × Rp ${selectedPkg?.price.toLocaleString('id-ID')})`}:
               </span>
               <strong style={{ fontSize: '1.25rem', color: 'var(--primary-ocean)' }}>
                 Rp {finalTotalPrice.toLocaleString('id-ID')}
