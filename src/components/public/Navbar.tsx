@@ -4,7 +4,10 @@ import React, { useState, useEffect, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import LanguageSwitcher from "@/components/public/LanguageSwitcher";
+import LanguageSwitcher, {
+  SUPPORTED_LANGUAGES,
+  LanguageOption,
+} from "@/components/public/LanguageSwitcher";
 import {
   Waves,
   Menu,
@@ -20,8 +23,8 @@ import {
   ChevronRight,
   Globe,
   Check,
-  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface NavbarProps {
   whatsappNumber?: string;
@@ -84,10 +87,27 @@ export default function Navbar({
     return pathname.startsWith(href);
   };
 
-  const handleSwitchLanguage = (newLocale: "id" | "en") => {
-    if (newLocale === locale || isPending) return;
+  const handleSwitchLanguage = (lang: LanguageOption) => {
+    if (!lang.isAvailable) {
+      if (lang.code === "id") {
+        toast.info(
+          "🇮🇩 Versi Bahasa Indonesia sedang dalam proses pengembangan (In Progress).",
+        );
+      } else if (lang.code === "de") {
+        toast.info("🇩🇪 Deutsche Version ist in Vorbereitung (In Progress).");
+      } else if (lang.code === "es") {
+        toast.info(
+          "🇪🇸 La versión en Español está en desarrollo (In Progress).",
+        );
+      } else {
+        toast.info(`${lang.label} translation is currently in progress.`);
+      }
+      return;
+    }
+
+    if (lang.code === locale || isPending) return;
     startTransition(() => {
-      router.replace(pathname, { locale: newLocale });
+      router.replace(pathname, { locale: lang.code as any });
     });
   };
 
@@ -309,7 +329,7 @@ export default function Navbar({
       </div>
 
       {/* ========================================================================= */}
-      {/* 📱 MODERN MOBILE SLIDE-OVER DRAWER VIA PORTAL (100% RELIABLE STACKING) */}
+      {/* 📱 MODERN MOBILE SLIDE-OVER DRAWER VIA PORTAL */}
       {/* ========================================================================= */}
       {mounted &&
         mobileMenuOpen &&
@@ -424,75 +444,102 @@ export default function Navbar({
                   </button>
                 </div>
 
-                {/* Language Switcher Selector Tabs */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "6px",
-                    background: "var(--bg-alt)",
-                    padding: "4px",
-                    borderRadius: "var(--radius-sm)",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => handleSwitchLanguage("id")}
-                    disabled={isPending}
+                {/* Multilingual Selector Grid */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div
                     style={{
-                      padding: "8px 10px",
-                      borderRadius: "6px",
-                      border: "none",
-                      background: locale === "id" ? "#ffffff" : "transparent",
-                      color:
-                        locale === "id"
-                          ? "var(--primary-ocean)"
-                          : "var(--text-muted)",
-                      fontWeight: locale === "id" ? 700 : 500,
-                      fontSize: "0.82rem",
-                      cursor: "pointer",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      color: "var(--text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      marginBottom: "8px",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      boxShadow:
-                        locale === "id" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
-                      transition: "all 0.15s ease",
+                      gap: "4px",
                     }}
                   >
-                    <span>🇮🇩 Indonesia</span>
-                    {locale === "id" && <Check size={12} />}
-                  </button>
+                    <Globe size={12} color="var(--primary-ocean)" />
+                    <span>Language / Bahasa</span>
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleSwitchLanguage("en")}
-                    disabled={isPending}
+                  <div
                     style={{
-                      padding: "8px 10px",
-                      borderRadius: "6px",
-                      border: "none",
-                      background: locale === "en" ? "#ffffff" : "transparent",
-                      color:
-                        locale === "en"
-                          ? "var(--primary-ocean)"
-                          : "var(--text-muted)",
-                      fontWeight: locale === "en" ? 700 : 500,
-                      fontSize: "0.82rem",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
                       gap: "6px",
-                      boxShadow:
-                        locale === "en" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
-                      transition: "all 0.15s ease",
                     }}
                   >
-                    <span>🇬🇧 English</span>
-                    {locale === "en" && <Check size={12} />}
-                  </button>
+                    {SUPPORTED_LANGUAGES.map((lang) => {
+                      const isSelected =
+                        locale === lang.code && lang.isAvailable;
+                      return (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => handleSwitchLanguage(lang)}
+                          disabled={isPending}
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: "var(--radius-sm)",
+                            border: isSelected
+                              ? "1.5px solid var(--primary-ocean)"
+                              : "1px solid var(--border-light)",
+                            background: isSelected
+                              ? "var(--primary-surface)"
+                              : "var(--bg-alt)",
+                            color: isSelected
+                              ? "var(--primary-ocean)"
+                              : "var(--primary-deep)",
+                            fontWeight: isSelected ? 700 : 500,
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "4px",
+                            textAlign: "left",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                            }}
+                          >
+                            <span>{lang.flag}</span>
+                            <span style={{ fontSize: "0.76rem" }}>
+                              {lang.nativeLabel}
+                            </span>
+                          </div>
+
+                          {lang.statusBadge ? (
+                            <span
+                              style={{
+                                fontSize: "0.6rem",
+                                fontWeight: 700,
+                                padding: "1px 4px",
+                                borderRadius: "var(--radius-full)",
+                                background: "#fef3c7",
+                                color: "#b45309",
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              Soon
+                            </span>
+                          ) : isSelected ? (
+                            <Check
+                              size={12}
+                              color="var(--primary-ocean)"
+                              strokeWidth={2.5}
+                            />
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Navigation Links List */}
@@ -643,7 +690,7 @@ export default function Navbar({
 
                 {/* Admin Link */}
                 <div style={{ textAlign: "center", marginTop: "2px" }}>
-                  <Link
+                  <a
                     href="/admin"
                     onClick={() => setMobileMenuOpen(false)}
                     style={{
@@ -658,7 +705,7 @@ export default function Navbar({
                   >
                     <Lock size={12} />
                     <span>{t("admin")} Portal</span>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
