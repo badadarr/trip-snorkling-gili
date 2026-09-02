@@ -207,6 +207,15 @@ export default function BookingForm({
     "Please include your Booking Reference Code in the transfer note.",
   );
 
+  // Automatically adjust paymentMethod if active setting is disabled
+  useEffect(() => {
+    if (!qrisActive && bankActive && paymentMethod === "qris") {
+      setPaymentMethod("bank_transfer");
+    } else if (!bankActive && qrisActive && paymentMethod === "bank_transfer") {
+      setPaymentMethod("qris");
+    }
+  }, [qrisActive, bankActive, paymentMethod]);
+
   // Current package
   const currentPackage =
     packagesList.find((p) => p.slug === selectedPkgSlug) || packagesList[0];
@@ -1725,156 +1734,184 @@ Please confirm slot availability and payment receipt. Thank you!`;
             >
               Choose Payment Method:
             </label>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("qris")}
-                style={{
-                  padding: "16px 14px",
-                  borderRadius: "var(--radius-md)",
-                  border:
-                    paymentMethod === "qris"
-                      ? "2px solid var(--primary-ocean)"
-                      : "1px solid var(--border-light)",
-                  background:
-                    paymentMethod === "qris"
-                      ? "var(--primary-surface)"
-                      : "#ffffff",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  textAlign: "left",
-                  boxShadow:
-                    paymentMethod === "qris"
-                      ? "0 4px 12px rgba(0, 180, 216, 0.15)"
-                      : "none",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <div
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "8px",
-                    background:
-                      paymentMethod === "qris" ? "#00b4d8" : "#f1f5f9",
-                    color: paymentMethod === "qris" ? "#ffffff" : "#64748b",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <QrCode size={22} />
-                </div>
-                <div>
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: "0.95rem",
-                      fontWeight: 700,
-                      color:
-                        paymentMethod === "qris"
-                          ? "var(--primary-deep)"
-                          : "var(--text-main)",
-                    }}
-                  >
-                    QRIS (Scan & Pay)
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: "0.75rem",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Instant E-Wallet & Mobile Banking
-                  </span>
-                </div>
-              </button>
 
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("bank_transfer")}
+            {qrisActive || bankActive ? (
+              <div
                 style={{
-                  padding: "16px 14px",
-                  borderRadius: "var(--radius-md)",
-                  border:
-                    paymentMethod === "bank_transfer"
-                      ? "2px solid var(--primary-ocean)"
-                      : "1px solid var(--border-light)",
-                  background:
-                    paymentMethod === "bank_transfer"
-                      ? "var(--primary-surface)"
-                      : "#ffffff",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
+                  display: "grid",
+                  gridTemplateColumns:
+                    qrisActive && bankActive
+                      ? "repeat(auto-fit, minmax(240px, 1fr))"
+                      : "1fr",
                   gap: "12px",
-                  textAlign: "left",
-                  boxShadow:
-                    paymentMethod === "bank_transfer"
-                      ? "0 4px 12px rgba(0, 180, 216, 0.15)"
-                      : "none",
-                  transition: "all 0.2s ease",
                 }}
               >
-                <div
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "8px",
-                    background:
-                      paymentMethod === "bank_transfer"
-                        ? "var(--primary-ocean)"
-                        : "#f1f5f9",
-                    color:
-                      paymentMethod === "bank_transfer" ? "#ffffff" : "#64748b",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Building2 size={22} />
-                </div>
-                <div>
-                  <span
+                {/* 1. QRIS Button (Only if active) */}
+                {qrisActive && (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("qris")}
                     style={{
-                      display: "block",
-                      fontSize: "0.95rem",
-                      fontWeight: 700,
-                      color:
+                      padding: "16px 14px",
+                      borderRadius: "var(--radius-md)",
+                      border:
+                        paymentMethod === "qris"
+                          ? "2px solid var(--primary-ocean)"
+                          : "1px solid var(--border-light)",
+                      background:
+                        paymentMethod === "qris"
+                          ? "var(--primary-surface)"
+                          : "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      textAlign: "left",
+                      boxShadow:
+                        paymentMethod === "qris"
+                          ? "0 4px 12px rgba(0, 180, 216, 0.15)"
+                          : "none",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "8px",
+                        background:
+                          paymentMethod === "qris" ? "#00b4d8" : "#f1f5f9",
+                        color: paymentMethod === "qris" ? "#ffffff" : "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <QrCode size={22} />
+                    </div>
+                    <div>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "0.95rem",
+                          fontWeight: 700,
+                          color:
+                            paymentMethod === "qris"
+                              ? "var(--primary-deep)"
+                              : "var(--text-main)",
+                        }}
+                      >
+                        QRIS (Scan & Pay)
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        Instant E-Wallet & Mobile Banking
+                      </span>
+                    </div>
+                  </button>
+                )}
+
+                {/* 2. Bank Transfer Button (Only if active) */}
+                {bankActive && (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("bank_transfer")}
+                    style={{
+                      padding: "16px 14px",
+                      borderRadius: "var(--radius-md)",
+                      border:
                         paymentMethod === "bank_transfer"
-                          ? "var(--primary-deep)"
-                          : "var(--text-main)",
+                          ? "2px solid var(--primary-ocean)"
+                          : "1px solid var(--border-light)",
+                      background:
+                        paymentMethod === "bank_transfer"
+                          ? "var(--primary-surface)"
+                          : "#ffffff",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      textAlign: "left",
+                      boxShadow:
+                        paymentMethod === "bank_transfer"
+                          ? "0 4px 12px rgba(0, 180, 216, 0.15)"
+                          : "none",
+                      transition: "all 0.2s ease",
                     }}
                   >
-                    Bank Transfer
-                  </span>
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: "0.75rem",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Manual Bank Transfer
-                  </span>
-                </div>
-              </button>
-            </div>
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "8px",
+                        background:
+                          paymentMethod === "bank_transfer"
+                            ? "var(--primary-ocean)"
+                            : "#f1f5f9",
+                        color:
+                          paymentMethod === "bank_transfer"
+                            ? "#ffffff"
+                            : "#64748b",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Building2 size={22} />
+                    </div>
+                    <div>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "0.95rem",
+                          fontWeight: 700,
+                          color:
+                            paymentMethod === "bank_transfer"
+                              ? "var(--primary-deep)"
+                              : "var(--text-main)",
+                        }}
+                      >
+                        Bank Transfer
+                      </span>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "0.75rem",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        Manual Transfer ({bankName})
+                      </span>
+                    </div>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: "#fef3c7",
+                  border: "1px solid #fde68a",
+                  borderRadius: "var(--radius-md)",
+                  padding: "16px",
+                  color: "#92400e",
+                  fontSize: "0.88rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                ⚠️ <strong>Online Payment Notice:</strong> Direct online payment is currently offline. You can proceed with booking reservation and our team will provide alternative payment instructions on WhatsApp.
+              </div>
+            )}
           </div>
 
           {/* ACTIVE PAYMENT METHOD DETAILS */}
-          {paymentMethod === "qris" && (
+          {qrisActive && paymentMethod === "qris" && (
             <div
               style={{
                 background: "#f8fafc",
@@ -2047,7 +2084,7 @@ Please confirm slot availability and payment receipt. Thank you!`;
             </div>
           )}
 
-          {paymentMethod === "bank_transfer" && (
+          {bankActive && paymentMethod === "bank_transfer" && (
             <div
               style={{
                 background: "#f8fafc",

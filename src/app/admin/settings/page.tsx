@@ -1627,12 +1627,27 @@ function AdminSettingsContent() {
                     <input
                       type="checkbox"
                       checked={settings["payment_qris_active"] !== "false"}
-                      onChange={(e) =>
-                        handleChange(
-                          "payment_qris_active",
-                          e.target.checked ? "true" : "false",
-                        )
-                      }
+                      onChange={async (e) => {
+                        const newVal = e.target.checked ? "true" : "false";
+                        handleChange("payment_qris_active", newVal);
+                        try {
+                          await fetch("/api/settings", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              key: "payment_qris_active",
+                              value: newVal,
+                            }),
+                          });
+                          toast.success(
+                            newVal === "true"
+                              ? "Opsi QRIS berhasil diaktifkan!"
+                              : "Opsi QRIS berhasil dinonaktifkan!",
+                          );
+                        } catch (err) {
+                          console.warn("Failed to auto-save QRIS toggle:", err);
+                        }
+                      }}
                       style={{
                         width: "18px",
                         height: "18px",
@@ -1952,12 +1967,27 @@ function AdminSettingsContent() {
                     <input
                       type="checkbox"
                       checked={settings["payment_bank_active"] !== "false"}
-                      onChange={(e) =>
-                        handleChange(
-                          "payment_bank_active",
-                          e.target.checked ? "true" : "false",
-                        )
-                      }
+                      onChange={async (e) => {
+                        const newVal = e.target.checked ? "true" : "false";
+                        handleChange("payment_bank_active", newVal);
+                        try {
+                          await fetch("/api/settings", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              key: "payment_bank_active",
+                              value: newVal,
+                            }),
+                          });
+                          toast.success(
+                            newVal === "true"
+                              ? "Opsi Transfer Bank berhasil diaktifkan!"
+                              : "Opsi Transfer Bank berhasil dinonaktifkan!",
+                          );
+                        } catch (err) {
+                          console.warn("Failed to auto-save Bank toggle:", err);
+                        }
+                      }}
                       style={{
                         width: "18px",
                         height: "18px",
