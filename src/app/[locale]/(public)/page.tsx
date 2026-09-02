@@ -23,7 +23,7 @@ export default async function HomePage() {
   const settings = await getSettings();
 
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   const activePackages = allPackages.filter((p) => p.isActive);
 

@@ -385,14 +385,22 @@ export const initialAboutData = {
 export const initialSiteSettings = [
   { key: "site_name", value: "Trip Snorkeling Gili Trawangan", section: "general", label: "Nama Website / Bisnis" },
   { key: "tagline", value: "Penyedia Wisata Snorkeling Terbaik di Gili Trawangan & 3 Gili", section: "general", label: "Tagline Bisnis" },
-  { key: "whatsapp_number", value: "6285921358615", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
+  { key: "whatsapp_number", value: "6282236851307", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
   { key: "whatsapp_message", value: "Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi / booking paket snorkeling...", section: "contact", label: "Pesan Default WhatsApp" },
-  { key: "phone", value: "+62 878-6455-1234", section: "contact", label: "Nomor Telepon" },
+  { key: "phone", value: "+62 822-3685-1307", section: "contact", label: "Nomor Telepon" },
   { key: "email", value: "info@snorkelinggilitrawangan.com", section: "contact", label: "Alamat Email" },
   { key: "address", value: "Jl. Pantai Gili Trawangan, Pemenang, Lombok Utara, Nusa Tenggara Barat, Indonesia", section: "contact", label: "Alamat / Lokasi Meeting Point" },
   { key: "instagram_url", value: "https://instagram.com/tripsnorkelinggili", section: "social", label: "Link Akun Instagram" },
   { key: "facebook_url", value: "https://facebook.com/tripsnorkelinggili", section: "social", label: "Link Facebook" },
   { key: "tiktok_url", value: "https://tiktok.com/@tripsnorkelinggili", section: "social", label: "Link TikTok" },
   { key: "tripadvisor_url", value: "https://tripadvisor.com", section: "social", label: "Link TripAdvisor" },
-  { key: "google_maps_url", value: "https://maps.google.com/?q=Gili+Trawangan", section: "contact", label: "Link Google Maps Meeting Point" }
+  { key: "google_maps_url", value: "https://maps.google.com/?q=Gili+Trawangan", section: "contact", label: "Link Google Maps Meeting Point" },
+  { key: "payment_qris_active", value: "true", section: "payment", label: "Status Aktif QRIS" },
+  { key: "payment_qris_name", value: "Trip Snorkeling Gili Trawangan", section: "payment", label: "Nama Merchant QRIS" },
+  { key: "payment_qris_image", value: "", section: "payment", label: "Gambar QR Code QRIS" },
+  { key: "payment_bank_active", value: "true", section: "payment", label: "Status Aktif Transfer Bank" },
+  { key: "payment_bank_name", value: "Bank Central Asia (BCA)", section: "payment", label: "Nama Bank" },
+  { key: "payment_bank_number", value: "8735-0123-4567", section: "payment", label: "Nomor Rekening Bank" },
+  { key: "payment_bank_holder", value: "Trip Snorkeling Gili", section: "payment", label: "Nama Pemilik Rekening" },
+  { key: "payment_bank_notes", value: "Mohon cantumkan Kode Booking pada berita transfer untuk verifikasi otomatis.", section: "payment", label: "Catatan Transfer Bank" }
 ];

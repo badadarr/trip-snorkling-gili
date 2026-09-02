@@ -24,7 +24,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
 
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   const name = pkg.nameEn || pkg.nameId;
   const tag = pkg.tagEn || pkg.tagId;

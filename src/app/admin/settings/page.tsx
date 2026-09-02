@@ -23,15 +23,47 @@ import {
   Lock,
   Key,
   ShieldCheck,
+  CreditCard,
+  QrCode,
+  Building2,
+  Upload,
+  Trash2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DEFAULT_MANIFEST_SETTINGS, generateManifestHtml } from '@/lib/manifestTemplate';
 
+import { useSearchParams } from 'next/navigation';
+
 export default function AdminSettingsPage() {
+  return (
+    <React.Suspense fallback={<div style={{ padding: '32px' }}>Memuat pengaturan...</div>}>
+      <AdminSettingsContent />
+    </React.Suspense>
+  );
+}
+
+function AdminSettingsContent() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') as any;
+
   const [settings, setSettings] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'contact' | 'location' | 'operations' | 'social' | 'manifest' | 'security'>('contact');
+  const [activeTab, setActiveTab] = useState<'contact' | 'location' | 'operations' | 'social' | 'payment' | 'manifest' | 'security'>(
+    tabParam && ['contact', 'location', 'operations', 'social', 'payment', 'manifest', 'security'].includes(tabParam)
+      ? tabParam
+      : 'contact'
+  );
+  const [isUploadingQris, setIsUploadingQris] = useState(false);
+  const qrisFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Sync activeTab when query param changes
+  useEffect(() => {
+    if (tabParam && ['contact', 'location', 'operations', 'social', 'payment', 'manifest', 'security'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Security & Admin Profile State
   const [adminEmail, setAdminEmail] = useState('');
@@ -181,8 +213,9 @@ export default function AdminSettingsPage() {
           { key: 'location', label: '2. Lokasi Dermaga & Maps', icon: MapPin },
           { key: 'operations', label: '3. Jam & Sesi Operasional', icon: Clock },
           { key: 'social', label: '4. Sosial Media & SEO', icon: Globe },
-          { key: 'manifest', label: '5. Preset & Template Laporan Manifest', icon: Printer },
-          { key: 'security', label: '6. Keamanan & Akun Admin', icon: Lock },
+          { key: 'payment', label: '5. Metode Pembayaran (QRIS & Bank)', icon: CreditCard },
+          { key: 'manifest', label: '6. Preset & Template Laporan Manifest', icon: Printer },
+          { key: 'security', label: '7. Keamanan & Akun Admin', icon: Lock },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -812,6 +845,260 @@ export default function AdminSettingsPage() {
                       borderRadius: '4px',
                       boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
                     }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: PAYMENT METHODS (QRIS & BANK TRANSFER) */}
+          {activeTab === 'payment' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <CreditCard size={22} color="var(--primary-ocean)" />
+                <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-deep)', margin: 0 }}>
+                  Kelola Metode Pembayaran (QRIS & Transfer Bank)
+                </h3>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                Atur informasi pembayaran manual yang akan ditampilkan kepada tamu saat reservasi online (QRIS Barcode, Nama Bank, Nomor Rekening, dan Pemilik Rekening).
+              </p>
+
+              {/* 1. QRIS SECTION */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '24px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#dbeafe', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <QrCode size={20} />
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)', margin: 0, fontWeight: 700 }}>
+                        1. Pembayaran QRIS (Scan & Pay)
+                      </h4>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Mendukung semua e-Wallet & Mobile Banking (BCA, Mandiri, GoPay, OVO, Dana, ShopeePay)
+                      </span>
+                    </div>
+                  </div>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={settings['payment_qris_active'] !== 'false'}
+                      onChange={(e) => handleChange('payment_qris_active', e.target.checked ? 'true' : 'false')}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--primary-ocean)' }}
+                    />
+                    <span>Aktifkan Opsi QRIS</span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                  {/* Merchant Name */}
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Nama Merchant / Akun QRIS</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings['payment_qris_name'] || ''}
+                      onChange={(e) => handleChange('payment_qris_name', e.target.value)}
+                      placeholder="e.g. Trip Snorkeling Gili Trawangan"
+                    />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      Nama bisnis yang muncul di aplikasi pembayaran saat tamu scan QR code
+                    </span>
+                  </div>
+
+                  {/* QRIS Image Uploader */}
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Upload Gambar QR Code QRIS</label>
+                    <input
+                      ref={qrisFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setIsUploadingQris(true);
+                        const toastId = toast.loading('Mengupload barcode QRIS...');
+                        try {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          const res = await fetch('/api/upload', {
+                            method: 'POST',
+                            body: formData,
+                          });
+                          if (!res.ok) throw new Error('Gagal mengupload gambar');
+                          const data = await res.json();
+                          handleChange('payment_qris_image', data.url);
+                          toast.success('Barcode QRIS berhasil diupload!', { id: toastId });
+                        } catch (err: any) {
+                          toast.error(err.message || 'Upload gagal', { id: toastId });
+                        } finally {
+                          setIsUploadingQris(false);
+                        }
+                      }}
+                    />
+
+                    {settings['payment_qris_image'] ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#ffffff', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
+                        <img
+                          src={settings['payment_qris_image']}
+                          alt="QRIS Preview"
+                          style={{ width: '64px', height: '64px', objectFit: 'contain', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--primary-deep)', display: 'block' }}>
+                            Gambar Barcode Aktif
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                            QRIS siap discan oleh tamu di halaman reservasi
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => qrisFileInputRef.current?.click()}
+                            disabled={isUploadingQris}
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+                          >
+                            Ganti
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleChange('payment_qris_image', '')}
+                            className="btn btn-danger btn-sm"
+                            style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+                            title="Hapus Barcode"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => qrisFileInputRef.current?.click()}
+                        disabled={isUploadingQris}
+                        style={{
+                          width: '100%',
+                          padding: '24px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '2px dashed var(--primary-ocean)',
+                          background: '#ffffff',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: 'var(--primary-ocean)',
+                        }}
+                      >
+                        {isUploadingQris ? (
+                          <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Upload size={24} />
+                        )}
+                        <span style={{ fontSize: '0.88rem', fontWeight: 600 }}>
+                          {isUploadingQris ? 'Mengupload Gambar...' : 'Klik untuk Upload Gambar Barcode QRIS (PNG/JPG)'}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                          File akan disimpan dan ditampilkan langsung saat tamu memilih opsi QRIS
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. BANK TRANSFER SECTION */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '24px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#fef3c7', color: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Building2 size={20} />
+                    </div>
+                    <div>
+                      <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)', margin: 0, fontWeight: 700 }}>
+                        2. Transfer Rekening Bank (Manual Transfer)
+                      </h4>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                        Informasi rekening tujuan transfer untuk tamu yang memilih metode transfer bank
+                      </span>
+                    </div>
+                  </div>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={settings['payment_bank_active'] !== 'false'}
+                      onChange={(e) => handleChange('payment_bank_active', e.target.checked ? 'true' : 'false')}
+                      style={{ width: '18px', height: '18px', accentColor: 'var(--primary-ocean)' }}
+                    />
+                    <span>Aktifkan Opsi Transfer Bank</span>
+                  </label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Nama Bank</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings['payment_bank_name'] || ''}
+                      onChange={(e) => handleChange('payment_bank_name', e.target.value)}
+                      placeholder="e.g. Bank Central Asia (BCA) / Mandiri / BRI"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Nomor Rekening Bank</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings['payment_bank_number'] || ''}
+                      onChange={(e) => handleChange('payment_bank_number', e.target.value)}
+                      placeholder="e.g. 8735-0123-4567"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Nama Pemilik Rekening (Atas Nama)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings['payment_bank_holder'] || ''}
+                      onChange={(e) => handleChange('payment_bank_holder', e.target.value)}
+                      placeholder="e.g. Trip Snorkeling Gili / Nama Pemilik"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Petunjuk / Catatan Transfer untuk Tamu</label>
+                  <textarea
+                    rows={2}
+                    className="form-control"
+                    value={settings['payment_bank_notes'] || ''}
+                    onChange={(e) => handleChange('payment_bank_notes', e.target.value)}
+                    placeholder="e.g. Mohon cantumkan Kode Booking pada berita transfer. Upload bukti transfer setelah melakukan pembayaran."
                   />
                 </div>
               </div>

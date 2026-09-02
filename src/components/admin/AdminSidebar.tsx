@@ -41,7 +41,6 @@ export default function AdminSidebar() {
     { href: '/admin/testimoni', label: 'Kelola Testimoni', icon: MessageSquare },
     { href: '/admin/faq', label: 'Kelola FAQ', icon: HelpCircle },
     { href: '/admin/about', label: 'Kelola Tentang Kami', icon: Info },
-    { href: '/admin/settings', label: 'Pengaturan Kontak & Web', icon: Settings },
   ];
 
   return (

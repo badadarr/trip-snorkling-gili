@@ -5,7 +5,13 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Waves, MapPin, Phone, Mail, MessageCircle, Lock } from "lucide-react";
 
-export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
+export default function Footer({
+  siteSettings,
+  packages = [],
+}: {
+  siteSettings?: any[];
+  packages?: any[];
+}) {
   const tNav = useTranslations("nav");
   const tFooter = useTranslations("footer");
 
@@ -15,8 +21,8 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
     return found?.value || fallback;
   };
 
-  const whatsapp = getSetting("whatsapp_number", "6285921358615");
-  const phone = getSetting("phone", "+62 859-2135-8615");
+  const whatsapp = getSetting("whatsapp_number", "6282236851307");
+  const phone = getSetting("phone", "+62 822-3685-1307");
   const email = getSetting("email", "info@snorkelinggilitrawangan.com");
   const address = getSetting(
     "address",
@@ -334,38 +340,53 @@ export default function Footer({ siteSettings }: { siteSettings?: any[] }) {
                 gap: "12px",
               }}
             >
-              <li>
-                <Link
-                  href="/paket/public-sharing-trip-3-gili"
-                  style={{ color: "#94a3b8", fontSize: "0.9rem" }}
-                >
-                  Public Sharing Trip (3 Gili)
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/paket/private-glass-bottom-boat"
-                  style={{ color: "#94a3b8", fontSize: "0.9rem" }}
-                >
-                  Private Glass Bottom Boat
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/paket/sunset-snorkeling-private-tour"
-                  style={{ color: "#94a3b8", fontSize: "0.9rem" }}
-                >
-                  Sunset Snorkeling Tour
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/paket/speed-boat-snorkeling-lombok-gili"
-                  style={{ color: "#94a3b8", fontSize: "0.9rem" }}
-                >
-                  Speedboat Lombok - 3 Gili
-                </Link>
-              </li>
+              {packages && packages.length > 0 ? (
+                packages.slice(0, 5).map((pkg) => (
+                  <li key={pkg.id || pkg.slug}>
+                    <Link
+                      href={`/paket/${pkg.slug}`}
+                      style={{ color: "#94a3b8", fontSize: "0.9rem" }}
+                    >
+                      {pkg.nameEn || pkg.nameId}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      href="/paket/public-sharing-trip-3-gili"
+                      style={{ color: "#94a3b8", fontSize: "0.9rem" }}
+                    >
+                      Public Sharing Trip (3 Gili)
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/paket/private-glass-bottom-boat"
+                      style={{ color: "#94a3b8", fontSize: "0.9rem" }}
+                    >
+                      Private Glass Bottom Boat
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/paket/sunset-snorkeling-private-tour"
+                      style={{ color: "#94a3b8", fontSize: "0.9rem" }}
+                    >
+                      Sunset Snorkeling Tour
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/paket/speed-boat-snorkeling-lombok-gili"
+                      style={{ color: "#94a3b8", fontSize: "0.9rem" }}
+                    >
+                      Speedboat Lombok - 3 Gili
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 

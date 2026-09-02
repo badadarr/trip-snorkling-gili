@@ -7,7 +7,7 @@ import { Calendar, MessageCircle, Sparkles } from 'lucide-react';
 
 export default function CtaBanner({ whatsappNumber }: { whatsappNumber?: string }) {
   const t = useTranslations('cta');
-  const phone = whatsappNumber || '6287864551234';
+  const phone = whatsappNumber || '6282236851307';
 
   return (
     <section

@@ -44,7 +44,7 @@ export default async function AdminDashboardPage() {
   const todayTotalPassengers = todayTrips.reduce((acc, b) => acc + (b.numberOfPeople || 0), 0);
 
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   return (
     <div>

@@ -17,7 +17,7 @@ export default async function BookingPage({ searchParams }: PageProps) {
   const settings = await getSettings();
 
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   const activePackages = packagesList.filter((p) => p.isActive);
 
@@ -54,6 +54,7 @@ export default async function BookingPage({ searchParams }: PageProps) {
             packagesList={activePackages}
             initialSlug={params.package}
             whatsappNumber={whatsappNumber}
+            siteSettings={settings}
           />
         </div>
       </section>

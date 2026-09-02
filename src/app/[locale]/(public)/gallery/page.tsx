@@ -12,7 +12,7 @@ export default async function GalleryPage() {
   const galleryItems = await getGalleryList();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   return (
     <div>

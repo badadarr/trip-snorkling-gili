@@ -11,7 +11,7 @@ export default async function AboutPage() {
   const about = await getAbout();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
-  const whatsappNumber = waSetting?.value || '6287864551234';
+  const whatsappNumber = waSetting?.value || '6282236851307';
 
   const title = about.titleEn || about.titleId || t('about.title');
   const subtitle = about.subtitleEn || about.subtitleId || t('about.subtitle');

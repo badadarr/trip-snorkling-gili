@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PackageData } from './PackageCard';
-import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass, AlertCircle, CreditCard, Upload, Image as ImageIcon, QrCode, Building2, Info } from 'lucide-react';
+import { Calendar, CheckCircle2, MessageCircle, ArrowLeft, Loader2, Compass, AlertCircle, CreditCard, Upload, Image as ImageIcon, QrCode, Building2, Info, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import CustomSelect from '@/components/ui/CustomSelect';
 import ModernDatePicker from '@/components/ui/ModernDatePicker';
@@ -15,13 +15,14 @@ interface BookingFormProps {
   packagesList: PackageData[];
   initialSlug?: string;
   whatsappNumber?: string;
+  siteSettings?: any[];
 }
 
-export default function BookingForm({ packagesList, initialSlug, whatsappNumber }: BookingFormProps) {
+export default function BookingForm({ packagesList, initialSlug, whatsappNumber, siteSettings }: BookingFormProps) {
   const t = useTranslations('booking');
   const tPkg = useTranslations('packages');
   const tCta = useTranslations('cta');
-  const phoneTarget = whatsappNumber || '6287864551234';
+  const phoneTarget = whatsappNumber || '6282236851307';
 
   const [selectedPkgSlug, setSelectedPkgSlug] = useState<string>(
     initialSlug || (packagesList.length > 0 ? packagesList[0].slug : '')
@@ -32,6 +33,8 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   const [numberOfPeople, setNumberOfPeople] = useState(2);
   const [tripDate, setTripDate] = useState('');
   const [tripSession, setTripSession] = useState('morning');
+  const [departureTime, setDepartureTime] = useState('09:30 AM');
+  const [tripDuration, setTripDuration] = useState('4 - 5 Hours (Standard)');
   const [pickupLocation, setPickupLocation] = useState('');
   const [specialRequests, setSpecialRequests] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'bank_transfer'>('qris');
@@ -40,6 +43,24 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
   const [submittedBooking, setSubmittedBooking] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [copiedBank, setCopiedBank] = useState(false);
+
+  // Helper to get settings
+  const getSetting = (key: string, fallback: string = '') => {
+    if (!siteSettings) return fallback;
+    const found = siteSettings.find((s) => s.key === key);
+    return found?.value !== undefined ? found.value : fallback;
+  };
+
+  const qrisActive = getSetting('payment_qris_active', 'true') !== 'false';
+  const qrisName = getSetting('payment_qris_name', 'Trip Snorkeling Gili Trawangan');
+  const qrisImage = getSetting('payment_qris_image', '');
+
+  const bankActive = getSetting('payment_bank_active', 'true') !== 'false';
+  const bankName = getSetting('payment_bank_name', 'Bank Central Asia (BCA)');
+  const bankNumber = getSetting('payment_bank_number', '8735-0123-4567');
+  const bankHolder = getSetting('payment_bank_holder', 'Trip Snorkeling Gili');
+  const bankNotes = getSetting('payment_bank_notes', 'Mohon cantumkan Kode Booking pada berita transfer.');
 
   // Payment proof upload state
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
@@ -98,6 +119,21 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
     }
   };
 
+  // Sync duration when package changes
+  useEffect(() => {
+    if (currentPackage?.durationEn) {
+      setTripDuration(currentPackage.durationEn);
+    }
+  }, [selectedPkgSlug]);
+
+  const getFormattedSession = () => {
+    if (!isPrivatePackage) {
+      return tripSession === 'morning' ? 'Morning Session (09:30 AM WITA)' : 'Afternoon Session (01:00 PM WITA)';
+    }
+    const sessionLabel = tripSession === 'morning' ? 'Morning' : tripSession === 'afternoon' ? 'Afternoon' : tripSession === 'sunset' ? 'Sunset' : 'Custom';
+    return `${sessionLabel} (Departure: ${departureTime} WITA) • Duration: ${tripDuration}`;
+  };
+
   const totals = computePrice();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,7 +178,7 @@ export default function BookingForm({ packagesList, initialSlug, whatsappNumber 
         customerPhone: customerPhone.trim(),
         numberOfPeople: Number(numberOfPeople),
         tripDate,
-        tripSession,
+        tripSession: getFormattedSession(),
         pickupLocation: pickupLocation.trim(),
         specialRequests: specialRequests.trim(),
         totalPriceIdr: totals.idr,
@@ -231,7 +267,7 @@ I have submitted an online booking with the following details:
 - Package: *${packageName}* (${tripType})
 - Name: *${customerName}*
 - Trip Date: *${tripDate}*
-- Session: *${tripSession}*
+- Session & Schedule: *${getFormattedSession()}*
 - Guests: *${numberOfPeople} Person(s)*
 - Payment Method: *${paymentMethod === 'qris' ? 'QRIS' : 'Bank Transfer'}*
 - Total Price: *${totals.usd ? `$${totals.usd} USD` : ''}* (~ Rp ${totals.idr.toLocaleString('id-ID')})
@@ -298,7 +334,8 @@ Please confirm slot availability and payment details. Thank you!`;
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.88rem' }}>
             <div><strong>Package:</strong> {currentPackage?.nameEn || currentPackage?.nameId} ({isPrivatePackage ? 'Private' : 'Public'})</div>
             <div><strong>Name:</strong> {customerName}</div>
-            <div><strong>Date:</strong> {tripDate} ({tripSession})</div>
+            <div><strong>Date:</strong> {tripDate}</div>
+            <div><strong>Session:</strong> {getFormattedSession()}</div>
             <div><strong>Guests:</strong> {numberOfPeople} Person(s) {isPrivatePackage && numberOfPeople > PRIVATE_MAX_PAX ? '(Extra charge applies)' : ''}</div>
             <div><strong>Payment:</strong> {paymentMethod === 'qris' ? 'QRIS' : 'Bank Transfer'}</div>
             <div><strong>Total:</strong> ${totals.usd} USD (~ Rp {totals.idr.toLocaleString('id-ID')})</div>
@@ -308,60 +345,167 @@ Please confirm slot availability and payment details. Thank you!`;
         {/* Payment Method & Upload Proof Section */}
         <div
           style={{
-            background: '#fffbeb',
+            background: '#ffffff',
             borderRadius: 'var(--radius-md)',
-            padding: '20px',
+            padding: '24px',
             textAlign: 'left',
             marginBottom: '20px',
-            border: '1px solid #fde68a',
+            border: '1.5px solid rgba(0, 180, 216, 0.3)',
+            boxShadow: '0 4px 20px rgba(0, 50, 100, 0.06)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <CreditCard size={20} color="#b45309" />
-            <h4 style={{ fontSize: '0.95rem', color: '#92400e', margin: 0 }}>
-              {t('paymentMethodTitle')}
-            </h4>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-            <div
-              style={{
-                padding: '12px',
-                borderRadius: 'var(--radius-sm)',
-                border: paymentMethod === 'qris' ? '2px solid #d97706' : '1px solid #e5e7eb',
-                background: paymentMethod === 'qris' ? '#fef3c7' : '#ffffff',
-                textAlign: 'center',
-              }}
-            >
-              <QrCode size={24} color="#b45309" style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#92400e' }}>QRIS</div>
-              <div style={{ fontSize: '0.72rem', color: '#a16207' }}>Scan & Pay</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--primary-surface)', color: 'var(--primary-ocean)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CreditCard size={18} />
             </div>
-            <div
-              style={{
-                padding: '12px',
-                borderRadius: 'var(--radius-sm)',
-                border: paymentMethod === 'bank_transfer' ? '2px solid #d97706' : '1px solid #e5e7eb',
-                background: paymentMethod === 'bank_transfer' ? '#fef3c7' : '#ffffff',
-                textAlign: 'center',
-              }}
-            >
-              <Building2 size={24} color="#b45309" style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#92400e' }}>Bank Transfer</div>
-              <div style={{ fontSize: '0.72rem', color: '#a16207' }}>Manual Transfer</div>
+            <div>
+              <h4 style={{ fontSize: '1rem', color: 'var(--primary-deep)', margin: 0, fontWeight: 700 }}>
+                Payment Instructions: {paymentMethod === 'qris' ? 'QRIS (Scan & Pay)' : 'Bank Transfer'}
+              </h4>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                Please complete your payment using the details below
+              </span>
             </div>
           </div>
 
-          <p style={{ fontSize: '0.82rem', color: '#a16207', marginBottom: '16px', lineHeight: 1.5 }}>
-            {t('paymentMethodDesc')}
-          </p>
+          {/* QRIS PAYMENT CARD */}
+          {paymentMethod === 'qris' && (
+            <div
+              style={{
+                background: '#f8fafc',
+                border: '1px solid var(--border-light)',
+                borderRadius: 'var(--radius-md)',
+                padding: '20px',
+                textAlign: 'center',
+                marginBottom: '18px',
+              }}
+            >
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: 'var(--radius-full)', background: '#dbeafe', color: '#1e40af', fontSize: '0.75rem', fontWeight: 700, marginBottom: '12px' }}>
+                <QrCode size={13} />
+                <span>QRIS Code</span>
+              </div>
+
+              {qrisImage ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '2px solid var(--primary-ocean)',
+                      display: 'inline-block',
+                      boxShadow: '0 4px 12px rgba(0, 180, 216, 0.15)',
+                    }}
+                  >
+                    <img
+                      src={qrisImage}
+                      alt="QRIS Barcode"
+                      style={{
+                        maxWidth: '220px',
+                        maxHeight: '220px',
+                        width: '100%',
+                        height: 'auto',
+                        display: 'block',
+                      }}
+                    />
+                  </div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary-deep)' }}>
+                    {qrisName}
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: '360px', margin: '0 auto', lineHeight: 1.4 }}>
+                    Scan QR code using any e-Wallet or Mobile Banking (BCA, Mandiri, GoPay, OVO, Dana, ShopeePay).
+                  </p>
+                </div>
+              ) : (
+                <div style={{ padding: '20px 0' }}>
+                  <QrCode size={48} color="var(--primary-ocean)" style={{ margin: '0 auto 10px' }} />
+                  <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--primary-deep)', marginBottom: '4px' }}>
+                    {qrisName}
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '360px', margin: '0 auto' }}>
+                    QRIS payment details will also be confirmed directly via WhatsApp support.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* BANK TRANSFER CARD */}
+          {paymentMethod === 'bank_transfer' && (
+            <div
+              style={{
+                background: '#f8fafc',
+                border: '1px solid var(--border-light)',
+                borderRadius: 'var(--radius-md)',
+                padding: '20px',
+                marginBottom: '18px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <Building2 size={18} color="var(--primary-ocean)" />
+                <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--primary-deep)' }}>
+                  {bankName}
+                </span>
+              </div>
+
+              <div style={{ background: '#ffffff', padding: '14px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', letterSpacing: '0.04em' }}>
+                      Account Number (Nomor Rekening)
+                    </span>
+                    <strong style={{ fontSize: '1.25rem', color: 'var(--primary-ocean)', letterSpacing: '0.04em', fontFamily: 'monospace' }}>
+                      {bankNumber}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(bankNumber.replace(/[^0-9]/g, ''));
+                      setCopiedBank(true);
+                      toast.success('Nomor rekening berhasil disalin!');
+                      setTimeout(() => setCopiedBank(false), 2500);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: 'var(--radius-full)',
+                      border: '1px solid var(--primary-ocean)',
+                      background: copiedBank ? '#d1fae5' : 'var(--primary-surface)',
+                      color: copiedBank ? '#065f46' : 'var(--primary-ocean)',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {copiedBank ? <Check size={13} /> : <Copy size={13} />}
+                    <span>{copiedBank ? 'Copied!' : 'Copy Number'}</span>
+                  </button>
+                </div>
+
+                <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed var(--border-light)', display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Account Holder (Atas Nama):</span>
+                  <strong style={{ color: 'var(--primary-deep)' }}>{bankHolder}</strong>
+                </div>
+              </div>
+
+              {bankNotes && (
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic', lineHeight: 1.4 }}>
+                  {bankNotes}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Upload Payment Proof */}
           <div
             style={{
-              background: '#ffffff',
+              background: '#fffbeb',
               borderRadius: 'var(--radius-sm)',
-              padding: '16px',
+              padding: '18px',
               border: '1px dashed #d97706',
             }}
           >
@@ -718,12 +862,12 @@ Please confirm slot availability and payment details. Thank you!`;
                 <input
                   type="number"
                   min="1"
-                  max={isPrivatePackage ? PRIVATE_MAX_PAX : 50}
+                  max="50"
                   className="form-control"
                   value={numberOfPeople}
                   onChange={(e) => {
                     const val = Math.max(1, parseInt(e.target.value) || 1);
-                    setNumberOfPeople(isPrivatePackage ? Math.min(PRIVATE_MAX_PAX, val) : val);
+                    setNumberOfPeople(val);
                     if (errors.numberOfPeople) setErrors((prev) => ({ ...prev, numberOfPeople: '' }));
                   }}
                   style={{
@@ -736,8 +880,7 @@ Please confirm slot availability and payment details. Thank you!`;
                   type="button"
                   onClick={() => {
                     setNumberOfPeople((prev) => {
-                      const max = isPrivatePackage ? PRIVATE_MAX_PAX : 50;
-                      const nextVal = Math.min(max, prev + 1);
+                      const nextVal = Math.min(50, prev + 1);
                       if (errors.numberOfPeople) setErrors((err) => ({ ...err, numberOfPeople: '' }));
                       return nextVal;
                     });
@@ -766,25 +909,34 @@ Please confirm slot availability and payment details. Thank you!`;
                   {errors.numberOfPeople}
                 </span>
               )}
-              {/* Private: Max 4 Pax info */}
+              {/* Private: Max 4 Pax info with extra charge warning */}
               {isPrivatePackage && (
                 <div
                   style={{
                     marginTop: '6px',
                     fontSize: '0.75rem',
-                    color: '#b45309',
-                    background: '#fffbeb',
-                    padding: '6px 10px',
+                    color: numberOfPeople > PRIVATE_MAX_PAX ? '#b45309' : '#475569',
+                    background: numberOfPeople > PRIVATE_MAX_PAX ? '#fffbeb' : '#f8fafc',
+                    padding: '8px 10px',
                     borderRadius: 'var(--radius-sm)',
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'flex-start',
                     gap: '6px',
-                    border: '1px solid #fde68a',
+                    border: numberOfPeople > PRIVATE_MAX_PAX ? '1px solid #fde68a' : '1px solid var(--border-light)',
+                    lineHeight: 1.4,
                   }}
                 >
-                  <AlertCircle size={13} />
+                  <AlertCircle size={14} color={numberOfPeople > PRIVATE_MAX_PAX ? '#b45309' : '#0284c7'} style={{ flexShrink: 0, marginTop: '2px' }} />
                   <span>
-                    Max. {PRIVATE_MAX_PAX} Pax per private trip. <strong>{t('extraChargeWarning')}</strong>
+                    {numberOfPeople > PRIVATE_MAX_PAX ? (
+                      <>
+                        <strong>{numberOfPeople} Guests selected ({numberOfPeople - PRIVATE_MAX_PAX} extra).</strong> Standard private trip rate covers up to {PRIVATE_MAX_PAX} pax. Additional charges apply for extra guests.
+                      </>
+                    ) : (
+                      <>
+                        Max. {PRIVATE_MAX_PAX} Pax included in base private trip. <strong>{t('extraChargeWarning')}</strong>.
+                      </>
+                    )}
                   </span>
                 </div>
               )}
@@ -821,6 +973,10 @@ Please confirm slot availability and payment details. Thank you!`;
                 setTripSession(s);
                 if (errors.tripSession) setErrors((prev) => ({ ...prev, tripSession: '' }));
               }}
+              departureTime={departureTime}
+              onDepartureTimeChange={setDepartureTime}
+              duration={tripDuration}
+              onDurationChange={setTripDuration}
               error={errors.tripSession}
               locale="en"
               packageType={packageType}
@@ -969,13 +1125,19 @@ Please confirm slot availability and payment details. Thank you!`;
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--text-muted)' }}>
                   {isPrivatePackage
-                    ? `Private Trip (Max ${PRIVATE_MAX_PAX} Pax)`
+                    ? `Base Private Trip (1-4 Pax)`
                     : `Rate per Person (${numberOfPeople}x)`}
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>
                   {formatUsd(totals.usd)} <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({formatIdr(totals.idr)})</span>
                 </span>
               </div>
+              {isPrivatePackage && numberOfPeople > PRIVATE_MAX_PAX && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.82rem', color: '#b45309' }}>
+                  <span>Extra Guests (+{numberOfPeople - PRIVATE_MAX_PAX} Pax):</span>
+                  <span style={{ fontWeight: 600 }}>Additional charge applies</span>
+                </div>
+              )}
               {isPrivatePackage && (
                 <div style={{ fontSize: '0.75rem', color: '#b45309', marginBottom: '8px', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <AlertCircle size={12} />
