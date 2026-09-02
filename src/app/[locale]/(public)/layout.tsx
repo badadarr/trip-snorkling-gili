@@ -21,7 +21,7 @@ export default async function PublicLayout({
 
   return (
     <>
-      <Navbar />
+      <Navbar whatsappNumber={whatsappNumber} />
       <main style={{ minHeight: "80vh" }}>{children}</main>
       <Footer siteSettings={settings} packages={activePackages} />
       <WhatsAppButton whatsappNumber={whatsappNumber} />

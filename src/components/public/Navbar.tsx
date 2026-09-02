@@ -1,79 +1,185 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import React, { useState, useEffect, useTransition } from "react";
+import { createPortal } from "react-dom";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import LanguageSwitcher from "@/components/public/LanguageSwitcher";
+import {
+  Waves,
+  Menu,
+  X,
+  Calendar,
+  Lock,
+  Home,
+  Compass,
+  Camera,
+  Info,
+  HelpCircle,
+  MessageCircle,
+  ChevronRight,
+  Globe,
+  Check,
+  Loader2,
+} from "lucide-react";
 
-import { Waves, Menu, X, Calendar, Lock } from 'lucide-react';
+interface NavbarProps {
+  whatsappNumber?: string;
+}
 
-export default function Navbar() {
-  const t = useTranslations('nav');
+export default function Navbar({
+  whatsappNumber = "6282236851307",
+}: NavbarProps) {
+  const t = useTranslations("nav");
+  const tCta = useTranslations("cta");
+  const pathname = usePathname();
+  const router = useRouter();
+  const locale = useLocale();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    setMounted(true);
   }, []);
+
+  // Detect scroll to style navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 15);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Lock body scroll when mobile menu is active
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  const navLinks = [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/paket", label: t("packages"), icon: Compass, badge: "Popular" },
+    { href: "/gallery", label: t("gallery"), icon: Camera },
+    { href: "/tentang", label: t("about"), icon: Info },
+    { href: "/faq", label: t("faq"), icon: HelpCircle },
+  ];
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/" || pathname === "";
+    return pathname.startsWith(href);
+  };
+
+  const handleSwitchLanguage = (newLocale: "id" | "en") => {
+    if (newLocale === locale || isPending) return;
+    startTransition(() => {
+      router.replace(pathname, { locale: newLocale });
+    });
+  };
+
+  const cleanPhone = whatsappNumber.replace(/[^0-9]/g, "");
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+    locale === "id"
+      ? "Halo Admin Trip Snorkeling Gili! Saya ingin bertanya mengenai paket trip."
+      : "Hello Admin Gili Snorkeling Trip! I would like to inquire about tour packages.",
+  )}`;
 
   return (
     <header
       style={{
-        position: 'sticky',
+        position: "sticky",
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 100,
-        transition: 'all 0.3s ease',
-        backgroundColor: isScrolled ? 'rgba(255, 255, 255, 0.94)' : 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: isScrolled ? '1px solid rgba(0, 119, 182, 0.15)' : '1px solid rgba(255, 255, 255, 0.4)',
-        boxShadow: isScrolled ? '0 4px 20px rgba(0, 50, 100, 0.06)' : 'none',
+        zIndex: 1000,
+        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        backgroundColor: isScrolled
+          ? "rgba(255, 255, 255, 0.96)"
+          : "rgba(255, 255, 255, 0.90)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderBottom: isScrolled
+          ? "1px solid rgba(0, 119, 182, 0.15)"
+          : "1px solid rgba(255, 255, 255, 0.6)",
+        boxShadow: isScrolled
+          ? "0 6px 24px rgba(0, 50, 100, 0.08)"
+          : "0 2px 10px rgba(0, 50, 100, 0.02)",
       }}
     >
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '80px' }}>
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: "74px",
+        }}
+      >
         {/* Brand Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+        <Link
+          href="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            textDecoration: "none",
+            flexShrink: 0,
+          }}
+        >
           <div
             style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 119, 182, 0.3)',
+              width: "40px",
+              height: "40px",
+              borderRadius: "12px",
+              background:
+                "linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 12px rgba(0, 119, 182, 0.28)",
+              flexShrink: 0,
             }}
           >
-            <Waves color="#ffffff" size={26} strokeWidth={2.4} />
+            <Waves color="#ffffff" size={22} strokeWidth={2.4} />
           </div>
           <div>
             <span
               style={{
-                fontFamily: 'var(--font-heading)',
+                fontFamily: "var(--font-heading)",
                 fontWeight: 800,
-                fontSize: '1.25rem',
-                color: 'var(--primary-deep)',
-                letterSpacing: '-0.03em',
-                display: 'block',
+                fontSize: "1.15rem",
+                color: "var(--primary-deep)",
+                letterSpacing: "-0.02em",
+                display: "block",
                 lineHeight: 1.1,
               }}
             >
-              SNORKELING <span style={{ color: 'var(--primary-turquoise)' }}>GILI</span>
+              SNORKELING{" "}
+              <span style={{ color: "var(--primary-turquoise)" }}>GILI</span>
             </span>
             <span
               style={{
-                fontSize: '0.72rem',
+                fontSize: "0.66rem",
                 fontWeight: 600,
-                color: 'var(--primary-ocean)',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                display: 'block',
+                color: "var(--primary-ocean)",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                display: "block",
+                marginTop: "2px",
               }}
             >
               Gili Trawangan • 3 Gili
@@ -81,214 +187,503 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav style={{ display: 'none', alignItems: 'center', gap: '32px' }} className="desktop-nav">
-          <Link
-            href="/"
-            style={{
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: 'var(--primary-deep)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {t('home')}
-          </Link>
-          <Link
-            href="/paket"
-            style={{
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: 'var(--primary-deep)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {t('packages')}
-          </Link>
-          <Link
-            href="/gallery"
-            style={{
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: 'var(--primary-deep)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {t('gallery')}
-          </Link>
-          <Link
-            href="/tentang"
-            style={{
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: 'var(--primary-deep)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {t('about')}
-          </Link>
-          <Link
-            href="/faq"
-            style={{
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: 'var(--primary-deep)',
-              transition: 'color 0.2s',
-            }}
-          >
-            {t('faq')}
-          </Link>
+        {/* Desktop Navigation Links */}
+        <nav
+          style={{
+            display: "none",
+            alignItems: "center",
+            gap: "24px",
+          }}
+          className="desktop-nav"
+        >
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontWeight: active ? 700 : 600,
+                  fontSize: "0.92rem",
+                  color: active
+                    ? "var(--primary-ocean)"
+                    : "var(--primary-deep)",
+                  textDecoration: "none",
+                  position: "relative",
+                  padding: "8px 4px",
+                  transition: "color 0.2s ease",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <span>{link.label}</span>
+                {link.badge && (
+                  <span
+                    style={{
+                      fontSize: "0.65rem",
+                      padding: "1px 6px",
+                      borderRadius: "var(--radius-full)",
+                      background: "#fef3c7",
+                      color: "#b45309",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {link.badge}
+                  </span>
+                )}
+                {active && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: "4px",
+                      right: "4px",
+                      height: "2.5px",
+                      borderRadius: "2px",
+                      background: "var(--primary-ocean)",
+                    }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Right CTA Area */}
-        <div style={{ display: 'none', alignItems: 'center', gap: '16px' }} className="desktop-actions">
-          <Link href="/booking" className="btn btn-primary btn-sm">
+        {/* Desktop Right Action Area */}
+        <div
+          style={{
+            display: "none",
+            alignItems: "center",
+            gap: "14px",
+          }}
+          className="desktop-actions"
+        >
+          <LanguageSwitcher />
+
+          <Link
+            href="/booking"
+            className="btn btn-primary btn-sm"
+            style={{
+              padding: "10px 18px",
+              fontSize: "0.88rem",
+              boxShadow: "0 4px 14px rgba(0, 180, 216, 0.25)",
+            }}
+          >
             <Calendar size={15} />
-            {t('bookNow')}
+            <span>{t("bookNow")}</span>
           </Link>
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="mobile-toggle-group">
+        {/* Mobile Header Right (Hamburger Button) */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          className="mobile-toggle-group"
+        >
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMobileMenuOpen(true)}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              border: '1px solid var(--border-light)',
-              background: '#ffffff',
-              cursor: 'pointer',
-              color: 'var(--primary-deep)',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "42px",
+              height: "42px",
+              borderRadius: "12px",
+              border: "1.5px solid var(--border-light)",
+              background: "#ffffff",
+              cursor: "pointer",
+              color: "var(--primary-deep)",
+              transition: "all 0.2s ease",
+              boxShadow: "0 2px 8px rgba(0, 50, 100, 0.08)",
             }}
-            aria-label="Toggle navigation menu"
+            aria-label="Open navigation menu"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <Menu size={22} strokeWidth={2.2} />
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '80px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(10, 37, 64, 0.96)',
-            backdropFilter: 'blur(20px)',
-            padding: '30px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-            zIndex: 99,
-            overflowY: 'auto',
-          }}
-        >
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
+      {/* ========================================================================= */}
+      {/* 📱 MODERN MOBILE SLIDE-OVER DRAWER VIA PORTAL (100% RELIABLE STACKING) */}
+      {/* ========================================================================= */}
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <div
             style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              padding: '12px 0',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              position: "fixed",
+              inset: 0,
+              zIndex: 999999,
+              display: "flex",
+              justifyContent: "flex-end",
             }}
           >
-            {t('home')}
-          </Link>
-          <Link
-            href="/paket"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              padding: '12px 0',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {t('packages')}
-          </Link>
-          <Link
-            href="/gallery"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              padding: '12px 0',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {t('gallery')}
-          </Link>
-          <Link
-            href="/tentang"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              padding: '12px 0',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {t('about')}
-          </Link>
-          <Link
-            href="/faq"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              padding: '12px 0',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {t('faq')}
-          </Link>
-          <a
-            href="/admin"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              color: 'rgba(255, 255, 255, 0.6)',
-              padding: '12px 0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <Lock size={16} />
-            {t('admin')}
-          </a>
-
-          <div style={{ marginTop: '20px' }}>
-            <Link
-              href="/booking"
+            {/* Backdrop Dimmer */}
+            <div
               onClick={() => setMobileMenuOpen(false)}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '16px', fontSize: '1.05rem' }}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(10, 37, 64, 0.65)",
+                backdropFilter: "blur(6px)",
+                WebkitBackdropFilter: "blur(6px)",
+                animation: "mobileBackdropIn 0.25s ease-out forwards",
+              }}
+            />
+
+            {/* Slide-over White Card Drawer */}
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                maxWidth: "340px",
+                height: "100%",
+                background: "#ffffff",
+                boxShadow: "-12px 0 40px rgba(0, 0, 0, 0.25)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: "24px 20px",
+                overflowY: "auto",
+                zIndex: 10,
+                animation:
+                  "mobileDrawerSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+              }}
             >
-              <Calendar size={18} />
-              {t('bookNow')}
-            </Link>
-          </div>
-        </div>
-      )}
+              {/* Top Drawer Header with Logo & Close Button */}
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingBottom: "16px",
+                    borderBottom: "1px solid var(--border-light)",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "34px",
+                        height: "34px",
+                        borderRadius: "10px",
+                        background:
+                          "linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <Waves size={18} />
+                    </div>
+                    <span
+                      style={{
+                        fontWeight: 800,
+                        fontSize: "1rem",
+                        color: "var(--primary-deep)",
+                      }}
+                    >
+                      SNORKELING{" "}
+                      <span style={{ color: "var(--primary-turquoise)" }}>
+                        GILI
+                      </span>
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      background: "var(--bg-alt)",
+                      border: "1px solid var(--border-light)",
+                      color: "var(--text-muted)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                    }}
+                    aria-label="Close navigation menu"
+                  >
+                    <X size={18} strokeWidth={2.5} />
+                  </button>
+                </div>
+
+                {/* Language Switcher Selector Tabs */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "6px",
+                    background: "var(--bg-alt)",
+                    padding: "4px",
+                    borderRadius: "var(--radius-sm)",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchLanguage("id")}
+                    disabled={isPending}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: locale === "id" ? "#ffffff" : "transparent",
+                      color:
+                        locale === "id"
+                          ? "var(--primary-ocean)"
+                          : "var(--text-muted)",
+                      fontWeight: locale === "id" ? 700 : 500,
+                      fontSize: "0.82rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      boxShadow:
+                        locale === "id" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <span>🇮🇩 Indonesia</span>
+                    {locale === "id" && <Check size={12} />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchLanguage("en")}
+                    disabled={isPending}
+                    style={{
+                      padding: "8px 10px",
+                      borderRadius: "6px",
+                      border: "none",
+                      background: locale === "en" ? "#ffffff" : "transparent",
+                      color:
+                        locale === "en"
+                          ? "var(--primary-ocean)"
+                          : "var(--text-muted)",
+                      fontWeight: locale === "en" ? 700 : 500,
+                      fontSize: "0.82rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      boxShadow:
+                        locale === "en" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <span>🇬🇧 English</span>
+                    {locale === "en" && <Check size={12} />}
+                  </button>
+                </div>
+
+                {/* Navigation Links List */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  {navLinks.map((link) => {
+                    const active = isActive(link.href);
+                    const IconComponent = link.icon;
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "12px 14px",
+                          borderRadius: "var(--radius-sm)",
+                          background: active
+                            ? "var(--primary-surface)"
+                            : "transparent",
+                          border: active
+                            ? "1px solid rgba(0, 180, 216, 0.25)"
+                            : "1px solid transparent",
+                          color: active
+                            ? "var(--primary-ocean)"
+                            : "var(--primary-deep)",
+                          textDecoration: "none",
+                          fontWeight: active ? 700 : 600,
+                          fontSize: "0.98rem",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "8px",
+                              background: active
+                                ? "rgba(0, 180, 216, 0.15)"
+                                : "var(--bg-alt)",
+                              color: active
+                                ? "var(--primary-ocean)"
+                                : "var(--text-muted)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <IconComponent size={16} />
+                          </div>
+                          <span>{link.label}</span>
+                          {link.badge && (
+                            <span
+                              style={{
+                                fontSize: "0.65rem",
+                                padding: "1px 6px",
+                                borderRadius: "var(--radius-full)",
+                                background: "#fef3c7",
+                                color: "#b45309",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {link.badge}
+                            </span>
+                          )}
+                        </div>
+                        <ChevronRight
+                          size={16}
+                          color={
+                            active
+                              ? "var(--primary-ocean)"
+                              : "var(--border-light)"
+                          }
+                        />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Quick CTAs & Admin Link */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  paddingTop: "20px",
+                  marginTop: "20px",
+                  borderTop: "1px solid var(--border-light)",
+                }}
+              >
+                {/* Book Trip Button */}
+                <Link
+                  href="/booking"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="btn btn-primary"
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    fontSize: "0.95rem",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: "0 6px 20px rgba(0, 180, 216, 0.3)",
+                  }}
+                >
+                  <Calendar size={17} />
+                  <span>{t("bookNow")}</span>
+                </Link>
+
+                {/* WhatsApp Quick Chat */}
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="btn btn-whatsapp"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    fontSize: "0.9rem",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <MessageCircle size={17} />
+                  <span>{tCta("whatsappButton")}</span>
+                </a>
+
+                {/* Admin Link */}
+                <div style={{ textAlign: "center", marginTop: "2px" }}>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      fontSize: "0.76rem",
+                      color: "var(--text-muted)",
+                      textDecoration: "none",
+                      padding: "4px 10px",
+                    }}
+                  >
+                    <Lock size={12} />
+                    <span>{t("admin")} Portal</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <style jsx global>{`
-        @media (min-width: 900px) {
+        @keyframes mobileBackdropIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes mobileDrawerSlide {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+        @media (min-width: 960px) {
           .desktop-nav {
             display: flex !important;
           }
