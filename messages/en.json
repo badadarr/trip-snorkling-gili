@@ -137,10 +137,20 @@
     "paymentProofDesc": "Please upload your payment proof (QRIS receipt or bank transfer screenshot) to speed up confirmation.",
     "paymentProofUpload": "Upload Payment Proof",
     "paymentProofUploading": "Uploading...",
-    "paymentProofSuccess": "Payment proof uploaded successfully!",
     "paymentProofOptional": "You can also send it via WhatsApp",
     "extraChargeWarning": "Additional charges apply for more than 4 guests",
-    "bookingCodeLabel": "BOOKING CODE"
+    "bookingCodeLabel": "BOOKING CODE",
+    "step1": "Reservation Details",
+    "step2": "Payment & Proof",
+    "step3": "Confirmation",
+    "step1Desc": "Fill in your contact and tour preferences",
+    "step2Desc": "Select payment method and transfer proof",
+    "step3Desc": "Review booking & confirm on WhatsApp",
+    "continueToPayment": "Continue to Payment",
+    "proceedToConfirm": "I Have Completed Payment",
+    "payLater": "Pay Later / Skip to WhatsApp Confirmation",
+    "backToStep1": "Back to Edit Details",
+    "backToStep2": "Back to Payment Step"
   },
   "gallery": {
     "badge": "PHOTO GALLERY",
