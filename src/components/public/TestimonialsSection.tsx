@@ -17,8 +17,23 @@ export interface TestimonialItem {
   isActive?: boolean | null;
 }
 
-export default function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
+export interface TestimonialsHeaderData {
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+interface TestimonialsSectionProps {
+  items: TestimonialItem[];
+  headerData?: TestimonialsHeaderData;
+}
+
+export default function TestimonialsSection({ items, headerData }: TestimonialsSectionProps) {
   const t = useTranslations('testimonials');
+
+  const badgeText = headerData?.badge || t('badge');
+  const titleText = headerData?.title || t('title');
+  const subtitleText = headerData?.subtitle || t('subtitle');
 
   return (
     <section className="section section-alt">
@@ -27,10 +42,10 @@ export default function TestimonialsSection({ items }: { items: TestimonialItem[
         <div className="section-header">
           <div className="section-badge">
             <Sparkles size={14} />
-            <span>{t('badge')}</span>
+            <span>{badgeText}</span>
           </div>
-          <h2 className="section-title">{t('title')}</h2>
-          <p className="section-subtitle">{t('subtitle')}</p>
+          <h2 className="section-title">{titleText}</h2>
+          <p className="section-subtitle">{subtitleText}</p>
         </div>
 
         {/* Testimonials Grid */}

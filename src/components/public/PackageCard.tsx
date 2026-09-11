@@ -4,7 +4,8 @@ import React from 'react';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Clock, Calendar, CheckCircle2, MapPin, ArrowRight, Sparkles } from 'lucide-react';
-import { formatIdr, formatUsd } from '@/lib/format';
+import { useCurrency } from '@/components/providers/CurrencyProvider';
+import SharePackageButton from '@/components/public/SharePackageButton';
 
 export interface PackageData {
   id: number;
@@ -17,6 +18,7 @@ export interface PackageData {
   descriptionEn: string;
   price: number;
   priceUsd: number;
+  priceEur?: number | null;
   priceUnit?: string | null;
   durationId?: string | null;
   durationEn?: string | null;
@@ -34,6 +36,8 @@ export interface PackageData {
 
 export default function PackageCard({ pkg }: { pkg: PackageData }) {
   const t = useTranslations('packages');
+  const { format, secondary } = useCurrency();
+  const prices = { idr: pkg.price, usd: pkg.priceUsd, eur: pkg.priceEur };
 
   const name = pkg.nameEn || pkg.nameId;
   const tag = pkg.tagEn || pkg.tagId;
@@ -42,10 +46,6 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
   const schedule = pkg.scheduleEn || pkg.scheduleId;
   const includes = (pkg.includesEn && pkg.includesEn.length > 0) ? pkg.includesEn : (pkg.includesId || []);
   const spots = (pkg.spotsEn && pkg.spotsEn.length > 0) ? pkg.spotsEn : (pkg.spotsId || []);
-
-  const formatPrice = (amountUsd: number, amountIdr: number) => {
-    return `$${amountUsd} USD`;
-  };
 
   return (
     <div
@@ -125,14 +125,16 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
               {t('priceStarts')}
             </span>
             <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-heading)' }}>
-              {formatUsd(pkg.priceUsd)}
+              {format(prices)}
             </span>
             <span style={{ fontSize: '0.8rem', color: '#caf0f8', marginLeft: '4px' }}>
               {(pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000)) ? t('perBoat') : t('perPerson')}
             </span>
-            <span style={{ display: 'block', fontSize: '0.72rem', color: '#bde0fe', marginTop: '2px' }}>
-              ~ {formatIdr(pkg.price)}
-            </span>
+            {secondary(prices) && (
+              <span style={{ display: 'block', fontSize: '0.72rem', color: '#bde0fe', marginTop: '2px' }}>
+                ~ {secondary(prices)}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -238,6 +240,7 @@ export default function PackageCard({ pkg }: { pkg: PackageData }) {
             <Calendar size={14} />
             <span>{t('bookPackage')}</span>
           </Link>
+          <SharePackageButton slug={pkg.slug} packageName={name} />
         </div>
       </div>
     </div>

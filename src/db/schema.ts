@@ -31,6 +31,7 @@ export const packages = pgTable('packages', {
   descriptionEn: text('description_en').notNull(),
   price: integer('price').notNull(), // in IDR (e.g. 150000)
   priceUsd: doublePrecision('price_usd').notNull(), // in USD (e.g. 44.30 or 10)
+  priceEur: doublePrecision('price_eur').default(0), // in EUR (e.g. 41.50); 0 = auto-convert from IDR
   priceUnit: text('price_unit').default('per_person'), // 'per_person' | 'per_boat'
   durationId: text('duration_id').default('4 - 5 Jam'),
   durationEn: text('duration_en').default('4 - 5 Hours'),

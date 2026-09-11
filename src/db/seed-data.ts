@@ -27,6 +27,7 @@ export const initialPackagesData = [
     descriptionEn: "The perfect choice for solo travelers, couples, or friends looking to experience 3 Gili islands snorkeling at an affordable price with great social vibes.",
     price: 150000,
     priceUsd: 10,
+    priceEur: 9,
     priceUnit: "per_person",
     durationId: "4 - 5 Jam",
     durationEn: "4 - 5 Hours",
@@ -78,6 +79,7 @@ export const initialPackagesData = [
     descriptionEn: "Enjoy maximum freedom and exclusivity exploring the top spots of 3 Gilis with loved ones at your own relaxed pace. Flexible timing and spot durations tailored to your preferences.",
     price: 850000,
     priceUsd: 55,
+    priceEur: 49,
     priceUnit: "per_boat",
     durationId: "4 - 5 Jam (Fleksibel)",
     durationEn: "4 - 5 Hours (Flexible)",
@@ -131,6 +133,7 @@ export const initialPackagesData = [
     descriptionEn: "A magical blend of late afternoon snorkeling with peaceful turtles, followed by cruising to catch the world-famous golden sunset over Mount Agung from the open sea.",
     price: 950000,
     priceUsd: 62,
+    priceEur: 55,
     priceUnit: "per_boat",
     durationId: "3.5 Jam (15:30 - 19:00 WITA)",
     durationEn: "3.5 Hours (03:30 PM - 07:00 PM)",
@@ -180,6 +183,7 @@ export const initialPackagesData = [
     descriptionEn: "For travelers staying in mainland Lombok (Senggigi, Mataram, or Teluk Nare), we provide direct private speedboat pickup for a hassle-free 1-day 3-Gili snorkeling tour.",
     price: 1500000,
     priceUsd: 98,
+    priceEur: 87,
     priceUnit: "per_boat",
     durationId: "6 - 7 Jam (Full Day)",
     durationEn: "6 - 7 Hours (Full Day)",
@@ -385,6 +389,10 @@ export const initialAboutData = {
 export const initialSiteSettings = [
   { key: "site_name", value: "Trip Snorkeling Gili Trawangan", section: "general", label: "Nama Website / Bisnis" },
   { key: "tagline", value: "Penyedia Wisata Snorkeling Terbaik di Gili Trawangan & 3 Gili", section: "general", label: "Tagline Bisnis" },
+  { key: "site_logo", value: "", section: "general", label: "File Logo Kustom" },
+  { key: "site_logo_type", value: "preset", section: "general", label: "Tipe Logo (preset/custom)" },
+  { key: "site_logo_preset", value: "waves", section: "general", label: "Ikon Preset Logo" },
+  { key: "site_logo_color", value: "ocean", section: "general", label: "Warna Preset Logo" },
   { key: "whatsapp_number", value: "6282236851307", section: "contact", label: "Nomor WhatsApp Utama (Format 62...)" },
   { key: "whatsapp_message", value: "Halo Admin Trip Snorkeling Gili Trawangan! Saya mau tanya informasi / booking paket snorkeling...", section: "contact", label: "Pesan Default WhatsApp" },
   { key: "phone", value: "+62 822-3685-1307", section: "contact", label: "Nomor Telepon" },
@@ -402,5 +410,13 @@ export const initialSiteSettings = [
   { key: "payment_bank_name", value: "Bank Central Asia (BCA)", section: "payment", label: "Nama Bank" },
   { key: "payment_bank_number", value: "8735-0123-4567", section: "payment", label: "Nomor Rekening Bank" },
   { key: "payment_bank_holder", value: "Trip Snorkeling Gili", section: "payment", label: "Nama Pemilik Rekening" },
-  { key: "payment_bank_notes", value: "Mohon cantumkan Kode Booking pada berita transfer untuk verifikasi otomatis.", section: "payment", label: "Catatan Transfer Bank" }
+  { key: "payment_bank_notes", value: "Mohon cantumkan Kode Booking pada berita transfer untuk verifikasi otomatis.", section: "payment", label: "Catatan Transfer Bank" },
+  { key: "payment_banks", value: JSON.stringify([
+      { id: "bank_bca", bankName: "Bank Central Asia (BCA)", accountNumber: "8735-0123-4567", accountHolder: "Trip Snorkeling Gili", notes: "", isActive: true }
+    ]), section: "payment", label: "Daftar Rekening Bank (JSON)" },
+  { key: "default_currency", value: "USD", section: "payment", label: "Mata Uang Default Pengunjung" },
+  { key: "currency_usd_rate", value: "15500", section: "payment", label: "Kurs Cadangan USD (Rp per $1)" },
+  { key: "currency_eur_rate", value: "17500", section: "payment", label: "Kurs Cadangan EUR (Rp per EUR1)" },
+  { key: "youtube_url", value: "", section: "social", label: "Link Kanal YouTube" },
+  { key: "testimonials_show_landing", value: "true", section: "general", label: "Tampilkan Seksi Ulasan di Landing Page" }
 ];

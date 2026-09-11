@@ -30,9 +30,19 @@ import { toast } from "sonner";
 import CustomSelect from "@/components/ui/CustomSelect";
 import ModernDatePicker from "@/components/ui/ModernDatePicker";
 import SessionTimePicker from "@/components/ui/SessionTimePicker";
-import { formatIdr, formatUsd } from "@/lib/format";
+import { formatIdr, resolveAmount } from "@/lib/format";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 const SESSION_STORAGE_KEY = "gili_snorkeling_active_booking_v1";
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  notes?: string;
+  isActive: boolean;
+}
 
 interface BookingFormProps {
   packagesList: PackageData[];
@@ -50,6 +60,7 @@ export default function BookingForm({
   const t = useTranslations("booking");
   const tPkg = useTranslations("packages");
   const tCta = useTranslations("cta");
+  const { currency, format, rates } = useCurrency();
   const phoneTarget = whatsappNumber || "6282236851307";
 
   // Wizard Step: 1 = Details Form, 2 = Payment & Proof, 3 = Confirmation & WhatsApp
@@ -72,6 +83,7 @@ export default function BookingForm({
   const [paymentMethod, setPaymentMethod] = useState<"qris" | "bank_transfer">(
     "qris",
   );
+  const [selectedBankId, setSelectedBankId] = useState<string>("");
 
   // Submission & Data states
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +93,7 @@ export default function BookingForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // UI helpers
-  const [copiedBank, setCopiedBank] = useState(false);
+  const [copiedBankId, setCopiedBankId] = useState("");
   const [copiedCode, setCopiedCode] = useState(false);
   const [showQrisModal, setShowQrisModal] = useState(false);
   const [liveSettings, setLiveSettings] = useState<any[]>(siteSettings || []);
@@ -114,6 +126,7 @@ export default function BookingForm({
         if (data.pickupLocation) setPickupLocation(data.pickupLocation);
         if (data.specialRequests) setSpecialRequests(data.specialRequests);
         if (data.paymentMethod) setPaymentMethod(data.paymentMethod);
+        if (data.selectedBankId) setSelectedBankId(data.selectedBankId);
         if (data.paymentProofUrl) setPaymentProofUrl(data.paymentProofUrl);
       }
     } catch (e) {
@@ -142,6 +155,7 @@ export default function BookingForm({
         pickupLocation,
         specialRequests,
         paymentMethod,
+        selectedBankId,
         paymentProofUrl,
       };
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
@@ -164,6 +178,7 @@ export default function BookingForm({
     pickupLocation,
     specialRequests,
     paymentMethod,
+    selectedBankId,
     paymentProofUrl,
   ]);
 
@@ -198,14 +213,62 @@ export default function BookingForm({
   );
   const qrisImage = getSetting("payment_qris_image", "");
 
-  const bankActive = getSetting("payment_bank_active", "true") !== "false";
-  const bankName = getSetting("payment_bank_name", "Bank Central Asia (BCA)");
-  const bankNumber = getSetting("payment_bank_number", "8735-0123-4567");
-  const bankHolder = getSetting("payment_bank_holder", "Trip Snorkeling Gili");
   const bankNotes = getSetting(
     "payment_bank_notes",
     "Please include your Booking Reference Code in the transfer note.",
   );
+
+  // Admin may configure several rekening; fall back to the legacy single-account keys
+  const bankAccounts: BankAccount[] = React.useMemo(() => {
+    const raw = getSetting("payment_banks", "");
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map((item: any, index: number) => ({
+              id: String(item.id || `bank_${index}`),
+              bankName: item.bankName || "",
+              accountNumber: item.accountNumber || "",
+              accountHolder: item.accountHolder || "",
+              notes: item.notes || "",
+              isActive: item.isActive !== false,
+            }))
+            .filter(
+              (bank: BankAccount) =>
+                bank.isActive && (bank.bankName || bank.accountNumber),
+            );
+        }
+      } catch (e) {
+        console.warn("Invalid payment_banks setting, using legacy keys:", e);
+      }
+    }
+
+    const legacyName = getSetting("payment_bank_name", "");
+    const legacyNumber = getSetting("payment_bank_number", "");
+    if (legacyName || legacyNumber) {
+      return [
+        {
+          id: "bank_legacy",
+          bankName: legacyName || "Bank Transfer",
+          accountNumber: legacyNumber,
+          accountHolder: getSetting("payment_bank_holder", ""),
+          notes: "",
+          isActive: true,
+        },
+      ];
+    }
+    return [];
+  }, [liveSettings, siteSettings]);
+
+  const bankActive =
+    getSetting("payment_bank_active", "true") !== "false" &&
+    bankAccounts.length > 0;
+
+  // Falls back to the first rekening, so a stale id (admin edited the list) is harmless
+  const selectedBank =
+    bankAccounts.find((bank) => bank.id === selectedBankId) || bankAccounts[0];
+  const bankName = selectedBank?.bankName || "Bank Transfer";
 
   // Automatically adjust paymentMethod if active setting is disabled
   useEffect(() => {
@@ -243,48 +306,75 @@ export default function BookingForm({
   }, [tripDate]);
 
   // Compute estimated total based on priceUnit + Rp 200.000 / $13 per extra person above 4 pax for private trip
+  // Unit EUR price: admin-set when available, otherwise converted from the IDR rate
+  const unitEur = currentPackage
+    ? resolveAmount(
+        {
+          idr: currentPackage.price,
+          usd: currentPackage.priceUsd,
+          eur: currentPackage.priceEur,
+        },
+        "EUR",
+        rates,
+      )
+    : 0;
+  const extraPaxEurUnit = resolveAmount({ idr: 200000 }, "EUR", rates);
+
   const computePrice = () => {
-    if (!currentPackage)
-      return {
-        idr: 0,
-        usd: 0,
-        boatsCount: 1,
-        isPerBoat: false,
-        baseIdr: 0,
-        baseUsd: 0,
-        extraPaxCount: 0,
-        extraPaxIdr: 0,
-        extraPaxUsd: 0,
-      };
+    const empty = {
+      idr: 0,
+      usd: 0,
+      eur: 0,
+      boatsCount: 1,
+      isPerBoat: false,
+      baseIdr: 0,
+      baseUsd: 0,
+      baseEur: 0,
+      extraPaxCount: 0,
+      extraPaxIdr: 0,
+      extraPaxUsd: 0,
+      extraPaxEur: 0,
+    };
+    if (!currentPackage) return empty;
+
     const isPerBoat = isPrivatePackage;
     if (isPerBoat) {
       const extraPaxCount = Math.max(0, numberOfPeople - PRIVATE_MAX_PAX);
       const extraPaxIdr = extraPaxCount * 200000;
       const extraPaxUsd = extraPaxCount * 13;
+      const extraPaxEur = Number(
+        (extraPaxCount * extraPaxEurUnit).toFixed(2),
+      );
       return {
         idr: currentPackage.price + extraPaxIdr,
         usd: Number((currentPackage.priceUsd + extraPaxUsd).toFixed(2)),
+        eur: Number((unitEur + extraPaxEur).toFixed(2)),
         boatsCount: 1,
         isPerBoat: true,
         baseIdr: currentPackage.price,
         baseUsd: currentPackage.priceUsd,
+        baseEur: unitEur,
         extraPaxCount,
         extraPaxIdr,
         extraPaxUsd,
-      };
-    } else {
-      return {
-        idr: currentPackage.price * numberOfPeople,
-        usd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
-        boatsCount: 1,
-        isPerBoat: false,
-        baseIdr: currentPackage.price * numberOfPeople,
-        baseUsd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
-        extraPaxCount: 0,
-        extraPaxIdr: 0,
-        extraPaxUsd: 0,
+        extraPaxEur,
       };
     }
+
+    return {
+      idr: currentPackage.price * numberOfPeople,
+      usd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
+      eur: Number((unitEur * numberOfPeople).toFixed(2)),
+      boatsCount: 1,
+      isPerBoat: false,
+      baseIdr: currentPackage.price * numberOfPeople,
+      baseUsd: Number((currentPackage.priceUsd * numberOfPeople).toFixed(2)),
+      baseEur: Number((unitEur * numberOfPeople).toFixed(2)),
+      extraPaxCount: 0,
+      extraPaxIdr: 0,
+      extraPaxUsd: 0,
+      extraPaxEur: 0,
+    };
   };
 
   // Sync duration when package changes
@@ -530,7 +620,9 @@ export default function BookingForm({
     const payLabel =
       paymentMethod === "qris"
         ? "QRIS (Scan & Pay)"
-        : `Bank Transfer (${bankName})`;
+        : `Bank Transfer (${bankName}${
+            selectedBank?.accountNumber ? ` - ${selectedBank.accountNumber}` : ""
+          })`;
     const proofStatus = paymentProofUrl
       ? "✅ Receipt Uploaded on Website"
       : "⏳ Receipt will be sent via WhatsApp";
@@ -550,11 +642,27 @@ I have submitted an online booking with the following details:
 - Guests: *${numberOfPeople} Person(s)*${extraPaxText}
 - Payment Method: *${payLabel}*
 - Payment Proof: *${proofStatus}*
-- Total Price: *${totals.usd ? `$${totals.usd} USD` : ""}* (~ Rp ${totals.idr.toLocaleString("id-ID")})
+- Total Price: *${format(totalsPriceSet)}* (~ Rp ${totals.idr.toLocaleString("id-ID")})
 ${pickupLocation ? `- Pickup/Location: ${pickupLocation}\n` : ""}${specialRequests ? `- Special Request: ${specialRequests}\n` : ""}
 Please confirm slot availability and payment receipt. Thank you!`;
 
     return `https://wa.me/${phoneTarget.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const totalsPriceSet = {
+    idr: totals.idr,
+    usd: totals.usd,
+    eur: totals.eur,
+  };
+  const basePriceSet = {
+    idr: totals.baseIdr,
+    usd: totals.baseUsd,
+    eur: totals.baseEur,
+  };
+  const extraPriceSet = {
+    idr: totals.extraPaxIdr,
+    usd: totals.extraPaxUsd,
+    eur: totals.extraPaxEur,
   };
 
   const bookingCodeDisplay = submittedBooking?.bookingCode || "GILI-2026-0001";
@@ -921,7 +1029,15 @@ Please confirm slot availability and payment receipt. Thank you!`;
                     return {
                       value: pkg.slug,
                       label: pkg.nameEn || pkg.nameId,
-                      subtitle: `$${pkg.priceUsd} USD / ${pkg.durationEn || pkg.durationId || "4-5 Hours"} (~Rp ${pkg.price.toLocaleString("id-ID")}) • ${isPkgPrivate ? "Private" : "Public"}`,
+                      subtitle: `${format({
+                        idr: pkg.price,
+                        usd: pkg.priceUsd,
+                        eur: pkg.priceEur,
+                      })} / ${pkg.durationEn || pkg.durationId || "4-5 Hours"}${
+                        currency === "IDR"
+                          ? ""
+                          : ` (~Rp ${pkg.price.toLocaleString("id-ID")})`
+                      } • ${isPkgPrivate ? "Private" : "Public"}`,
                       badge: pkg.isFeatured
                         ? "Popular"
                         : isPkgPrivate
@@ -1478,15 +1594,17 @@ Please confirm slot availability and payment receipt. Thank you!`;
                     <span
                       style={{ fontWeight: 600, color: "var(--text-main)" }}
                     >
-                      {formatUsd(totals.baseUsd)}{" "}
-                      <span
-                        style={{
-                          fontSize: "0.78rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        ({formatIdr(totals.baseIdr)})
-                      </span>
+                      {format(basePriceSet)}{" "}
+                      {currency !== "IDR" && (
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          ({formatIdr(totals.baseIdr)})
+                        </span>
+                      )}
                     </span>
                   </div>
 
@@ -1504,10 +1622,14 @@ Please confirm slot availability and payment receipt. Thank you!`;
                         Extra Guests (+{totals.extraPaxCount} Pax @ Rp 200.000):
                       </span>
                       <span style={{ fontWeight: 700 }}>
-                        +{formatUsd(totals.extraPaxUsd)}{" "}
-                        <span style={{ fontSize: "0.78rem", fontWeight: 500 }}>
-                          (+{formatIdr(totals.extraPaxIdr)})
-                        </span>
+                        +{format(extraPriceSet)}{" "}
+                        {currency !== "IDR" && (
+                          <span
+                            style={{ fontSize: "0.78rem", fontWeight: 500 }}
+                          >
+                            (+{formatIdr(totals.extraPaxIdr)})
+                          </span>
+                        )}
                       </span>
                     </div>
                   )}
@@ -1540,16 +1662,18 @@ Please confirm slot availability and payment receipt. Thank you!`;
                           fontFamily: "var(--font-heading)",
                         }}
                       >
-                        {formatUsd(totals.usd)}
+                        {format(totalsPriceSet)}
                       </div>
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        approx. {formatIdr(totals.idr)}
-                      </div>
+                      {currency !== "IDR" && (
+                        <div
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "var(--text-muted)",
+                          }}
+                        >
+                          approx. {formatIdr(totals.idr)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1678,7 +1802,8 @@ Please confirm slot availability and payment receipt. Thank you!`;
             >
               Your reservation has been created. Please complete the payment of{" "}
               <strong style={{ color: "var(--primary-ocean)" }}>
-                {formatUsd(totals.usd)} (~ {formatIdr(totals.idr)})
+                {format(totalsPriceSet)}
+                {currency !== "IDR" ? ` (~ ${formatIdr(totals.idr)})` : ""}
               </strong>{" "}
               using one of the options below.
             </p>
@@ -1914,7 +2039,9 @@ Please confirm slot availability and payment receipt. Thank you!`;
                           color: "var(--text-muted)",
                         }}
                       >
-                        Manual Transfer ({bankName})
+                        {bankAccounts.length > 1
+                          ? `${bankAccounts.length} rekening tersedia`
+                          : `Manual Transfer (${bankName})`}
                       </span>
                     </div>
                   </button>
@@ -2121,115 +2248,186 @@ Please confirm slot availability and payment receipt. Thank you!`;
                 marginBottom: "24px",
               }}
             >
+              {bankAccounts.length > 1 && (
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--text-muted)",
+                    margin: "0 0 14px 0",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Choose the account you will transfer to, then copy the number.
+                </p>
+              )}
+
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "14px",
+                  flexDirection: "column",
+                  gap: "12px",
+                  marginBottom: bankNotes ? "14px" : 0,
                 }}
               >
-                <Building2 size={18} color="var(--primary-ocean)" />
-                <span
-                  style={{
-                    fontSize: "0.95rem",
-                    fontWeight: 700,
-                    color: "var(--primary-deep)",
-                  }}
-                >
-                  {bankName}
-                </span>
-              </div>
-
-              <div
-                style={{
-                  background: "#ffffff",
-                  padding: "16px 18px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--border-light)",
-                  marginBottom: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "10px",
-                  }}
-                >
-                  <div>
-                    <span
+                {bankAccounts.map((bank) => {
+                  const isChosen =
+                    bankAccounts.length === 1 || bank.id === selectedBank?.id;
+                  const isCopied = copiedBankId === bank.id;
+                  return (
+                    <div
+                      key={bank.id}
+                      onClick={() =>
+                        bankAccounts.length > 1 && setSelectedBankId(bank.id)
+                      }
+                      role={bankAccounts.length > 1 ? "button" : undefined}
                       style={{
-                        fontSize: "0.72rem",
-                        color: "var(--text-muted)",
-                        textTransform: "uppercase",
-                        display: "block",
-                        letterSpacing: "0.04em",
+                        background: "#ffffff",
+                        padding: "16px 18px",
+                        borderRadius: "var(--radius-sm)",
+                        border: isChosen
+                          ? "2px solid var(--primary-ocean)"
+                          : "1px solid var(--border-light)",
+                        cursor: bankAccounts.length > 1 ? "pointer" : "default",
+                        transition: "all 0.2s ease",
                       }}
                     >
-                      Account Number
-                    </span>
-                    <strong
-                      style={{
-                        fontSize: "1.35rem",
-                        color: "var(--primary-ocean)",
-                        letterSpacing: "0.04em",
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {bankNumber}
-                    </strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        bankNumber.replace(/[^0-9]/g, ""),
-                      );
-                      setCopiedBank(true);
-                      toast.success("Account number copied to clipboard!");
-                      setTimeout(() => setCopiedBank(false), 2500);
-                    }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "8px 16px",
-                      borderRadius: "var(--radius-full)",
-                      border: "1px solid var(--primary-ocean)",
-                      background: copiedBank
-                        ? "#d1fae5"
-                        : "var(--primary-surface)",
-                      color: copiedBank ? "#065f46" : "var(--primary-ocean)",
-                      fontSize: "0.82rem",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {copiedBank ? <Check size={14} /> : <Copy size={14} />}
-                    <span>{copiedBank ? "Copied!" : "Copy Number"}</span>
-                  </button>
-                </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        {bankAccounts.length > 1 && (
+                          <input
+                            type="radio"
+                            name="bank_account_choice"
+                            checked={isChosen}
+                            onChange={() => setSelectedBankId(bank.id)}
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              accentColor: "var(--primary-ocean)",
+                            }}
+                          />
+                        )}
+                        <Building2 size={18} color="var(--primary-ocean)" />
+                        <span
+                          style={{
+                            fontSize: "0.95rem",
+                            fontWeight: 700,
+                            color: "var(--primary-deep)",
+                          }}
+                        >
+                          {bank.bankName}
+                        </span>
+                      </div>
 
-                <div
-                  style={{
-                    marginTop: "12px",
-                    paddingTop: "12px",
-                    borderTop: "1px dashed var(--border-light)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  <span style={{ color: "var(--text-muted)" }}>
-                    Account Holder:
-                  </span>
-                  <strong style={{ color: "var(--primary-deep)" }}>
-                    {bankHolder}
-                  </strong>
-                </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "10px",
+                        }}
+                      >
+                        <div>
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              color: "var(--text-muted)",
+                              textTransform: "uppercase",
+                              display: "block",
+                              letterSpacing: "0.04em",
+                            }}
+                          >
+                            Account Number
+                          </span>
+                          <strong
+                            style={{
+                              fontSize: "1.35rem",
+                              color: "var(--primary-ocean)",
+                              letterSpacing: "0.04em",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            {bank.accountNumber}
+                          </strong>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(
+                              bank.accountNumber.replace(/[^0-9]/g, ""),
+                            );
+                            setSelectedBankId(bank.id);
+                            setCopiedBankId(bank.id);
+                            toast.success(
+                              `${bank.bankName} account number copied!`,
+                            );
+                            setTimeout(() => setCopiedBankId(""), 2500);
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "8px 16px",
+                            borderRadius: "var(--radius-full)",
+                            border: "1px solid var(--primary-ocean)",
+                            background: isCopied
+                              ? "#d1fae5"
+                              : "var(--primary-surface)",
+                            color: isCopied
+                              ? "#065f46"
+                              : "var(--primary-ocean)",
+                            fontSize: "0.82rem",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                        >
+                          {isCopied ? <Check size={14} /> : <Copy size={14} />}
+                          <span>{isCopied ? "Copied!" : "Copy Number"}</span>
+                        </button>
+                      </div>
+
+                      {bank.accountHolder && (
+                        <div
+                          style={{
+                            marginTop: "12px",
+                            paddingTop: "12px",
+                            borderTop: "1px dashed var(--border-light)",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          <span style={{ color: "var(--text-muted)" }}>
+                            Account Holder:
+                          </span>
+                          <strong style={{ color: "var(--primary-deep)" }}>
+                            {bank.accountHolder}
+                          </strong>
+                        </div>
+                      )}
+
+                      {bank.notes && (
+                        <p
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "var(--text-muted)",
+                            margin: "10px 0 0 0",
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {bank.notes}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {bankNotes && (
@@ -2585,11 +2783,15 @@ Please confirm slot availability and payment receipt. Thank you!`;
                 <strong>Payment Method:</strong>{" "}
                 {paymentMethod === "qris"
                   ? "QRIS (Scan & Pay)"
-                  : `Bank Transfer (${bankName})`}
+                  : `Bank Transfer (${bankName}${
+                      selectedBank?.accountNumber
+                        ? ` - ${selectedBank.accountNumber}`
+                        : ""
+                    })`}
               </div>
               <div>
-                <strong>Total Amount:</strong> {formatUsd(totals.usd)} USD (~{" "}
-                {formatIdr(totals.idr)})
+                <strong>Total Amount:</strong> {format(totalsPriceSet)}
+                {currency !== "IDR" ? ` (~ ${formatIdr(totals.idr)})` : ""}
               </div>
             </div>
           </div>

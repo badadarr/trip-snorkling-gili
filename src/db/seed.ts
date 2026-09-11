@@ -60,6 +60,7 @@ export async function seedDatabase(dbUrl?: string) {
           descriptionEn: pkg.descriptionEn,
           price: pkg.price,
           priceUsd: pkg.priceUsd,
+          priceEur: (pkg as any).priceEur ?? 0,
           durationId: pkg.durationId,
           durationEn: pkg.durationEn,
           scheduleId: pkg.scheduleId,

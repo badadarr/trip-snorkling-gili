@@ -8,6 +8,11 @@ import LanguageSwitcher, {
   SUPPORTED_LANGUAGES,
   LanguageOption,
 } from "@/components/public/LanguageSwitcher";
+import CurrencySwitcher from "@/components/public/CurrencySwitcher";
+import {
+  CURRENCY_OPTIONS,
+  useCurrency,
+} from "@/components/providers/CurrencyProvider";
 import {
   Waves,
   Menu,
@@ -23,15 +28,19 @@ import {
   ChevronRight,
   Globe,
   Check,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
+import BrandLogo from "@/components/common/BrandLogo";
 
 interface NavbarProps {
   whatsappNumber?: string;
+  siteSettings?: any[];
 }
 
 export default function Navbar({
   whatsappNumber = "6282236851307",
+  siteSettings,
 }: NavbarProps) {
   const t = useTranslations("nav");
   const tCta = useTranslations("cta");
@@ -43,6 +52,7 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const { currency, setCurrency } = useCurrency();
 
   useEffect(() => {
     setMounted(true);
@@ -118,6 +128,19 @@ export default function Navbar({
       : "Hello Admin Gili Snorkeling Trip! I would like to inquire about tour packages.",
   )}`;
 
+  const getSetting = (key: string, fallback: string) => {
+    if (!siteSettings) return fallback;
+    const found = siteSettings.find((s) => s.key === key);
+    return found?.value || fallback;
+  };
+
+  const siteName = getSetting("site_name", "SNORKELING GILI");
+  const siteTagline = getSetting("tagline", "Gili Trawangan • 3 Gili");
+  const siteLogo = getSetting("site_logo", "");
+  const siteLogoType = getSetting("site_logo_type", "preset");
+  const siteLogoPreset = getSetting("site_logo_preset", "waves");
+  const siteLogoColor = getSetting("site_logo_color", "ocean");
+
   return (
     <header
       style={{
@@ -136,7 +159,7 @@ export default function Navbar({
           ? "1px solid rgba(0, 119, 182, 0.15)"
           : "1px solid rgba(255, 255, 255, 0.6)",
         boxShadow: isScrolled
-          ? "0 6px 24px rgba(0, 50, 100, 0.08)"
+          ? "0 4px 24px rgba(0, 50, 100, 0.08)"
           : "0 2px 10px rgba(0, 50, 100, 0.02)",
       }}
     >
@@ -155,56 +178,20 @@ export default function Navbar({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
             textDecoration: "none",
             flexShrink: 0,
           }}
         >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "12px",
-              background:
-                "linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 12px rgba(0, 119, 182, 0.28)",
-              flexShrink: 0,
-            }}
-          >
-            <Waves color="#ffffff" size={22} strokeWidth={2.4} />
-          </div>
-          <div>
-            <span
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 800,
-                fontSize: "1.15rem",
-                color: "var(--primary-deep)",
-                letterSpacing: "-0.02em",
-                display: "block",
-                lineHeight: 1.1,
-              }}
-            >
-              SNORKELING{" "}
-              <span style={{ color: "var(--primary-turquoise)" }}>GILI</span>
-            </span>
-            <span
-              style={{
-                fontSize: "0.66rem",
-                fontWeight: 600,
-                color: "var(--primary-ocean)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                display: "block",
-                marginTop: "2px",
-              }}
-            >
-              Gili Trawangan • 3 Gili
-            </span>
-          </div>
+          <BrandLogo
+            siteName={siteName}
+            tagline={siteTagline}
+            logoUrl={siteLogo}
+            logoType={siteLogoType}
+            logoPreset={siteLogoPreset}
+            logoColor={siteLogoColor}
+            variant="light"
+            size="md"
+          />
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -279,6 +266,8 @@ export default function Navbar({
           }}
           className="desktop-actions"
         >
+          <CurrencySwitcher />
+
           <LanguageSwitcher />
 
           <Link
@@ -387,41 +376,23 @@ export default function Navbar({
                     marginBottom: "16px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
+                  <Link
+                    href="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ textDecoration: "none" }}
                   >
-                    <div
-                      style={{
-                        width: "34px",
-                        height: "34px",
-                        borderRadius: "10px",
-                        background:
-                          "linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#ffffff",
-                      }}
-                    >
-                      <Waves size={18} />
-                    </div>
-                    <span
-                      style={{
-                        fontWeight: 800,
-                        fontSize: "1rem",
-                        color: "var(--primary-deep)",
-                      }}
-                    >
-                      SNORKELING{" "}
-                      <span style={{ color: "var(--primary-turquoise)" }}>
-                        GILI
-                      </span>
-                    </span>
-                  </div>
+                    <BrandLogo
+                      siteName={siteName}
+                      tagline={siteTagline}
+                      logoUrl={siteLogo}
+                      logoType={siteLogoType}
+                      logoPreset={siteLogoPreset}
+                      logoColor={siteLogoColor}
+                      variant="light"
+                      size="sm"
+                      showTagline={false}
+                    />
+                  </Link>
 
                   <button
                     type="button"
@@ -536,6 +507,69 @@ export default function Navbar({
                               strokeWidth={2.5}
                             />
                           ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Display Currency Selector Grid */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div
+                    style={{
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      color: "var(--text-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      marginBottom: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <Wallet size={12} color="var(--primary-ocean)" />
+                    <span>Currency / Mata Uang</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr 1fr",
+                      gap: "6px",
+                    }}
+                  >
+                    {CURRENCY_OPTIONS.map((option) => {
+                      const isSelected = currency === option.code;
+                      return (
+                        <button
+                          key={option.code}
+                          type="button"
+                          onClick={() => setCurrency(option.code)}
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: "var(--radius-sm)",
+                            border: isSelected
+                              ? "1.5px solid var(--primary-ocean)"
+                              : "1px solid var(--border-light)",
+                            background: isSelected
+                              ? "var(--primary-surface)"
+                              : "var(--bg-alt)",
+                            color: isSelected
+                              ? "var(--primary-ocean)"
+                              : "var(--primary-deep)",
+                            fontWeight: isSelected ? 700 : 500,
+                            fontSize: "0.78rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "5px",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <span>{option.flag}</span>
+                          <span>{option.short}</span>
                         </button>
                       );
                     })}

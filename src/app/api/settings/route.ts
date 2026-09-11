@@ -14,7 +14,16 @@ export async function PUT(req: Request) {
   }
 
   try {
-    const { key, value } = await req.json();
+    const body = await req.json();
+    if (body.settings && typeof body.settings === 'object') {
+      const results = [];
+      for (const [key, value] of Object.entries(body.settings)) {
+        results.push(await updateSetting(key, String(value)));
+      }
+      return NextResponse.json({ success: true, settings: results });
+    }
+
+    const { key, value } = body;
     if (!key) {
       return NextResponse.json({ error: 'Key is required' }, { status: 400 });
     }

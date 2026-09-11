@@ -8,19 +8,49 @@ import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
 import { getHero, getPackagesList, getGalleryList, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
 import { Link } from '@/i18n/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle, Ship, CheckCircle2, Clock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const t = await getTranslations();
+  const locale = await getLocale();
   const heroData = await getHero();
   const allPackages = await getPackagesList();
   const galleryItems = await getGalleryList();
   const testimonials = await getTestimonialsList();
   const faqs = await getFaqList();
   const settings = await getSettings();
+
+  const getSettingVal = (key: string) => settings.find((s) => s.key === key)?.value;
+  const isEn = locale === 'en';
+
+  const packagesHeader = {
+    badge: (isEn ? getSettingVal('packages_badge_en') : getSettingVal('packages_badge_id')) || t('packages.sectionBadge'),
+    title: (isEn ? getSettingVal('packages_title_en') : getSettingVal('packages_title_id')) || t('packages.sectionTitle'),
+    subtitle: (isEn ? getSettingVal('packages_subtitle_en') : getSettingVal('packages_subtitle_id')) || t('packages.sectionSubtitle'),
+  };
+
+  const galleryHeader = {
+    badge: (isEn ? getSettingVal('gallery_badge_en') : getSettingVal('gallery_badge_id')) || t('gallery.badge'),
+    title: (isEn ? getSettingVal('gallery_title_en') : getSettingVal('gallery_title_id')) || t('gallery.title'),
+    subtitle: (isEn ? getSettingVal('gallery_subtitle_en') : getSettingVal('gallery_subtitle_id')) || t('gallery.subtitle'),
+  };
+
+  const testimonialsHeader = {
+    badge: (isEn ? getSettingVal('testimonials_badge_en') : getSettingVal('testimonials_badge_id')) || undefined,
+    title: (isEn ? getSettingVal('testimonials_title_en') : getSettingVal('testimonials_title_id')) || undefined,
+    subtitle: (isEn ? getSettingVal('testimonials_subtitle_en') : getSettingVal('testimonials_subtitle_id')) || undefined,
+  };
+
+  const faqHeader = {
+    badge: (isEn ? getSettingVal('faq_badge_en') : getSettingVal('faq_badge_id')) || t('faq.badge'),
+    title: (isEn ? getSettingVal('faq_title_en') : getSettingVal('faq_title_id')) || t('faq.title'),
+    subtitle: (isEn ? getSettingVal('faq_subtitle_en') : getSettingVal('faq_subtitle_id')) || t('faq.subtitle'),
+  };
+
+  const showTestimonials = getSettingVal('testimonials_show_landing') !== 'false';
 
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6282236851307';
@@ -44,16 +74,56 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <Sparkles size={14} />
-              <span>{t('packages.sectionBadge')}</span>
+              <span>{packagesHeader.badge}</span>
             </div>
-            <h2 className="section-title">{t('packages.sectionTitle')}</h2>
+            <h2 className="section-title">{packagesHeader.title}</h2>
             <p className="section-subtitle">
-              {t('packages.sectionSubtitle')}
+              {packagesHeader.subtitle}
             </p>
           </div>
 
           {activePackages.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '56px' }}>
+              {/* Private Packages */}
+              {privatePackages.length > 0 && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 12px',
+                          borderRadius: 'var(--radius-full)',
+                          background: '#fef3c7',
+                          color: '#b45309',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          marginBottom: '8px',
+                          border: '1px solid #fde68a',
+                        }}
+                      >
+                        <Ship size={13} />
+                        <span>{t('packages.privateBadge')}</span>
+                      </div>
+                      <h3 style={{ fontSize: '1.45rem', color: 'var(--primary-deep)', margin: 0 }}>
+                        {t('packages.privateSectionTitle')}
+                      </h3>
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
+                      Max. 4 Pax • Flexible Schedule
+                    </span>
+                  </div>
+
+                  <div className="grid-3">
+                    {privatePackages.slice(0, 3).map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Public Packages */}
               {publicPackages.length > 0 && (
                 <div>
@@ -94,45 +164,6 @@ export default async function HomePage() {
                 </div>
               )}
 
-              {/* Private Packages */}
-              {privatePackages.length > 0 && (
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-                    <div>
-                      <div
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '5px 12px',
-                          borderRadius: 'var(--radius-full)',
-                          background: '#fef3c7',
-                          color: '#b45309',
-                          fontSize: '0.78rem',
-                          fontWeight: 700,
-                          marginBottom: '8px',
-                          border: '1px solid #fde68a',
-                        }}
-                      >
-                        <Ship size={13} />
-                        <span>{t('packages.privateBadge')}</span>
-                      </div>
-                      <h3 style={{ fontSize: '1.45rem', color: 'var(--primary-deep)', margin: 0 }}>
-                        {t('packages.privateSectionTitle')}
-                      </h3>
-                    </div>
-                    <span style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
-                      Max. 4 Pax • Flexible Schedule
-                    </span>
-                  </div>
-
-                  <div className="grid-3">
-                    {privatePackages.slice(0, 3).map((pkg) => (
-                      <PackageCard key={pkg.id} pkg={pkg} />
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div style={{ textAlign: 'center', marginTop: '12px' }}>
                 <Link href="/paket" className="btn btn-secondary btn-lg">
@@ -420,11 +451,11 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <Camera size={14} />
-              <span>{t('gallery.badge')}</span>
+              <span>{galleryHeader.badge}</span>
             </div>
-            <h2 className="section-title">{t('gallery.title')}</h2>
+            <h2 className="section-title">{galleryHeader.title}</h2>
             <p className="section-subtitle">
-              {t('gallery.subtitle')}
+              {galleryHeader.subtitle}
             </p>
           </div>
 
@@ -439,8 +470,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. Testimonials Section */}
-      <TestimonialsSection items={testimonials} />
+      {/* 6. Testimonials Section (hidden when disabled in Admin > Testimoni) */}
+      {showTestimonials && (
+        <TestimonialsSection items={testimonials} headerData={testimonialsHeader} />
+      )}
 
       {/* 7. FAQ Accordion Section */}
       <section className="section" id="faq">
@@ -448,11 +481,11 @@ export default async function HomePage() {
           <div className="section-header">
             <div className="section-badge">
               <HelpCircle size={14} />
-              <span>{t('faq.badge')}</span>
+              <span>{faqHeader.badge}</span>
             </div>
-            <h2 className="section-title">{t('faq.title')}</h2>
+            <h2 className="section-title">{faqHeader.title}</h2>
             <p className="section-subtitle">
-              {t('faq.subtitle')}
+              {faqHeader.subtitle}
             </p>
           </div>
 

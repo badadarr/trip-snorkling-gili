@@ -15,12 +15,26 @@ import {
   Settings,
   LogOut,
   ExternalLink,
-  Waves,
 } from 'lucide-react';
+import BrandLogo from '@/components/common/BrandLogo';
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [siteSettings, setSiteSettings] = React.useState<{ [key: string]: string }>({});
+
+  React.useEffect(() => {
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data: any[]) => {
+        const map: { [key: string]: string } = {};
+        data.forEach((item) => {
+          map[item.key] = item.value;
+        });
+        setSiteSettings(map);
+      })
+      .catch((e) => console.warn('Sidebar settings fetch error:', e));
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -41,6 +55,7 @@ export default function AdminSidebar() {
     { href: '/admin/testimoni', label: 'Kelola Testimoni', icon: MessageSquare },
     { href: '/admin/faq', label: 'Kelola FAQ', icon: HelpCircle },
     { href: '/admin/about', label: 'Kelola Tentang Kami', icon: Info },
+    { href: '/admin/settings', label: 'Pengaturan Sistem', icon: Settings },
   ];
 
   return (
@@ -59,29 +74,18 @@ export default function AdminSidebar() {
       }}
     >
       {/* Brand Header */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-        <NextLink href="/admin" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, var(--primary-ocean) 0%, var(--primary-turquoise) 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Waves color="#ffffff" size={22} strokeWidth={2.4} />
-          </div>
-          <div>
-            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.05rem', color: '#ffffff', display: 'block' }}>
-              ADMIN CMS
-            </span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--primary-aqua)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Snorkeling Gili
-            </span>
-          </div>
+      <div style={{ padding: '20px 18px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+        <NextLink href="/admin" style={{ display: 'block', textDecoration: 'none' }}>
+          <BrandLogo
+            siteName={siteSettings.site_name || "ADMIN CMS"}
+            tagline={siteSettings.tagline || "Snorkeling Gili"}
+            logoUrl={siteSettings.site_logo || ""}
+            logoType={siteSettings.site_logo_type || "preset"}
+            logoPreset={siteSettings.site_logo_preset || "waves"}
+            logoColor={siteSettings.site_logo_color || "ocean"}
+            variant="dark"
+            size="sm"
+          />
         </NextLink>
       </div>
 

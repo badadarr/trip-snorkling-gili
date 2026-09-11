@@ -9,9 +9,16 @@ import {
   X,
   Star,
   Loader2,
+  SlidersHorizontal,
+  Sparkles,
+  Save,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminConfirmModal from "@/components/admin/AdminConfirmModal";
+import AdminSectionHeaderModal from "@/components/admin/AdminSectionHeaderModal";
+import AdminLanguageTabs from "@/components/admin/AdminLanguageTabs";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { DataTable } from "@/components/admin/DataTable";
 import { DataTableColumnHeader } from "@/components/admin/DataTableColumnHeader";
@@ -22,7 +29,9 @@ export default function AdminTestimonialsPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHeaderModalOpen, setIsHeaderModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [formTab, setFormTab] = useState<"id" | "en">("id");
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
@@ -41,6 +50,52 @@ export default function AdminTestimonialsPage() {
   };
 
   const [formData, setFormData] = useState(initialEmptyTestimonial);
+  const [packages, setPackages] = useState<any[]>([]);
+
+  // Whether the whole review section is shown on the public landing page
+  const [showOnLanding, setShowOnLanding] = useState(true);
+  const [isTogglingLanding, setIsTogglingLanding] = useState(false);
+
+  const fetchLandingVisibility = async () => {
+    try {
+      const res = await fetch("/api/settings");
+      if (!res.ok) return;
+      const data = await res.json();
+      const found = Array.isArray(data)
+        ? data.find((item: any) => item.key === "testimonials_show_landing")
+        : null;
+      setShowOnLanding(found?.value !== "false");
+    } catch (e) {
+      console.warn("Gagal memuat pengaturan tampilan testimoni:", e);
+    }
+  };
+
+  const handleToggleLanding = async () => {
+    const nextValue = !showOnLanding;
+    setIsTogglingLanding(true);
+    setShowOnLanding(nextValue);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "testimonials_show_landing",
+          value: nextValue ? "true" : "false",
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan pengaturan");
+      toast.success(
+        nextValue
+          ? "Seksi ulasan kembali ditampilkan di landing page."
+          : "Seksi ulasan disembunyikan dari landing page.",
+      );
+    } catch (e: any) {
+      setShowOnLanding(!nextValue);
+      toast.error(e.message || "Gagal menyimpan pengaturan tampilan");
+    } finally {
+      setIsTogglingLanding(false);
+    }
+  };
 
   const fetchTestimonials = async () => {
     setLoading(true);
@@ -60,8 +115,22 @@ export default function AdminTestimonialsPage() {
     }
   };
 
+  const fetchPackages = async () => {
+    try {
+      const res = await fetch("/api/packages");
+      if (res.ok) {
+        const data = await res.json();
+        setPackages(data);
+      }
+    } catch (e) {
+      console.error("Gagal memuat paket trip:", e);
+    }
+  };
+
   useEffect(() => {
     fetchTestimonials();
+    fetchPackages();
+    fetchLandingVisibility();
   }, []);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -69,13 +138,20 @@ export default function AdminTestimonialsPage() {
   const openCreateModal = () => {
     setEditingId(null);
     setErrors({});
-    setFormData(initialEmptyTestimonial);
+    setFormTab("id");
+    const activePackages = packages.filter((p) => p.isActive !== false);
+    const defaultTripType = activePackages.length > 0 ? activePackages[0].nameId : "";
+    setFormData({
+      ...initialEmptyTestimonial,
+      tripType: defaultTripType,
+    });
     setIsModalOpen(true);
   };
 
   const openEditModal = (item: any) => {
     setEditingId(item.id);
     setErrors({});
+    setFormTab("id");
     setFormData({
       name: item.name,
       origin: item.origin || "",
@@ -83,7 +159,7 @@ export default function AdminTestimonialsPage() {
       rating: item.rating || 5,
       tripType: item.tripType || "",
       contentId: item.contentId,
-      contentEn: item.contentEn,
+      contentEn: item.contentEn || "",
       avatarUrl: item.avatarUrl || "",
       isActive: item.isActive !== false,
     });
@@ -95,7 +171,10 @@ export default function AdminTestimonialsPage() {
 
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Nama tamu wajib diisi";
-    if (!formData.contentId.trim()) newErrors.contentId = "Isi ulasan (Bahasa Indonesia) wajib diisi";
+    if (!formData.contentId.trim()) {
+      newErrors.contentId = "Isi ulasan (Bahasa Indonesia) wajib diisi";
+      setFormTab("id");
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -437,15 +516,91 @@ export default function AdminTestimonialsPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="btn btn-primary btn-sm"
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flexWrap: "wrap",
+          }}
         >
-          <Plus size={16} />
-          <span>Tambah Testimoni Baru</span>
-        </button>
+          <button
+            type="button"
+            onClick={handleToggleLanding}
+            disabled={isTogglingLanding}
+            title={
+              showOnLanding
+                ? "Klik untuk menyembunyikan seluruh seksi ulasan dari landing page"
+                : "Klik untuk menampilkan kembali seksi ulasan di landing page"
+            }
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              borderColor: showOnLanding ? undefined : "#fbbf24",
+              background: showOnLanding ? undefined : "#fffbeb",
+              color: showOnLanding ? undefined : "#b45309",
+              cursor: isTogglingLanding ? "wait" : "pointer",
+            }}
+          >
+            {showOnLanding ? <Eye size={16} /> : <EyeOff size={16} />}
+            <span>
+              {showOnLanding
+                ? "Ulasan Tampil di Landing Page"
+                : "Ulasan Disembunyikan dari Landing Page"}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsHeaderModalOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Kelola Judul & Header Seksi</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={16} />
+            <span>Tambah Testimoni Baru</span>
+          </button>
+        </div>
       </div>
+
+      {!showOnLanding && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "10px",
+            padding: "12px 16px",
+            borderRadius: "var(--radius-sm)",
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
+            color: "#92400e",
+            fontSize: "0.85rem",
+            lineHeight: 1.5,
+            marginBottom: "18px",
+          }}
+        >
+          <EyeOff size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+          <span>
+            Seksi ulasan sedang disembunyikan dari landing page. Testimoni di
+            bawah tetap tersimpan dan akan langsung tampil kembali begitu opsi
+            ini diaktifkan.
+          </span>
+        </div>
+      )}
 
       {/* Testimonials DataTable */}
       <DataTable
@@ -578,15 +733,35 @@ export default function AdminTestimonialsPage() {
               >
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Jenis Paket Trip</label>
-                  <input
-                    type="text"
+                  <select
                     className="form-control"
-                    placeholder="Private Glass Bottom Boat"
                     value={formData.tripType}
                     onChange={(e) =>
                       setFormData({ ...formData, tripType: e.target.value })
                     }
-                  />
+                  >
+                    <option value="">-- Pilih Jenis Paket Trip --</option>
+                    {packages
+                      .filter((pkg) => pkg.isActive !== false)
+                      .map((pkg) => (
+                        <option key={pkg.id} value={pkg.nameId}>
+                          {pkg.nameId}
+                        </option>
+                      ))}
+                    {packages
+                      .filter((pkg) => pkg.isActive === false)
+                      .map((pkg) => (
+                        <option key={pkg.id} value={pkg.nameId}>
+                          {pkg.nameId} (Nonaktif)
+                        </option>
+                      ))}
+                    {formData.tripType &&
+                      !packages.some((p) => p.nameId === formData.tripType) && (
+                        <option value={formData.tripType}>
+                          {formData.tripType}
+                        </option>
+                      )}
+                  </select>
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Rating Bintang</label>
@@ -600,48 +775,61 @@ export default function AdminTestimonialsPage() {
                       })
                     }
                   >
-                    <option value={5}>⭐⭐⭐⭐⭐ (5 Bintang - Sempurna)</option>
-                    <option value={4}>
-                      ⭐⭐⭐⭐ (4 Bintang - Sangat Bagus)
-                    </option>
-                    <option value={3}>⭐⭐⭐ (3 Bintang - Cukup)</option>
+                    <option value={5}>5 Bintang (Sempurna)</option>
+                    <option value={4}>4 Bintang (Sangat Bagus)</option>
+                    <option value={3}>3 Bintang (Cukup)</option>
+                    <option value={2}>2 Bintang (Kurang)</option>
+                    <option value={1}>1 Bintang (Sangat Kurang)</option>
                   </select>
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">
-                  Isi Ulasan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                </label>
-                <textarea
-                  className="form-control"
-                  placeholder="Cerita pengalaman tamu..."
-                  value={formData.contentId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, contentId: e.target.value });
-                    if (errors.contentId) setErrors((prev) => ({ ...prev, contentId: "" }));
-                  }}
-                  rows={3}
-                  style={errors.contentId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+              {/* Bilingual Review Content Switcher */}
+              <div style={{ marginTop: "6px", marginBottom: "14px" }}>
+                <AdminLanguageTabs
+                  activeLang={formTab}
+                  onChange={setFormTab}
+                  hasErrorId={Boolean(errors.contentId)}
                 />
-                {errors.contentId && (
-                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                    {errors.contentId}
-                  </span>
-                )}
-              </div>
 
-              <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">Isi Ulasan (English)</label>
-                <textarea
-                  className="form-control"
-                  placeholder="Guest review in English..."
-                  value={formData.contentEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, contentEn: e.target.value })
-                  }
-                  rows={3}
-                />
+                {formTab === "id" ? (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Isi Ulasan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                    </label>
+                    <textarea
+                      className="form-control"
+                      placeholder="Cerita pengalaman tamu saat trip snorkeling..."
+                      value={formData.contentId}
+                      onChange={(e) => {
+                        setFormData({ ...formData, contentId: e.target.value });
+                        if (errors.contentId) setErrors((prev) => ({ ...prev, contentId: "" }));
+                      }}
+                      rows={4}
+                      style={errors.contentId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                    />
+                    {errors.contentId && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                        {errors.contentId}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Isi Ulasan (English)
+                    </label>
+                    <textarea
+                      className="form-control"
+                      placeholder="Guest review story and snorkeling experience in English..."
+                      value={formData.contentEn}
+                      onChange={(e) =>
+                        setFormData({ ...formData, contentEn: e.target.value })
+                      }
+                      rows={4}
+                    />
+                  </div>
+                )}
               </div>
 
               <ImageUpload
@@ -697,6 +885,30 @@ export default function AdminTestimonialsPage() {
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      {/* Header Settings Modal */}
+      <AdminSectionHeaderModal
+        isOpen={isHeaderModalOpen}
+        onClose={() => setIsHeaderModalOpen(false)}
+        sectionTitle="Pengaturan Header Seksi Testimoni"
+        sectionDescription="Kelola badge, judul utama, dan subjudul bagian ulasan tamu di halaman utama website."
+        badgeKeyId="testimonials_badge_id"
+        badgeKeyEn="testimonials_badge_en"
+        titleKeyId="testimonials_title_id"
+        titleKeyEn="testimonials_title_en"
+        subtitleKeyId="testimonials_subtitle_id"
+        subtitleKeyEn="testimonials_subtitle_en"
+        defaults={{
+          badgeId: "ULASAN TAMU",
+          badgeEn: "GUEST REVIEWS",
+          titleId: "Cerita Pengalaman dari Tamu Kami",
+          titleEn: "Stories from Our Happy Snorkelers",
+          subtitleId:
+            "Lebih dari 5.000+ tamu dari berbagai belahan dunia telah menikmati serunya snorkeling di 3 Gili bersama kami.",
+          subtitleEn:
+            "Over 5,000+ happy travelers from around the globe have explored the Gili islands with our team.",
+        }}
       />
     </div>
   );

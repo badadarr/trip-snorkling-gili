@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Info, Save, CheckCircle2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageUpload from '@/components/admin/ImageUpload';
+import AdminLanguageTabs from '@/components/admin/AdminLanguageTabs';
 
 export default function AdminAboutPage() {
+  const [activeLang, setActiveLang] = useState<'id' | 'en'>('id');
   const [formData, setFormData] = useState({
     titleId: '',
     titleEn: '',
@@ -35,6 +37,28 @@ export default function AdminAboutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.titleId?.trim()) {
+      setActiveLang('id');
+      toast.error('Judul utama halaman (Bahasa Indonesia) wajib diisi');
+      return;
+    }
+    if (!formData.storyId?.trim()) {
+      setActiveLang('id');
+      toast.error('Cerita & nilai dedikasi (Bahasa Indonesia) wajib diisi');
+      return;
+    }
+    if (!formData.titleEn?.trim()) {
+      setActiveLang('en');
+      toast.error('Judul utama halaman (English) wajib diisi');
+      return;
+    }
+    if (!formData.storyEn?.trim()) {
+      setActiveLang('en');
+      toast.error('Cerita & nilai dedikasi (English) wajib diisi');
+      return;
+    }
+
     setIsSaving(true);
     const toastId = toast.loading('Menyimpan perubahan Tentang Kami...');
 
@@ -78,83 +102,113 @@ export default function AdminAboutPage() {
 
       <div className="glass-card" style={{ padding: '36px', background: '#ffffff' }}>
         <form onSubmit={handleSubmit}>
-          {/* Main Titles */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            <div className="form-group">
-              <label className="form-label">Judul Utama Halaman (ID)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.titleId || ''}
-                onChange={(e) => setFormData({ ...formData, titleId: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Judul Utama Halaman (EN)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.titleEn || ''}
-                onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Subtitles */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-            <div className="form-group">
-              <label className="form-label">Subjudul Halaman (ID)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.subtitleId || ''}
-                onChange={(e) => setFormData({ ...formData, subtitleId: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Subjudul Halaman (EN)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formData.subtitleEn || ''}
-                onChange={(e) => setFormData({ ...formData, subtitleEn: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Story ID */}
-          <div className="form-group">
-            <label className="form-label">Cerita & Nilai Dedikasi (Bahasa Indonesia)</label>
-            <textarea
-              className="form-control"
-              rows={4}
-              value={formData.storyId || ''}
-              onChange={(e) => setFormData({ ...formData, storyId: e.target.value })}
-              required
-            />
-          </div>
-
-          {/* Story EN */}
-          <div className="form-group">
-            <label className="form-label">Cerita & Nilai Dedikasi (English)</label>
-            <textarea
-              className="form-control"
-              rows={4}
-              value={formData.storyEn || ''}
-              onChange={(e) => setFormData({ ...formData, storyEn: e.target.value })}
-              required
-            />
-          </div>
-
-          {/* Documentation Team / Boat Image Upload */}
-          <ImageUpload
-            label="Foto Dokumentasi Perahu / Tim"
-            value={formData.imageUrl || ''}
-            onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-            helperText="Upload foto armada kapal atau tim pemandu (JPG, PNG, WebP maks 10MB)"
+          {/* Language Switcher Tabs */}
+          <AdminLanguageTabs
+            activeLang={activeLang}
+            onChange={setActiveLang}
+            hasErrorId={!formData.titleId?.trim() || !formData.storyId?.trim()}
+            hasErrorEn={!formData.titleEn?.trim() || !formData.storyEn?.trim()}
           />
+
+          {activeLang === 'id' ? (
+            <>
+              {/* Title ID */}
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label">
+                  Judul Utama Halaman (ID) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Contoh: Dedikasi Kami untuk Wisata Snorkeling Berkelanjutan"
+                  value={formData.titleId || ''}
+                  onChange={(e) => setFormData({ ...formData, titleId: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* Subtitle ID */}
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label">Subjudul Halaman (ID)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Contoh: Menghubungkan Anda dengan Keindahan Alami 3 Gili Lombok Sejak 2018"
+                  value={formData.subtitleId || ''}
+                  onChange={(e) => setFormData({ ...formData, subtitleId: e.target.value })}
+                />
+              </div>
+
+              {/* Story ID */}
+              <div className="form-group" style={{ marginBottom: '24px' }}>
+                <label className="form-label">
+                  Cerita & Nilai Dedikasi (Bahasa Indonesia) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
+                <textarea
+                  className="form-control"
+                  rows={6}
+                  placeholder="Cerita latar belakang tim, pemandu lokal terpercaya, dan komitmen menjaga kelestarian terumbu karang..."
+                  value={formData.storyId || ''}
+                  onChange={(e) => setFormData({ ...formData, storyId: e.target.value })}
+                  required
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Title EN */}
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label">
+                  Judul Utama Halaman (EN) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. Our Passion for Sustainable Snorkeling Adventures"
+                  value={formData.titleEn || ''}
+                  onChange={(e) => setFormData({ ...formData, titleEn: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* Subtitle EN */}
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label className="form-label">Subjudul Halaman (EN)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. Connecting You with the Pristine Marine Wonders of 3 Gili Since 2018"
+                  value={formData.subtitleEn || ''}
+                  onChange={(e) => setFormData({ ...formData, subtitleEn: e.target.value })}
+                />
+              </div>
+
+              {/* Story EN */}
+              <div className="form-group" style={{ marginBottom: '24px' }}>
+                <label className="form-label">
+                  Cerita & Nilai Dedikasi (English) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                </label>
+                <textarea
+                  className="form-control"
+                  rows={6}
+                  placeholder="Story about your local captain team, safety guidelines, and coral reef conservation efforts..."
+                  value={formData.storyEn || ''}
+                  onChange={(e) => setFormData({ ...formData, storyEn: e.target.value })}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Documentation Team / Boat Image Upload (Shared) */}
+          <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '24px', marginTop: '10px' }}>
+            <ImageUpload
+              label="Foto Dokumentasi Perahu / Tim"
+              value={formData.imageUrl || ''}
+              onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+              helperText="Upload foto armada kapal atau tim pemandu (JPG, PNG, WebP maks 10MB)"
+            />
+          </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '28px' }}>
             <button

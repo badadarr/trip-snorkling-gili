@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Image as ImageIcon, Plus, Trash2, X, CheckCircle2, Loader2, Filter, Eye } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, X, CheckCircle2, Loader2, Filter, Eye, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import AdminConfirmModal from '@/components/admin/AdminConfirmModal';
+import AdminSectionHeaderModal from '@/components/admin/AdminSectionHeaderModal';
+import AdminLanguageTabs from '@/components/admin/AdminLanguageTabs';
 import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function AdminGalleryPage() {
@@ -11,7 +13,9 @@ export default function AdminGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHeaderModalOpen, setIsHeaderModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [formTab, setFormTab] = useState<'id' | 'en'>('id');
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
@@ -68,8 +72,13 @@ export default function AdminGalleryPage() {
 
     const newErrors: Record<string, string> = {};
     if (!formData.imageUrl.trim()) newErrors.imageUrl = 'Unggah foto galeri wajib diisi';
-    if (!formData.titleId.trim()) newErrors.titleId = 'Judul foto (Bahasa Indonesia) wajib diisi';
-    if (!formData.titleEn.trim()) newErrors.titleEn = 'Judul foto (English) wajib diisi';
+    if (!formData.titleId.trim()) {
+      newErrors.titleId = 'Judul foto (Bahasa Indonesia) wajib diisi';
+      setFormTab('id');
+    } else if (!formData.titleEn.trim()) {
+      newErrors.titleEn = 'Judul foto (English) wajib diisi';
+      setFormTab('en');
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -145,23 +154,40 @@ export default function AdminGalleryPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setFormData({
-              imageUrl: '',
-              titleId: '',
-              titleEn: '',
-              category: 'turtles',
-              orderIndex: gallery.length + 1,
-            });
-            setIsModalOpen(true);
-          }}
-          className="btn btn-primary btn-sm"
-        >
-          <Plus size={16} />
-          <span>Tambah Foto Baru</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setIsHeaderModalOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Kelola Judul & Header Seksi</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFormData({
+                imageUrl: '',
+                titleId: '',
+                titleEn: '',
+                category: 'turtles',
+                orderIndex: gallery.length + 1,
+              });
+              setFormTab('id');
+              setIsModalOpen(true);
+            }}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={16} />
+            <span>Tambah Foto Baru</span>
+          </button>
+        </div>
       </div>
 
       {/* Category Filter Pills */}
@@ -351,47 +377,59 @@ export default function AdminGalleryPage() {
                 )}
               </div>
 
-              <div className="form-group" style={{ marginBottom: '14px' }}>
-                <label className="form-label">
-                  Judul Foto (Bahasa Indonesia) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Contoh: Berenang Bersama Penyu di Gili Meno"
-                  value={formData.titleId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, titleId: e.target.value });
-                    if (errors.titleId) setErrors((prev) => ({ ...prev, titleId: '' }));
-                  }}
-                  style={errors.titleId ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
+              {/* Bilingual Title Switcher */}
+              <div style={{ marginTop: '6px', marginBottom: '14px' }}>
+                <AdminLanguageTabs
+                  activeLang={formTab}
+                  onChange={setFormTab}
+                  hasErrorId={Boolean(errors.titleId)}
+                  hasErrorEn={Boolean(errors.titleEn)}
                 />
-                {errors.titleId && (
-                  <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
-                    {errors.titleId}
-                  </span>
-                )}
-              </div>
 
-              <div className="form-group" style={{ marginBottom: '14px' }}>
-                <label className="form-label">
-                  Judul Foto (English) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Swimming with Wild Turtles at Gili Meno"
-                  value={formData.titleEn}
-                  onChange={(e) => {
-                    setFormData({ ...formData, titleEn: e.target.value });
-                    if (errors.titleEn) setErrors((prev) => ({ ...prev, titleEn: '' }));
-                  }}
-                  style={errors.titleEn ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
-                />
-                {errors.titleEn && (
-                  <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
-                    {errors.titleEn}
-                  </span>
+                {formTab === 'id' ? (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Judul Foto (Bahasa Indonesia) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Berenang Bersama Penyu di Gili Meno"
+                      value={formData.titleId}
+                      onChange={(e) => {
+                        setFormData({ ...formData, titleId: e.target.value });
+                        if (errors.titleId) setErrors((prev) => ({ ...prev, titleId: '' }));
+                      }}
+                      style={errors.titleId ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
+                    />
+                    {errors.titleId && (
+                      <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+                        {errors.titleId}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Judul Foto (English) <span style={{ color: '#ef4444', fontWeight: 700 }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Swimming with Wild Turtles at Gili Meno"
+                      value={formData.titleEn}
+                      onChange={(e) => {
+                        setFormData({ ...formData, titleEn: e.target.value });
+                        if (errors.titleEn) setErrors((prev) => ({ ...prev, titleEn: '' }));
+                      }}
+                      style={errors.titleEn ? { borderColor: '#ef4444', backgroundColor: '#fffbfa' } : {}}
+                    />
+                    {errors.titleEn && (
+                      <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', display: 'block', fontWeight: 500 }}>
+                        {errors.titleEn}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -446,6 +484,30 @@ export default function AdminGalleryPage() {
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      {/* Header Settings Modal */}
+      <AdminSectionHeaderModal
+        isOpen={isHeaderModalOpen}
+        onClose={() => setIsHeaderModalOpen(false)}
+        sectionTitle="Pengaturan Header Seksi Galeri Foto"
+        sectionDescription="Kelola badge, judul utama, dan subjudul bagian galeri foto & video bawah air di halaman utama website."
+        badgeKeyId="gallery_badge_id"
+        badgeKeyEn="gallery_badge_en"
+        titleKeyId="gallery_title_id"
+        titleKeyEn="gallery_title_en"
+        subtitleKeyId="gallery_subtitle_id"
+        subtitleKeyEn="gallery_subtitle_en"
+        defaults={{
+          badgeId: "GALERI FOTO & VIDEO",
+          badgeEn: "PHOTO & VIDEO GALLERY",
+          titleId: "Momen Seru di Bawah Air",
+          titleEn: "Captivating Underwater Moments",
+          subtitleId:
+            "Dokumentasi nyata keseruan para tamu kami saat berenang bersama penyu liar dan menikmati keindahan terumbu karang 3 Gili.",
+          subtitleEn:
+            "Real underwater memories captured while swimming with sea turtles and exploring vibrant coral reefs across the 3 Gili islands.",
+        }}
       />
     </div>
   );

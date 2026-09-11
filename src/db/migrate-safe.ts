@@ -23,6 +23,9 @@ async function migrateSafe() {
     await sql`ALTER TABLE "packages" ADD COLUMN IF NOT EXISTS "price_unit" varchar(30) DEFAULT 'per_person';`;
     console.log('✅ Column "price_unit" ensured in "packages"');
 
+    await sql`ALTER TABLE "packages" ADD COLUMN IF NOT EXISTS "price_eur" double precision DEFAULT 0;`;
+    console.log('✅ Column "price_eur" ensured in "packages"');
+
     console.log('🎉 Safe database migration completed successfully!');
     process.exit(0);
   } catch (err: any) {

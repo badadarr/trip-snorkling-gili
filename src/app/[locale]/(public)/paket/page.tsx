@@ -54,7 +54,45 @@ export default async function PackagesPage() {
         <div className="container">
           {activePackages.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '64px' }}>
-              {/* 1. Public Packages Section */}
+              {/* 1. Private Packages Section */}
+              {privatePackages.length > 0 && (
+                <div>
+                  <div style={{ marginBottom: '32px' }}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        borderRadius: 'var(--radius-full)',
+                        background: '#fef3c7',
+                        color: '#b45309',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        marginBottom: '12px',
+                        border: '1px solid #fde68a',
+                      }}
+                    >
+                      <Ship size={14} />
+                      <span>{t('packages.privateBadge')}</span>
+                    </div>
+                    <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--primary-deep)', marginBottom: '8px' }}>
+                      {t('packages.privateSectionTitle')}
+                    </h2>
+                    <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '620px', lineHeight: 1.6 }}>
+                      {t('packages.privateSectionSubtitle')}
+                    </p>
+                  </div>
+
+                  <div className="grid-3">
+                    {privatePackages.map((pkg) => (
+                      <PackageCard key={pkg.id} pkg={pkg} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Public Packages Section */}
               {publicPackages.length > 0 && (
                 <div>
                   <div style={{ marginBottom: '32px' }}>
@@ -92,43 +130,7 @@ export default async function PackagesPage() {
                 </div>
               )}
 
-              {/* 2. Private Packages Section */}
-              {privatePackages.length > 0 && (
-                <div>
-                  <div style={{ marginBottom: '32px' }}>
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        borderRadius: 'var(--radius-full)',
-                        background: '#fef3c7',
-                        color: '#b45309',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        marginBottom: '12px',
-                        border: '1px solid #fde68a',
-                      }}
-                    >
-                      <Ship size={14} />
-                      <span>{t('packages.privateBadge')}</span>
-                    </div>
-                    <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--primary-deep)', marginBottom: '8px' }}>
-                      {t('packages.privateSectionTitle')}
-                    </h2>
-                    <p style={{ fontSize: '0.98rem', color: 'var(--text-muted)', maxWidth: '620px', lineHeight: 1.6 }}>
-                      {t('packages.privateSectionSubtitle')}
-                    </p>
-                  </div>
 
-                  <div className="grid-3">
-                    {privatePackages.map((pkg) => (
-                      <PackageCard key={pkg.id} pkg={pkg} />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div

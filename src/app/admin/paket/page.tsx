@@ -22,12 +22,15 @@ import {
   Clock,
   DollarSign,
   Calendar,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import AdminConfirmModal from "@/components/admin/AdminConfirmModal";
+import AdminSectionHeaderModal from "@/components/admin/AdminSectionHeaderModal";
+import AdminLanguageTabs from "@/components/admin/AdminLanguageTabs";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { formatIdr, formatUsd } from "@/lib/format";
+import { formatIdr, formatUsd, formatEur } from "@/lib/format";
 import { DataTable } from "@/components/admin/DataTable";
 import { DataTableColumnHeader } from "@/components/admin/DataTableColumnHeader";
 import { ColumnDef } from "@tanstack/react-table";
@@ -38,7 +41,9 @@ export default function AdminPackagesPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHeaderModalOpen, setIsHeaderModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [formTab, setFormTab] = useState<"id" | "en">("id");
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
@@ -87,6 +92,7 @@ export default function AdminPackagesPage() {
     descriptionEn: "",
     price: 0,
     priceUsd: 0,
+    priceEur: 0,
     priceUnit: "per_person",
     durationId: "",
     durationEn: "",
@@ -105,6 +111,7 @@ export default function AdminPackagesPage() {
 
   // Structured time & duration pickers state
   const [usdInputStr, setUsdInputStr] = useState<string>("");
+  const [eurInputStr, setEurInputStr] = useState<string>("");
   const [timePicker1, setTimePicker1] = useState("09:30");
   const [timePicker2, setTimePicker2] = useState("13:30");
   const [hasSecondSlot, setHasSecondSlot] = useState(false);
@@ -198,10 +205,12 @@ export default function AdminPackagesPage() {
   const openCreateModal = () => {
     setEditingId(null);
     setErrors({});
+    setFormTab("id");
     setFormData({
       ...initialEmptyPackage,
     });
     setUsdInputStr("");
+    setEurInputStr("");
     setTimePicker1("09:30");
     setTimePicker2("13:30");
     setHasSecondSlot(false);
@@ -217,6 +226,7 @@ export default function AdminPackagesPage() {
   const openEditModal = (pkg: any) => {
     setEditingId(pkg.id);
     setErrors({});
+    setFormTab("id");
     const spots = Array.isArray(pkg.spotsId)
       ? pkg.spotsId
       : typeof pkg.spotsId === "string"
@@ -236,6 +246,7 @@ export default function AdminPackagesPage() {
         : [];
 
     setUsdInputStr(pkg.priceUsd ? String(pkg.priceUsd) : "");
+    setEurInputStr(pkg.priceEur ? String(pkg.priceEur) : "");
 
     setFormData({
       slug: pkg.slug,
@@ -247,6 +258,7 @@ export default function AdminPackagesPage() {
       descriptionEn: pkg.descriptionEn,
       price: pkg.price,
       priceUsd: pkg.priceUsd,
+      priceEur: pkg.priceEur || 0,
       priceUnit:
         pkg.priceUnit || (pkg.price > 500000 ? "per_boat" : "per_person"),
       durationId: pkg.durationId || "",
@@ -273,10 +285,12 @@ export default function AdminPackagesPage() {
   const handleDuplicate = (pkg: any) => {
     setEditingId(null);
     setErrors({});
+    setFormTab("id");
     const spots = Array.isArray(pkg.spotsId) ? pkg.spotsId : [];
     const includes = Array.isArray(pkg.includesId) ? pkg.includesId : [];
 
     setUsdInputStr(pkg.priceUsd ? String(pkg.priceUsd) : "");
+    setEurInputStr(pkg.priceEur ? String(pkg.priceEur) : "");
 
     setFormData({
       slug: `${pkg.slug}-copy-${Date.now().toString().slice(-4)}`,
@@ -288,6 +302,7 @@ export default function AdminPackagesPage() {
       descriptionEn: pkg.descriptionEn,
       price: pkg.price,
       priceUsd: pkg.priceUsd,
+      priceEur: pkg.priceEur || 0,
       priceUnit:
         pkg.priceUnit || (pkg.price > 500000 ? "per_boat" : "per_person"),
       durationId: pkg.durationId || "",
@@ -395,6 +410,11 @@ export default function AdminPackagesPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      if (newErrors.nameId || newErrors.descriptionId) {
+        setFormTab("id");
+      } else if (newErrors.nameEn || newErrors.descriptionEn) {
+        setFormTab("en");
+      }
       toast.error("Harap lengkapi semua kolom bertanda merah (*)");
       return;
     }
@@ -575,7 +595,10 @@ export default function AdminPackagesPage() {
       {
         accessorKey: "price",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Harga (IDR / USD)" />
+          <DataTableColumnHeader
+            column={column}
+            title="Harga (IDR / USD / EUR)"
+          />
         ),
         cell: ({ row }) => {
           const pkg = row.original;
@@ -635,7 +658,8 @@ export default function AdminPackagesPage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                ${pkg.priceUsd} USD{" "}
+                {formatUsd(pkg.priceUsd)}
+                {pkg.priceEur > 0 ? ` • ${formatEur(pkg.priceEur)}` : ""}{" "}
                 {pkg.priceUnit === "per_boat" ? "/ private" : "/ person"}
               </div>
             </div>
@@ -934,14 +958,37 @@ export default function AdminPackagesPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="btn btn-primary btn-sm"
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flexWrap: "wrap",
+          }}
         >
-          <Plus size={16} />
-          <span>Tambah Paket Baru</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsHeaderModalOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Kelola Judul & Header Seksi</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={16} />
+            <span>Tambah Paket Baru</span>
+          </button>
+        </div>
       </div>
 
       {/* Packages DataTable */}
@@ -1039,61 +1086,152 @@ export default function AdminPackagesPage() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Name ID & EN */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                  marginBottom: "14px",
-                }}
-              >
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Nama Paket (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Contoh: Snorkeling Sharing Glass Bottom Boat"
-                    value={formData.nameId}
-                    onChange={(e) => {
-                      setFormData({ ...formData, nameId: e.target.value });
-                      if (errors.nameId) setErrors((prev) => ({ ...prev, nameId: "" }));
-                    }}
-                    style={errors.nameId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
-                  />
-                  {errors.nameId && (
-                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                      {errors.nameId}
-                    </span>
-                  )}
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Nama Paket (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Public Glass Bottom Boat Snorkeling Tour"
-                    value={formData.nameEn}
-                    onChange={(e) => {
-                      setFormData({ ...formData, nameEn: e.target.value });
-                      if (errors.nameEn) setErrors((prev) => ({ ...prev, nameEn: "" }));
-                    }}
-                    style={errors.nameEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
-                  />
-                  {errors.nameEn && (
-                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                      {errors.nameEn}
-                    </span>
-                  )}
-                </div>
-              </div>
+              {/* Language Switcher Tabs */}
+              <AdminLanguageTabs
+                activeLang={formTab}
+                onChange={setFormTab}
+                hasErrorId={Boolean(errors.nameId || errors.descriptionId)}
+                hasErrorEn={Boolean(errors.nameEn || errors.descriptionEn)}
+              />
+
+              {formTab === "id" ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">
+                      Nama Paket (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Contoh: Snorkeling Sharing Glass Bottom Boat"
+                      value={formData.nameId}
+                      onChange={(e) => {
+                        setFormData({ ...formData, nameId: e.target.value });
+                        if (errors.nameId) setErrors((prev) => ({ ...prev, nameId: "" }));
+                      }}
+                      style={errors.nameId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                    />
+                    {errors.nameId && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                        {errors.nameId}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">
+                      Tag / Badge (Bahasa Indonesia)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="contoh: Paling Populer / Best Value"
+                      value={formData.tagId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const prevTagId = formData.tagId;
+                        const shouldSync =
+                          !formData.tagEn || formData.tagEn === prevTagId;
+                        setFormData({
+                          ...formData,
+                          tagId: val,
+                          tagEn: shouldSync ? val : formData.tagEn,
+                        });
+                      }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">
+                      Deskripsi Singkat (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                    </label>
+                    <textarea
+                      className="form-control"
+                      placeholder="Contoh: Paket hemat snorkeling sharing 3 Gili mengunjungi patung bawah air..."
+                      value={formData.descriptionId}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          descriptionId: e.target.value,
+                        });
+                        if (errors.descriptionId) setErrors((prev) => ({ ...prev, descriptionId: "" }));
+                      }}
+                      rows={3}
+                      style={errors.descriptionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                    />
+                    {errors.descriptionId && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                        {errors.descriptionId}
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">
+                      Nama Paket (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Public Glass Bottom Boat Snorkeling Tour"
+                      value={formData.nameEn}
+                      onChange={(e) => {
+                        setFormData({ ...formData, nameEn: e.target.value });
+                        if (errors.nameEn) setErrors((prev) => ({ ...prev, nameEn: "" }));
+                      }}
+                      style={errors.nameEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                    />
+                    {errors.nameEn && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                        {errors.nameEn}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">Tag / Badge (English)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Most Popular / Best Value"
+                      value={formData.tagEn}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tagEn: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: "14px" }}>
+                    <label className="form-label">
+                      Deskripsi Singkat (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                    </label>
+                    <textarea
+                      className="form-control"
+                      placeholder="e.g. Budget-friendly public sharing boat trip visiting underwater statues..."
+                      value={formData.descriptionEn}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          descriptionEn: e.target.value,
+                        });
+                        if (errors.descriptionEn) setErrors((prev) => ({ ...prev, descriptionEn: "" }));
+                      }}
+                      rows={3}
+                      style={errors.descriptionEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                    />
+                    {errors.descriptionEn && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                        {errors.descriptionEn}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
 
               {/* Slug URL */}
-              <div className="form-group" style={{ marginBottom: "14px" }}>
+              <div className="form-group" style={{ marginBottom: "16px" }}>
                 <label className="form-label">
                   Slug URL (Unik) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
@@ -1115,57 +1253,11 @@ export default function AdminPackagesPage() {
                 )}
               </div>
 
-              {/* Tag / Badge ID & EN */}
+              {/* Formatted Price IDR, USD & EUR */}
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                  marginBottom: "14px",
-                }}
-              >
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Tag / Badge (Bahasa Indonesia)
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="contoh: Paling Populer / Best Value"
-                    value={formData.tagId}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const prevTagId = formData.tagId;
-                      // Auto-sync tagEn if tagEn is empty or was in sync with tagId
-                      const shouldSync =
-                        !formData.tagEn || formData.tagEn === prevTagId;
-                      setFormData({
-                        ...formData,
-                        tagId: val,
-                        tagEn: shouldSync ? val : formData.tagEn,
-                      });
-                    }}
-                  />
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Tag / Badge (English)</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Most Popular / Best Value"
-                    value={formData.tagEn}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tagEn: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Formatted Price IDR & USD */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
                   gap: "16px",
                   marginBottom: "16px",
                 }}
@@ -1236,10 +1328,20 @@ export default function AdminPackagesPage() {
                           newUsd = approx;
                           setUsdInputStr(String(approx));
                         }
+                        let newEur = formData.priceEur;
+                        if (
+                          (formData.priceEur === 0 || !formData.priceEur) &&
+                          num > 0
+                        ) {
+                          const approxEur = Number((num / 17500).toFixed(2));
+                          newEur = approxEur;
+                          setEurInputStr(String(approxEur));
+                        }
                         setFormData({
                           ...formData,
                           price: num,
                           priceUsd: newUsd,
+                          priceEur: newEur,
                         });
                         if (errors.price && num > 0) {
                           setErrors((prev) => ({ ...prev, price: "" }));
@@ -1332,6 +1434,82 @@ export default function AdminPackagesPage() {
                       {errors.priceUsd}
                     </span>
                   )}
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <label className="form-label" style={{ margin: 0 }}>
+                      Harga EUR (&euro;)
+                    </label>
+                    {formData.priceEur > 0 && (
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#7c3aed",
+                        }}
+                      >
+                        {formatEur(formData.priceEur)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "var(--text-muted)",
+                        fontWeight: 700,
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      &euro;
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ paddingLeft: "28px", fontWeight: 600 }}
+                      placeholder="41.50"
+                      value={eurInputStr}
+                      onChange={(e) => {
+                        let raw = e.target.value.replace(/[^0-9.,]/g, "");
+                        const separatorIndex = raw.search(/[.,]/);
+                        if (separatorIndex !== -1) {
+                          const before = raw.slice(0, separatorIndex + 1);
+                          const after = raw
+                            .slice(separatorIndex + 1)
+                            .replace(/[.,]/g, "");
+                          raw = before + after;
+                        }
+                        setEurInputStr(raw);
+                        const parsed = parseFloat(raw.replace(",", "."));
+                        setFormData({
+                          ...formData,
+                          priceEur: isNaN(parsed) ? 0 : parsed,
+                        });
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{
+                      color: "var(--text-muted)",
+                      fontSize: "0.72rem",
+                      marginTop: "4px",
+                      display: "block",
+                    }}
+                  >
+                    Opsional. Kosongkan untuk konversi otomatis dari harga IDR
+                    memakai kurs di Pengaturan.
+                  </span>
                 </div>
               </div>
 
@@ -2197,65 +2375,6 @@ export default function AdminPackagesPage() {
                 </div>
               </div>
 
-              {/* Description ID & EN */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                  marginBottom: "14px",
-                }}
-              >
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Deskripsi Singkat (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                  </label>
-                  <textarea
-                    className="form-control"
-                    placeholder="Contoh: Paket hemat snorkeling sharing 3 Gili mengunjungi patung bawah air..."
-                    value={formData.descriptionId}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        descriptionId: e.target.value,
-                      });
-                      if (errors.descriptionId) setErrors((prev) => ({ ...prev, descriptionId: "" }));
-                    }}
-                    rows={2}
-                    style={errors.descriptionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
-                  />
-                  {errors.descriptionId && (
-                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                      {errors.descriptionId}
-                    </span>
-                  )}
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Deskripsi Singkat (English) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                  </label>
-                  <textarea
-                    className="form-control"
-                    placeholder="e.g. Budget-friendly public sharing boat trip visiting underwater statues..."
-                    value={formData.descriptionEn}
-                    onChange={(e) => {
-                      setFormData({
-                        ...formData,
-                        descriptionEn: e.target.value,
-                      });
-                      if (errors.descriptionEn) setErrors((prev) => ({ ...prev, descriptionEn: "" }));
-                    }}
-                    rows={2}
-                    style={errors.descriptionEn ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
-                  />
-                  {errors.descriptionEn && (
-                    <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                      {errors.descriptionEn}
-                    </span>
-                  )}
-                </div>
-              </div>
-
               {/* Image Upload with live preview & drag-drop */}
               <div className="form-group" style={{ marginBottom: "14px" }}>
                 <ImageUpload
@@ -2367,6 +2486,30 @@ export default function AdminPackagesPage() {
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      {/* Header Settings Modal */}
+      <AdminSectionHeaderModal
+        isOpen={isHeaderModalOpen}
+        onClose={() => setIsHeaderModalOpen(false)}
+        sectionTitle="Pengaturan Header Seksi Paket Trip"
+        sectionDescription="Kelola badge, judul utama, dan subjudul bagian pilihan paket trip snorkeling di halaman utama website."
+        badgeKeyId="packages_badge_id"
+        badgeKeyEn="packages_badge_en"
+        titleKeyId="packages_title_id"
+        titleKeyEn="packages_title_en"
+        subtitleKeyId="packages_subtitle_id"
+        subtitleKeyEn="packages_subtitle_en"
+        defaults={{
+          badgeId: "PAKET PILIHAN",
+          badgeEn: "FEATURED PACKAGES",
+          titleId: "Pilihan Paket Snorkeling 3 Gili",
+          titleEn: "3 Gili Snorkeling Tour Packages",
+          subtitleId:
+            "Pilih paket yang sesuai dengan gaya liburan Anda, mulai dari trip sharing hemat hingga private boat eksklusif dengan fasilitas lengkap.",
+          subtitleEn:
+            "Choose the ideal package matching your holiday style, from affordable sharing tours to exclusive private boat charters.",
+        }}
       />
     </div>
   );

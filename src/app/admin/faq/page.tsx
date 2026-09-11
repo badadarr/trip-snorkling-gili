@@ -9,9 +9,12 @@ import {
   X,
   Loader2,
   Filter,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminConfirmModal from "@/components/admin/AdminConfirmModal";
+import AdminSectionHeaderModal from "@/components/admin/AdminSectionHeaderModal";
+import AdminLanguageTabs from "@/components/admin/AdminLanguageTabs";
 import { DataTable } from "@/components/admin/DataTable";
 import { DataTableColumnHeader } from "@/components/admin/DataTableColumnHeader";
 import { ColumnDef } from "@tanstack/react-table";
@@ -22,7 +25,9 @@ export default function AdminFaqPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isSaving, setIsSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHeaderModalOpen, setIsHeaderModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [formTab, setFormTab] = useState<"id" | "en">("id");
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
@@ -78,6 +83,7 @@ export default function AdminFaqPage() {
   const openCreateModal = () => {
     setEditingId(null);
     setErrors({});
+    setFormTab("id");
     setFormData({
       questionId: "",
       questionEn: "",
@@ -93,6 +99,7 @@ export default function AdminFaqPage() {
   const openEditModal = (item: any) => {
     setEditingId(item.id);
     setErrors({});
+    setFormTab("id");
     setFormData({
       questionId: item.questionId,
       questionEn: item.questionEn || "",
@@ -109,8 +116,14 @@ export default function AdminFaqPage() {
     e.preventDefault();
 
     const newErrors: Record<string, string> = {};
-    if (!formData.questionId.trim()) newErrors.questionId = "Pertanyaan (Bahasa Indonesia) wajib diisi";
-    if (!formData.answerId.trim()) newErrors.answerId = "Jawaban (Bahasa Indonesia) wajib diisi";
+    if (!formData.questionId.trim()) {
+      newErrors.questionId = "Pertanyaan (Bahasa Indonesia) wajib diisi";
+      setFormTab("id");
+    }
+    if (!formData.answerId.trim()) {
+      newErrors.answerId = "Jawaban (Bahasa Indonesia) wajib diisi";
+      setFormTab("id");
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -391,14 +404,37 @@ export default function AdminFaqPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="btn btn-primary btn-sm"
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flexWrap: "wrap",
+          }}
         >
-          <Plus size={16} />
-          <span>Tambah FAQ Baru</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsHeaderModalOpen(true)}
+            className="btn btn-secondary btn-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Kelola Judul & Header Seksi</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={16} />
+            <span>Tambah FAQ Baru</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -535,74 +571,89 @@ export default function AdminFaqPage() {
                 </select>
               </div>
 
-              <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">
-                  Pertanyaan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Contoh: Apakah pemula yang tidak bisa berenang bisa ikut?"
-                  value={formData.questionId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, questionId: e.target.value });
-                    if (errors.questionId) setErrors((prev) => ({ ...prev, questionId: "" }));
-                  }}
-                  style={errors.questionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+              {/* Bilingual Q&A Switcher */}
+              <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+                <AdminLanguageTabs
+                  activeLang={formTab}
+                  onChange={setFormTab}
+                  hasErrorId={Boolean(errors.questionId || errors.answerId)}
                 />
-                {errors.questionId && (
-                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                    {errors.questionId}
-                  </span>
+
+                {formTab === "id" ? (
+                  <>
+                    <div className="form-group" style={{ marginBottom: "14px" }}>
+                      <label className="form-label">
+                        Pertanyaan (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Contoh: Apakah pemula yang tidak bisa berenang bisa ikut?"
+                        value={formData.questionId}
+                        onChange={(e) => {
+                          setFormData({ ...formData, questionId: e.target.value });
+                          if (errors.questionId) setErrors((prev) => ({ ...prev, questionId: "" }));
+                        }}
+                        style={errors.questionId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                      />
+                      {errors.questionId && (
+                        <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                          {errors.questionId}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: "14px" }}>
+                      <label className="form-label">
+                        Jawaban (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                      </label>
+                      <textarea
+                        className="form-control"
+                        placeholder="Penjelasan lengkap dalam Bahasa Indonesia..."
+                        value={formData.answerId}
+                        onChange={(e) => {
+                          setFormData({ ...formData, answerId: e.target.value });
+                          if (errors.answerId) setErrors((prev) => ({ ...prev, answerId: "" }));
+                        }}
+                        rows={4}
+                        style={errors.answerId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
+                      />
+                      {errors.answerId && (
+                        <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
+                          {errors.answerId}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="form-group" style={{ marginBottom: "14px" }}>
+                      <label className="form-label">Pertanyaan (English)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. Can non-swimmers or beginners join the trip?"
+                        value={formData.questionEn}
+                        onChange={(e) =>
+                          setFormData({ ...formData, questionEn: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: "14px" }}>
+                      <label className="form-label">Jawaban (English)</label>
+                      <textarea
+                        className="form-control"
+                        placeholder="Detailed answer explanation in English..."
+                        value={formData.answerEn}
+                        onChange={(e) =>
+                          setFormData({ ...formData, answerEn: e.target.value })
+                        }
+                        rows={4}
+                      />
+                    </div>
+                  </>
                 )}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">Pertanyaan (English)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Can non-swimmers or beginners join the trip?"
-                  value={formData.questionEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, questionEn: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: "14px" }}>
-                <label className="form-label">
-                  Jawaban (Bahasa Indonesia) <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
-                </label>
-                <textarea
-                  className="form-control"
-                  placeholder="Penjelasan lengkap..."
-                  value={formData.answerId}
-                  onChange={(e) => {
-                    setFormData({ ...formData, answerId: e.target.value });
-                    if (errors.answerId) setErrors((prev) => ({ ...prev, answerId: "" }));
-                  }}
-                  rows={3}
-                  style={errors.answerId ? { borderColor: "#ef4444", backgroundColor: "#fffbfa" } : {}}
-                />
-                {errors.answerId && (
-                  <span style={{ color: "#ef4444", fontSize: "0.75rem", marginTop: "4px", display: "block", fontWeight: 500 }}>
-                    {errors.answerId}
-                  </span>
-                )}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: "20px" }}>
-                <label className="form-label">Jawaban (English)</label>
-                <textarea
-                  className="form-control"
-                  placeholder="Detailed answer in English..."
-                  value={formData.answerEn}
-                  onChange={(e) =>
-                    setFormData({ ...formData, answerEn: e.target.value })
-                  }
-                  rows={3}
-                />
               </div>
 
               <div
@@ -650,6 +701,30 @@ export default function AdminFaqPage() {
         isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+
+      {/* Header Settings Modal */}
+      <AdminSectionHeaderModal
+        isOpen={isHeaderModalOpen}
+        onClose={() => setIsHeaderModalOpen(false)}
+        sectionTitle="Pengaturan Header Seksi FAQ"
+        sectionDescription="Kelola badge, judul utama, dan subjudul bagian tanya jawab (FAQ) di halaman utama website."
+        badgeKeyId="faq_badge_id"
+        badgeKeyEn="faq_badge_en"
+        titleKeyId="faq_title_id"
+        titleKeyEn="faq_title_en"
+        subtitleKeyId="faq_subtitle_id"
+        subtitleKeyEn="faq_subtitle_en"
+        defaults={{
+          badgeId: "PUSAT BANTUAN",
+          badgeEn: "HELP CENTER",
+          titleId: "Pertanyaan yang Sering Diajukan (FAQ)",
+          titleEn: "Frequently Asked Questions (FAQ)",
+          subtitleId:
+            "Jawaban cepat seputar persiapan, keamanan, peralatan, titik kumpul, dan detail trip di 3 Gili.",
+          subtitleEn:
+            "Quick answers about preparation, safety, equipment, meeting points, and tour details across 3 Gilis.",
+        }}
       />
     </div>
   );

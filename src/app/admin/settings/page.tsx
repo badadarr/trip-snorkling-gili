@@ -29,14 +29,72 @@ import {
   Upload,
   Trash2,
   Image as ImageIcon,
+  Plus,
+  Wallet,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   DEFAULT_MANIFEST_SETTINGS,
   generateManifestHtml,
 } from "@/lib/manifestTemplate";
+import BrandLogo, {
+  LOGO_PRESETS,
+  LOGO_COLOR_GRADIENTS,
+} from "@/components/common/BrandLogo";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 import { useSearchParams } from "next/navigation";
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  notes?: string;
+  isActive: boolean;
+}
+
+/**
+ * Reads the bank account list from settings, falling back to the legacy single
+ * account keys so existing installations keep their rekening after the upgrade.
+ */
+function parseBankAccounts(settings: { [key: string]: string }): BankAccount[] {
+  const raw = settings["payment_banks"];
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: any, index: number) => ({
+          id: String(item.id || `bank_${index}`),
+          bankName: item.bankName || "",
+          accountNumber: item.accountNumber || "",
+          accountHolder: item.accountHolder || "",
+          notes: item.notes || "",
+          isActive: item.isActive !== false,
+        }));
+      }
+    } catch (e) {
+      console.warn("Invalid payment_banks value, falling back to legacy keys:", e);
+    }
+  }
+
+  if (settings["payment_bank_name"] || settings["payment_bank_number"]) {
+    return [
+      {
+        id: "bank_legacy",
+        bankName: settings["payment_bank_name"] || "",
+        accountNumber: settings["payment_bank_number"] || "",
+        accountHolder: settings["payment_bank_holder"] || "",
+        notes: settings["payment_bank_notes"] || "",
+        isActive: true,
+      },
+    ];
+  }
+
+  return [];
+}
 
 export default function AdminSettingsPage() {
   return (
@@ -56,6 +114,7 @@ function AdminSettingsContent() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<
+    | "branding"
     | "contact"
     | "location"
     | "operations"
@@ -66,6 +125,7 @@ function AdminSettingsContent() {
   >(
     tabParam &&
       [
+        "branding",
         "contact",
         "location",
         "operations",
@@ -75,7 +135,7 @@ function AdminSettingsContent() {
         "security",
       ].includes(tabParam)
       ? tabParam
-      : "contact",
+      : "branding",
   );
   const [isUploadingQris, setIsUploadingQris] = useState(false);
   const qrisFileInputRef = React.useRef<HTMLInputElement>(null);
@@ -85,6 +145,7 @@ function AdminSettingsContent() {
     if (
       tabParam &&
       [
+        "branding",
         "contact",
         "location",
         "operations",
@@ -137,6 +198,74 @@ function AdminSettingsContent() {
 
   const handleChange = (key: string, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // Social profile links are stored as absolute URLs, but admins commonly paste
+  // "instagram.com/..." — normalize instead of rejecting the whole form.
+  const SOCIAL_URL_KEYS = [
+    "instagram_url",
+    "facebook_url",
+    "tiktok_url",
+    "youtube_url",
+    "tripadvisor_url",
+    "google_maps_url",
+  ];
+
+  const normalizeUrl = (value: string) => {
+    const trimmed = (value || "").trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("//")) return `https:${trimmed}`;
+    return `https://${trimmed.replace(/^\/+/, "")}`;
+  };
+
+  // --- Bank accounts (multiple) ---
+  const createEmptyBank = (): BankAccount => ({
+    id: `bank_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    bankName: "",
+    accountNumber: "",
+    accountHolder: "",
+    notes: "",
+    isActive: true,
+  });
+
+  const bankAccounts: BankAccount[] = React.useMemo(
+    () => parseBankAccounts(settings),
+    [settings],
+  );
+
+  const persistBankAccounts = (list: BankAccount[]) => {
+    handleChange("payment_banks", JSON.stringify(list));
+  };
+
+  const updateBankAccount = (
+    id: string,
+    field: keyof BankAccount,
+    value: string | boolean,
+  ) => {
+    persistBankAccounts(
+      bankAccounts.map((bank) =>
+        bank.id === id ? { ...bank, [field]: value } : bank,
+      ),
+    );
+  };
+
+  const addBankAccount = () => {
+    persistBankAccounts([...bankAccounts, createEmptyBank()]);
+  };
+
+  const removeBankAccount = (id: string) => {
+    const remaining = bankAccounts.filter((bank) => bank.id !== id);
+    persistBankAccounts(remaining);
+    toast.success("Rekening dihapus dari daftar. Klik Simpan untuk menerapkan.");
+  };
+
+  const moveBankAccount = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= bankAccounts.length) return;
+    const list = [...bankAccounts];
+    [list[index], list[target]] = [list[target], list[index]];
+    persistBankAccounts(list);
   };
 
   // Client-side canvas compression for QR code image
@@ -232,7 +361,21 @@ function AdminSettingsContent() {
     const toastId = toast.loading("Menyimpan pengaturan website...");
 
     try {
-      const promises = Object.entries(settings).map(([key, value]) =>
+      const payload = Object.entries(settings).map(([key, value]) => [
+        key,
+        SOCIAL_URL_KEYS.includes(key) ? normalizeUrl(String(value)) : value,
+      ]) as [string, string][];
+
+      // Reflect normalized links back into the form so the admin sees what was stored
+      setSettings((prev) => {
+        const next = { ...prev };
+        payload.forEach(([key, value]) => {
+          if (SOCIAL_URL_KEYS.includes(key)) next[key] = value;
+        });
+        return next;
+      });
+
+      const promises = payload.map(([key, value]) =>
         fetch("/api/settings", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -310,28 +453,33 @@ function AdminSettingsContent() {
       >
         {[
           {
+            key: "branding",
+            label: "1. Identitas & Logo Website",
+            icon: Sparkles,
+          },
+          {
             key: "contact",
-            label: "1. Kontak & WhatsApp",
+            label: "2. Kontak & WhatsApp",
             icon: MessageCircle,
           },
-          { key: "location", label: "2. Lokasi Dermaga & Maps", icon: MapPin },
+          { key: "location", label: "3. Lokasi Dermaga & Maps", icon: MapPin },
           {
             key: "operations",
-            label: "3. Jam & Sesi Operasional",
+            label: "4. Jam & Sesi Operasional",
             icon: Clock,
           },
-          { key: "social", label: "4. Sosial Media & SEO", icon: Globe },
+          { key: "social", label: "5. Sosial Media & SEO", icon: Globe },
           {
             key: "payment",
-            label: "5. Metode Pembayaran (QRIS & Bank)",
+            label: "6. Pembayaran & Mata Uang",
             icon: CreditCard,
           },
           {
             key: "manifest",
-            label: "6. Preset & Template Laporan Manifest",
+            label: "7. Preset & Template Laporan Manifest",
             icon: Printer,
           },
-          { key: "security", label: "7. Keamanan & Akun Admin", icon: Lock },
+          { key: "security", label: "8. Keamanan & Akun Admin", icon: Lock },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -369,7 +517,385 @@ function AdminSettingsContent() {
         style={{ padding: "32px", background: "#ffffff" }}
       >
         <form onSubmit={handleSubmit}>
-          {/* TAB 1: CONTACT & WHATSAPP */}
+          {/* TAB 1: BRANDING & LOGO */}
+          {activeTab === "branding" && (
+            <div>
+              <div style={{ marginBottom: "24px" }}>
+                <h3
+                  style={{
+                    fontSize: "1.15rem",
+                    color: "var(--primary-deep)",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Identitas, Logo & Nama Website
+                </h3>
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--text-muted)",
+                    margin: 0,
+                  }}
+                >
+                  Konfigurasi nama brand website, tagline resmi, serta pilih preset logo grafis bahari atau unggah file logo custom Anda.
+                </p>
+              </div>
+
+              {/* Live Interactive Preview Box */}
+              <div
+                style={{
+                  background: "#f8fafc",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "20px",
+                  marginBottom: "28px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    color: "var(--primary-ocean)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <Eye size={15} />
+                  <span>Pratinjau Langsung (Live Preview)</span>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "16px",
+                  }}
+                >
+                  {/* Light Navbar View */}
+                  <div
+                    style={{
+                      background: "#ffffff",
+                      border: "1px solid var(--border-light)",
+                      borderRadius: "8px",
+                      padding: "16px 20px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        color: "var(--text-muted)",
+                        fontWeight: 600,
+                        display: "block",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      Tampilan di Header Navbar (Mode Terang):
+                    </span>
+                    <BrandLogo
+                      siteName={settings["site_name"] || "SNORKELING GILI"}
+                      tagline={settings["tagline"] || "Gili Trawangan • 3 Gili"}
+                      logoUrl={settings["site_logo"] || ""}
+                      logoType={settings["site_logo_type"] || "preset"}
+                      logoPreset={settings["site_logo_preset"] || "waves"}
+                      logoColor={settings["site_logo_color"] || "ocean"}
+                      variant="light"
+                      size="md"
+                    />
+                  </div>
+
+                  {/* Dark Footer & Sidebar View */}
+                  <div
+                    style={{
+                      background: "var(--primary-deep, #0a192f)",
+                      borderRadius: "8px",
+                      padding: "16px 20px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        color: "rgba(255,255,255,0.6)",
+                        fontWeight: 600,
+                        display: "block",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      Tampilan di Footer & Sidebar Admin (Mode Gelap):
+                    </span>
+                    <BrandLogo
+                      siteName={settings["site_name"] || "SNORKELING GILI"}
+                      tagline={settings["tagline"] || "Gili Trawangan • 3 Gili"}
+                      logoUrl={settings["site_logo"] || ""}
+                      logoType={settings["site_logo_type"] || "preset"}
+                      logoPreset={settings["site_logo_preset"] || "waves"}
+                      logoColor={settings["site_logo_color"] || "ocean"}
+                      variant="dark"
+                      size="md"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Website Name & Tagline Inputs */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "20px",
+                  marginBottom: "24px",
+                }}
+              >
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">
+                    Nama Website / Brand Utama <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: SNORKELING GILI"
+                    value={settings["site_name"] || ""}
+                    onChange={(e) => handleChange("site_name", e.target.value)}
+                    required
+                  />
+                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                    Kata terakhir akan otomatis diberi highlight warna aksen toska yang modern.
+                  </span>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">
+                    Tagline / Subjudul Brand
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Contoh: Gili Trawangan • 3 Gili"
+                    value={settings["tagline"] || ""}
+                    onChange={(e) => handleChange("tagline", e.target.value)}
+                  />
+                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                    Teks kecil yang tampil tepat di bawah nama website pada navbar dan footer.
+                  </span>
+                </div>
+              </div>
+
+              {/* Logo Selection Mode: Preset vs Custom */}
+              <div className="form-group" style={{ marginBottom: "20px" }}>
+                <label className="form-label" style={{ fontWeight: 700 }}>
+                  Format & Model Logo Website <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                </label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                      padding: "12px 14px",
+                      borderRadius: "var(--radius-sm)",
+                      border: (settings["site_logo_type"] || "preset") === "preset" ? "2px solid var(--primary-ocean)" : "1px solid var(--border-light)",
+                      background: (settings["site_logo_type"] || "preset") === "preset" ? "var(--primary-surface)" : "#f8fafc",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="site_logo_type"
+                      value="preset"
+                      checked={(settings["site_logo_type"] || "preset") === "preset"}
+                      onChange={() => handleChange("site_logo_type", "preset")}
+                      style={{ marginTop: "3px" }}
+                    />
+                    <div>
+                      <strong style={{ color: "var(--primary-deep)", fontSize: "0.88rem", display: "block" }}>
+                        Gunakan Preset Ikon & Tema Warna Bahari
+                      </strong>
+                      <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
+                        Pilihan ikon grafis bahari siap pakai (ombak, kompas, perahu, jangkar, dll) dengan gradien warna modern.
+                      </span>
+                    </div>
+                  </label>
+
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "10px",
+                      padding: "12px 14px",
+                      borderRadius: "var(--radius-sm)",
+                      border: settings["site_logo_type"] === "custom" ? "2px solid var(--primary-ocean)" : "1px solid var(--border-light)",
+                      background: settings["site_logo_type"] === "custom" ? "var(--primary-surface)" : "#f8fafc",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="site_logo_type"
+                      value="custom"
+                      checked={settings["site_logo_type"] === "custom"}
+                      onChange={() => handleChange("site_logo_type", "custom")}
+                      style={{ marginTop: "3px" }}
+                    />
+                    <div>
+                      <strong style={{ color: "var(--primary-deep)", fontSize: "0.88rem", display: "block" }}>
+                        Unggah File Logo Kustom Sendiri
+                      </strong>
+                      <span style={{ fontSize: "0.76rem", color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
+                        Gunakan file gambar logo brand bisnis Anda sendiri (format PNG transparan, WebP, SVG, atau JPG).
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* IF PRESET SELECTED: Show Presets Selection */}
+              {(settings["site_logo_type"] || "preset") === "preset" && (
+                <div
+                  style={{
+                    background: "#f8fafc",
+                    border: "1px solid var(--border-light)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "20px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  {/* Preset Icons */}
+                  <div style={{ marginBottom: "20px" }}>
+                    <label className="form-label" style={{ fontWeight: 700, marginBottom: "8px" }}>
+                      Pilih Ikon Preset Logo:
+                    </label>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                        gap: "10px",
+                      }}
+                    >
+                      {LOGO_PRESETS.map((preset) => {
+                        const Icon = preset.icon;
+                        const isSelected = (settings["site_logo_preset"] || "waves") === preset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => handleChange("site_logo_preset", preset.id)}
+                            style={{
+                              padding: "12px 10px",
+                              borderRadius: "8px",
+                              border: isSelected ? "2px solid var(--primary-ocean)" : "1px solid var(--border-light)",
+                              background: isSelected ? "var(--primary-surface)" : "#ffffff",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: "8px",
+                              cursor: "pointer",
+                              transition: "0.15s",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "36px",
+                                height: "36px",
+                                borderRadius: "8px",
+                                background: isSelected ? "var(--primary-ocean)" : "rgba(0, 119, 182, 0.08)",
+                                color: isSelected ? "#ffffff" : "var(--primary-ocean)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Icon size={20} />
+                            </div>
+                            <span
+                              style={{
+                                fontSize: "0.78rem",
+                                fontWeight: isSelected ? 700 : 500,
+                                color: isSelected ? "var(--primary-deep)" : "var(--text-main)",
+                                textAlign: "center",
+                              }}
+                            >
+                              {preset.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Preset Colors */}
+                  <div>
+                    <label className="form-label" style={{ fontWeight: 700, marginBottom: "8px" }}>
+                      Pilih Tema Warna Gradien Logo:
+                    </label>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                      {Object.entries(LOGO_COLOR_GRADIENTS).map(([colorKey, colorItem]) => {
+                        const isSelected = (settings["site_logo_color"] || "ocean") === colorKey;
+                        return (
+                          <button
+                            key={colorKey}
+                            type="button"
+                            onClick={() => handleChange("site_logo_color", colorKey)}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "8px 14px",
+                              borderRadius: "6px",
+                              border: isSelected ? "2px solid var(--primary-ocean)" : "1px solid var(--border-light)",
+                              background: isSelected ? "var(--primary-surface)" : "#ffffff",
+                              cursor: "pointer",
+                              fontSize: "0.82rem",
+                              fontWeight: isSelected ? 700 : 500,
+                              color: isSelected ? "var(--primary-deep)" : "var(--text-main)",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                                borderRadius: "50%",
+                                background: colorItem.gradient,
+                                display: "inline-block",
+                                flexShrink: 0,
+                              }}
+                            />
+                            <span>{colorItem.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* IF CUSTOM SELECTED: Show ImageUpload */}
+              {settings["site_logo_type"] === "custom" && (
+                <div
+                  style={{
+                    background: "#f8fafc",
+                    border: "1px solid var(--border-light)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "20px",
+                    marginBottom: "24px",
+                  }}
+                >
+                  <ImageUpload
+                    label="Unggah File Logo Kustom"
+                    value={settings["site_logo"] || ""}
+                    onChange={(url) => handleChange("site_logo", url)}
+                    helperText="Upload gambar logo bisnis Anda (format transparan PNG atau WebP disarankan, maks 5MB)"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: CONTACT & WHATSAPP */}
           {activeTab === "contact" && (
             <div>
               <h3
@@ -630,24 +1156,24 @@ function AdminSettingsContent() {
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Link Akun Instagram</label>
                   <input
-                    type="url"
+                    type="text"
                     className="form-control"
                     value={settings["instagram_url"] || ""}
                     onChange={(e) =>
                       handleChange("instagram_url", e.target.value)
                     }
-                    placeholder="https://instagram.com/tripsnorkelinggili"
+                    placeholder="instagram.com/tripsnorkelinggili"
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Link Akun TikTok</label>
                   <input
-                    type="url"
+                    type="text"
                     className="form-control"
                     value={settings["tiktok_url"] || ""}
                     onChange={(e) => handleChange("tiktok_url", e.target.value)}
-                    placeholder="https://tiktok.com/@tripsnorkelinggili"
+                    placeholder="tiktok.com/@tripsnorkelinggili"
                   />
                 </div>
               </div>
@@ -663,26 +1189,77 @@ function AdminSettingsContent() {
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Link Halaman Facebook</label>
                   <input
-                    type="url"
+                    type="text"
                     className="form-control"
                     value={settings["facebook_url"] || ""}
                     onChange={(e) =>
                       handleChange("facebook_url", e.target.value)
                     }
+                    placeholder="facebook.com/tripsnorkelinggili"
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Link Kanal YouTube</label>
                   <input
-                    type="url"
+                    type="text"
                     className="form-control"
                     value={settings["youtube_url"] || ""}
                     onChange={(e) =>
                       handleChange("youtube_url", e.target.value)
                     }
+                    placeholder="youtube.com/@tripsnorkelinggili"
                   />
                 </div>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "20px",
+                  marginBottom: "20px",
+                }}
+              >
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Link TripAdvisor</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={settings["tripadvisor_url"] || ""}
+                    onChange={(e) =>
+                      handleChange("tripadvisor_url", e.target.value)
+                    }
+                    placeholder="tripadvisor.com/..."
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  padding: "12px 14px",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--primary-surface)",
+                  border: "1px solid rgba(0, 119, 182, 0.2)",
+                  fontSize: "0.82rem",
+                  color: "var(--text-main)",
+                  lineHeight: 1.5,
+                }}
+              >
+                <Share2
+                  size={16}
+                  color="var(--primary-ocean)"
+                  style={{ flexShrink: 0, marginTop: "2px" }}
+                />
+                <span>
+                  Ikon sosial media hanya muncul di footer website untuk kolom
+                  yang diisi. Kosongkan kolom untuk menyembunyikan ikonnya.
+                  Awalan <strong>https://</strong> ditambahkan otomatis saat
+                  disimpan.
+                </span>
               </div>
             </div>
           )}
@@ -1998,59 +2575,288 @@ function AdminSettingsContent() {
                   </label>
                 </div>
 
+                {bankAccounts.length === 0 && (
+                  <div
+                    style={{
+                      padding: "22px",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px dashed var(--border-light)",
+                      background: "#ffffff",
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <Building2
+                      size={26}
+                      color="var(--text-muted)"
+                      style={{ marginBottom: "8px" }}
+                    />
+                    <p
+                      style={{
+                        fontSize: "0.86rem",
+                        color: "var(--text-muted)",
+                        margin: 0,
+                      }}
+                    >
+                      Belum ada rekening bank. Tambahkan minimal satu rekening
+                      agar opsi transfer bank tampil di halaman booking.
+                    </p>
+                  </div>
+                )}
+
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                    gap: "16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "14px",
                     marginBottom: "16px",
                   }}
                 >
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Nama Bank</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={settings["payment_bank_name"] || ""}
-                      onChange={(e) =>
-                        handleChange("payment_bank_name", e.target.value)
-                      }
-                      placeholder="e.g. Bank Central Asia (BCA) / Mandiri / BRI"
-                    />
-                  </div>
+                  {bankAccounts.map((bank, index) => (
+                    <div
+                      key={bank.id}
+                      style={{
+                        border: bank.isActive
+                          ? "1px solid rgba(0, 119, 182, 0.28)"
+                          : "1px dashed var(--border-light)",
+                        borderRadius: "var(--radius-sm)",
+                        background: bank.isActive ? "#ffffff" : "#f8fafc",
+                        padding: "16px 18px",
+                        opacity: bank.isActive ? 1 : 0.75,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: "10px",
+                          flexWrap: "wrap",
+                          marginBottom: "14px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            fontWeight: 700,
+                            fontSize: "0.9rem",
+                            color: "var(--primary-deep)",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              background: "var(--primary-surface)",
+                              color: "var(--primary-ocean)",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {index + 1}
+                          </span>
+                          <span>{bank.bankName || "Rekening Baru"}</span>
+                        </div>
 
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Nomor Rekening Bank</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={settings["payment_bank_number"] || ""}
-                      onChange={(e) =>
-                        handleChange("payment_bank_number", e.target.value)
-                      }
-                      placeholder="e.g. 8735-0123-4567"
-                    />
-                  </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              cursor: "pointer",
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              marginRight: "4px",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={bank.isActive}
+                              onChange={(e) =>
+                                updateBankAccount(
+                                  bank.id,
+                                  "isActive",
+                                  e.target.checked,
+                                )
+                              }
+                              style={{
+                                width: "16px",
+                                height: "16px",
+                                accentColor: "var(--primary-ocean)",
+                              }}
+                            />
+                            <span>Tampilkan</span>
+                          </label>
 
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">
-                      Nama Pemilik Rekening (Atas Nama)
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={settings["payment_bank_holder"] || ""}
-                      onChange={(e) =>
-                        handleChange("payment_bank_holder", e.target.value)
-                      }
-                      placeholder="e.g. Trip Snorkeling Gili / Nama Pemilik"
-                    />
-                  </div>
+                          <button
+                            type="button"
+                            onClick={() => moveBankAccount(index, -1)}
+                            disabled={index === 0}
+                            title="Pindah ke atas"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid var(--border-light)",
+                              background: "#ffffff",
+                              color: "var(--primary-deep)",
+                              cursor: index === 0 ? "not-allowed" : "pointer",
+                              opacity: index === 0 ? 0.4 : 1,
+                            }}
+                          >
+                            <ChevronUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveBankAccount(index, 1)}
+                            disabled={index === bankAccounts.length - 1}
+                            title="Pindah ke bawah"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid var(--border-light)",
+                              background: "#ffffff",
+                              color: "var(--primary-deep)",
+                              cursor:
+                                index === bankAccounts.length - 1
+                                  ? "not-allowed"
+                                  : "pointer",
+                              opacity:
+                                index === bankAccounts.length - 1 ? 0.4 : 1,
+                            }}
+                          >
+                            <ChevronDown size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeBankAccount(bank.id)}
+                            title="Hapus rekening"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              padding: "5px 8px",
+                              borderRadius: "6px",
+                              border: "1px solid #fecaca",
+                              background: "#fef2f2",
+                              color: "#dc2626",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(220px, 1fr))",
+                          gap: "14px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label">Nama Bank</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={bank.bankName}
+                            onChange={(e) =>
+                              updateBankAccount(
+                                bank.id,
+                                "bankName",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="e.g. Bank Central Asia (BCA) / Mandiri / BRI"
+                          />
+                        </div>
+
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label">Nomor Rekening</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={bank.accountNumber}
+                            onChange={(e) =>
+                              updateBankAccount(
+                                bank.id,
+                                "accountNumber",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="e.g. 8735-0123-4567"
+                          />
+                        </div>
+
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label className="form-label">
+                            Nama Pemilik (Atas Nama)
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={bank.accountHolder}
+                            onChange={(e) =>
+                              updateBankAccount(
+                                bank.id,
+                                "accountHolder",
+                                e.target.value,
+                              )
+                            }
+                            placeholder="e.g. Trip Snorkeling Gili"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">
+                          Catatan Khusus Rekening Ini (Opsional)
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={bank.notes || ""}
+                          onChange={(e) =>
+                            updateBankAccount(bank.id, "notes", e.target.value)
+                          }
+                          placeholder="e.g. Khusus transfer dari luar negeri (SWIFT: CENAIDJA)"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={addBankAccount}
+                  className="btn btn-secondary btn-sm"
+                  style={{ marginBottom: "18px" }}
+                >
+                  <Plus size={16} />
+                  <span>Tambah Rekening Bank</span>
+                </button>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">
-                    Petunjuk / Catatan Transfer untuk Tamu
+                    Petunjuk / Catatan Transfer untuk Tamu (Berlaku untuk Semua
+                    Rekening)
                   </label>
                   <textarea
                     rows={2}
@@ -2061,6 +2867,121 @@ function AdminSettingsContent() {
                     }
                     placeholder="e.g. Mohon cantumkan Kode Booking pada berita transfer. Upload bukti transfer setelah melakukan pembayaran."
                   />
+                </div>
+              </div>
+
+              {/* Display Currency & Exchange Rates */}
+              <div
+                style={{
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "20px",
+                  background: "#f8fafc",
+                  marginTop: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "10px",
+                      background: "#dcfce7",
+                      color: "#15803d",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Wallet size={20} />
+                  </div>
+                  <div>
+                    <h4
+                      style={{
+                        fontSize: "1rem",
+                        color: "var(--primary-deep)",
+                        margin: 0,
+                        fontWeight: 700,
+                      }}
+                    >
+                      3. Mata Uang Tampilan Website (IDR / USD / EUR)
+                    </h4>
+                    <span
+                      style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}
+                    >
+                      Tamu dapat mengganti mata uang lewat tombol di navbar.
+                      Kurs di bawah hanya dipakai sebagai cadangan jika harga
+                      paket belum diisi manual.
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Mata Uang Default Pengunjung Baru
+                    </label>
+                    <select
+                      className="form-control"
+                      value={settings["default_currency"] || "USD"}
+                      onChange={(e) =>
+                        handleChange("default_currency", e.target.value)
+                      }
+                    >
+                      <option value="USD">USD — US Dollar ($)</option>
+                      <option value="EUR">EUR — Euro (€)</option>
+                      <option value="IDR">IDR — Rupiah (Rp)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Kurs Cadangan USD (Rp per $1)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings["currency_usd_rate"] || ""}
+                      onChange={(e) =>
+                        handleChange(
+                          "currency_usd_rate",
+                          e.target.value.replace(/[^0-9]/g, ""),
+                        )
+                      }
+                      placeholder="15500"
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">
+                      Kurs Cadangan EUR (Rp per €1)
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={settings["currency_eur_rate"] || ""}
+                      onChange={(e) =>
+                        handleChange(
+                          "currency_eur_rate",
+                          e.target.value.replace(/[^0-9]/g, ""),
+                        )
+                      }
+                      placeholder="17500"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

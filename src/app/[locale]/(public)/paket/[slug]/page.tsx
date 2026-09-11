@@ -5,7 +5,8 @@ import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';
 import { Clock, Calendar, CheckCircle2, Sparkles, ShieldCheck, Camera, MessageCircle, ChevronRight } from 'lucide-react';
 import CtaBanner from '@/components/public/CtaBanner';
-import { formatIdr, formatUsd } from '@/lib/format';
+import PackagePriceBlock from '@/components/public/PackagePriceBlock';
+import SharePackageButton from '@/components/public/SharePackageButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -225,18 +226,13 @@ export default async function PackageDetailPage({ params }: PageProps) {
                   {t('packages.packagePricing')}
                 </span>
 
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--primary-deep)', fontFamily: 'var(--font-heading)' }}>
-                    {formatUsd(pkg.priceUsd)}
-                  </span>
-                  <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>
-                    {(pkg.priceUnit === 'per_boat' || (!pkg.priceUnit && pkg.price > 500000)) ? t('packages.perBoat') : t('packages.perPerson')}
-                  </span>
-                </div>
-
-                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: isPrivate ? '10px' : '24px' }}>
-                  approx. {formatIdr(pkg.price)}
-                </div>
+                <PackagePriceBlock
+                  priceIdr={pkg.price}
+                  priceUsd={pkg.priceUsd}
+                  priceEur={pkg.priceEur}
+                  unitLabel={isPrivate ? t('packages.perBoat') : t('packages.perPerson')}
+                  marginBottom={isPrivate ? '10px' : '24px'}
+                />
 
                 {isPrivate && (
                   <div
@@ -273,6 +269,13 @@ export default async function PackageDetailPage({ params }: PageProps) {
                     <MessageCircle size={18} />
                     <span>{t('packages.bookViaWa')}</span>
                   </a>
+
+                  <SharePackageButton
+                    slug={pkg.slug}
+                    packageName={name}
+                    variant="full"
+                    label="Share This Package"
+                  />
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>

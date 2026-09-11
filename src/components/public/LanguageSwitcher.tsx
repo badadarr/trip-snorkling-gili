@@ -38,8 +38,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
     nativeLabel: "Indonesia",
     short: "ID",
     flag: "🇮🇩",
-    isAvailable: false,
-    statusBadge: "In Progress",
+    isAvailable: true,
   },
   {
     code: "de",
