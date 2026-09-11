@@ -7,6 +7,7 @@ import { Clock, Calendar, CheckCircle2, Sparkles, ShieldCheck, Camera, MessageCi
 import CtaBanner from '@/components/public/CtaBanner';
 import PackagePriceBlock from '@/components/public/PackagePriceBlock';
 import SharePackageButton from '@/components/public/SharePackageButton';
+import ExtraPaxNotice from '@/components/public/ExtraPaxNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -234,22 +235,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
                   marginBottom={isPrivate ? '10px' : '24px'}
                 />
 
-                {isPrivate && (
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      background: '#fffbeb',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid #fde68a',
-                      fontSize: '0.78rem',
-                      color: '#b45309',
-                      marginBottom: '20px',
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    Max. 4 Pax included. Extra guests: +Rp 200.000 (~$13 USD) / person.
-                  </div>
-                )}
+                {isPrivate && <ExtraPaxNotice />}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
                   <Link href={`/booking?package=${pkg.slug}`} className="btn btn-primary btn-lg" style={{ width: '100%' }}>

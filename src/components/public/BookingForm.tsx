@@ -35,6 +35,10 @@ import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 const SESSION_STORAGE_KEY = "gili_snorkeling_active_booking_v1";
 
+/** Surcharge per guest above the standard private boat capacity */
+const EXTRA_PAX_IDR = 200000;
+const EXTRA_PAX_USD = 13;
+
 export interface BankAccount {
   id: string;
   bankName: string;
@@ -305,7 +309,7 @@ export default function BookingForm({
     }
   }, [tripDate]);
 
-  // Compute estimated total based on priceUnit + Rp 200.000 / $13 per extra person above 4 pax for private trip
+  // Compute estimated total based on priceUnit + the extra pax surcharge above the standard private boat capacity
   // Unit EUR price: admin-set when available, otherwise converted from the IDR rate
   const unitEur = currentPackage
     ? resolveAmount(
@@ -318,7 +322,17 @@ export default function BookingForm({
         rates,
       )
     : 0;
-  const extraPaxEurUnit = resolveAmount({ idr: 200000 }, "EUR", rates);
+  const extraPaxEurUnit = resolveAmount({ idr: EXTRA_PAX_IDR }, "EUR", rates);
+
+  // Extra guest fee shown in the currency the visitor picked, with IDR as reference
+  const extraPaxUnitPrices = {
+    idr: EXTRA_PAX_IDR,
+    usd: EXTRA_PAX_USD,
+    eur: extraPaxEurUnit,
+  };
+  const extraPaxFeeText = `${format(extraPaxUnitPrices)}${
+    currency === "IDR" ? "" : ` (~ ${formatIdr(EXTRA_PAX_IDR)})`
+  }`;
 
   const computePrice = () => {
     const empty = {
@@ -340,8 +354,8 @@ export default function BookingForm({
     const isPerBoat = isPrivatePackage;
     if (isPerBoat) {
       const extraPaxCount = Math.max(0, numberOfPeople - PRIVATE_MAX_PAX);
-      const extraPaxIdr = extraPaxCount * 200000;
-      const extraPaxUsd = extraPaxCount * 13;
+      const extraPaxIdr = extraPaxCount * EXTRA_PAX_IDR;
+      const extraPaxUsd = extraPaxCount * EXTRA_PAX_USD;
       const extraPaxEur = Number(
         (extraPaxCount * extraPaxEurUnit).toFixed(2),
       );
@@ -629,7 +643,9 @@ export default function BookingForm({
 
     const extraPaxText =
       isPrivatePackage && totals.extraPaxCount > 0
-        ? ` (Base 4 pax + ${totals.extraPaxCount} extra pax @ Rp 200.000 / $13)`
+        ? ` (Base ${PRIVATE_MAX_PAX} pax + ${totals.extraPaxCount} extra pax @ ${format(
+            extraPaxUnitPrices,
+          )} each)`
         : "";
 
     const msg = `Hello Admin Gili Trawangan Snorkeling Trip!
@@ -1369,11 +1385,11 @@ Please confirm slot availability and payment receipt. Thank you!`;
                             <strong>
                               {numberOfPeople} Guests ({numberOfPeople - PRIVATE_MAX_PAX} extra pax):
                             </strong>{" "}
-                            Standard private boat rate includes up to {PRIVATE_MAX_PAX} pax. Extra fee +Rp 200.000 (~$13 USD)/person is automatically included in the total.
+                            Standard private boat rate includes up to {PRIVATE_MAX_PAX} pax. Extra fee +{extraPaxFeeText}/person is automatically included in the total.
                           </>
                         ) : (
                           <>
-                            Standard private boat covers <strong>1 - {PRIVATE_MAX_PAX} pax</strong>. Additional guests above {PRIVATE_MAX_PAX} pax are +Rp 200.000 (~$13 USD)/person.
+                            Standard private boat covers <strong>1 - {PRIVATE_MAX_PAX} pax</strong>. Additional guests above {PRIVATE_MAX_PAX} pax are +{extraPaxFeeText}/person.
                           </>
                         )}
                       </span>
@@ -1619,7 +1635,8 @@ Please confirm slot availability and payment receipt. Thank you!`;
                       }}
                     >
                       <span>
-                        Extra Guests (+{totals.extraPaxCount} Pax @ Rp 200.000):
+                        Extra Guests (+{totals.extraPaxCount} Pax @{" "}
+                        {format(extraPaxUnitPrices)}):
                       </span>
                       <span style={{ fontWeight: 700 }}>
                         +{format(extraPriceSet)}{" "}

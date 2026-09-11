@@ -17,7 +17,8 @@ export default async function AboutPage() {
   const subtitle = about.subtitleEn || about.subtitleId || t('about.subtitle');
   const story = about.storyEn || about.storyId || '';
 
-  const stats = about.stats || [
+  const savedStats = Array.isArray(about.stats) ? about.stats : null;
+  const stats = savedStats && savedStats.length > 0 ? savedStats : [
     { number: '5.000+', labelId: 'Wisatawan Puas', labelEn: 'Happy Snorkelers' },
     { number: '100%', labelId: 'Spot Bergaransi Penyu', labelEn: 'Turtle Spot Guarantee' },
     { number: '8+ Yrs', labelId: 'Pengalaman Bahari', labelEn: 'Years Marine Experience' },
@@ -90,7 +91,8 @@ export default async function AboutPage() {
             </div>
           </div>
 
-          {/* Stats Bar */}
+          {/* Stats Bar — hidden when admin removes every entry */}
+          {(savedStats === null || savedStats.length > 0) && (
           <div
             className="glass-card"
             style={{
@@ -113,6 +115,7 @@ export default async function AboutPage() {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 

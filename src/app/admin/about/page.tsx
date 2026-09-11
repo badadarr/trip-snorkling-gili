@@ -1,10 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Info, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import {
+  Info,
+  Save,
+  CheckCircle2,
+  Loader2,
+  BarChart3,
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import ImageUpload from '@/components/admin/ImageUpload';
 import AdminLanguageTabs from '@/components/admin/AdminLanguageTabs';
+
+interface AboutStat {
+  number: string;
+  labelId: string;
+  labelEn: string;
+}
 
 export default function AdminAboutPage() {
   const [activeLang, setActiveLang] = useState<'id' | 'en'>('id');
@@ -16,6 +32,7 @@ export default function AdminAboutPage() {
     storyId: '',
     storyEn: '',
     imageUrl: '',
+    stats: [] as AboutStat[],
   });
 
   const [loading, setLoading] = useState(true);
@@ -25,7 +42,10 @@ export default function AdminAboutPage() {
     fetch('/api/about')
       .then((res) => res.json())
       .then((data) => {
-        setFormData(data);
+        setFormData({
+          ...data,
+          stats: Array.isArray(data?.stats) ? data.stats : [],
+        });
         setLoading(false);
       })
       .catch((e) => {
@@ -34,6 +54,31 @@ export default function AdminAboutPage() {
         setLoading(false);
       });
   }, []);
+
+  // --- Statistik ringkas (tampil di kotak angka halaman Tentang Kami) ---
+  const stats: AboutStat[] = formData.stats || [];
+
+  const setStats = (list: AboutStat[]) =>
+    setFormData((prev) => ({ ...prev, stats: list }));
+
+  const updateStat = (index: number, field: keyof AboutStat, value: string) =>
+    setStats(
+      stats.map((stat, i) => (i === index ? { ...stat, [field]: value } : stat)),
+    );
+
+  const addStat = () =>
+    setStats([...stats, { number: '', labelId: '', labelEn: '' }]);
+
+  const removeStat = (index: number) =>
+    setStats(stats.filter((_, i) => i !== index));
+
+  const moveStat = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= stats.length) return;
+    const list = [...stats];
+    [list[index], list[target]] = [list[target], list[index]];
+    setStats(list);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,11 +107,18 @@ export default function AdminAboutPage() {
     setIsSaving(true);
     const toastId = toast.loading('Menyimpan perubahan Tentang Kami...');
 
+    const payload = {
+      ...formData,
+      stats: (formData.stats || []).filter(
+        (stat) => stat.number.trim() || stat.labelId.trim() || stat.labelEn.trim(),
+      ),
+    };
+
     try {
       const res = await fetch('/api/about', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('Gagal menyimpan');
@@ -199,6 +251,247 @@ export default function AdminAboutPage() {
               </div>
             </>
           )}
+
+          {/* Statistik Ringkas (Shared across languages) */}
+          <div
+            style={{
+              borderTop: '1px solid var(--border-light)',
+              paddingTop: '24px',
+              marginTop: '10px',
+              marginBottom: '24px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                flexWrap: 'wrap',
+                marginBottom: '14px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: 'var(--primary-surface)',
+                    color: 'var(--primary-ocean)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <BarChart3 size={20} />
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      fontSize: '1rem',
+                      color: 'var(--primary-deep)',
+                      margin: 0,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Statistik Ringkas
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Kotak angka di halaman Tentang Kami (mis. 5.000+ Wisatawan Puas).
+                    Angka dipakai untuk kedua bahasa, labelnya terpisah.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {stats.length === 0 && (
+              <div
+                style={{
+                  padding: '22px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px dashed var(--border-light)',
+                  background: '#f8fafc',
+                  textAlign: 'center',
+                  marginBottom: '14px',
+                  fontSize: '0.86rem',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                Belum ada statistik. Kotak angka tidak akan tampil di halaman
+                Tentang Kami sampai Anda menambahkannya.
+              </div>
+            )}
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                marginBottom: '14px',
+              }}
+            >
+              {stats.map((stat, index) => (
+                <div
+                  key={index}
+                  style={{
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-sm)',
+                    background: '#ffffff',
+                    padding: '14px 16px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        color: 'var(--primary-deep)',
+                      }}
+                    >
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: 'var(--primary-surface)',
+                          color: 'var(--primary-ocean)',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        {index + 1}
+                      </span>
+                      <span>{stat.number || 'Statistik Baru'}</span>
+                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <button
+                        type="button"
+                        onClick={() => moveStat(index, -1)}
+                        disabled={index === 0}
+                        title="Pindah ke atas"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-light)',
+                          background: '#ffffff',
+                          color: 'var(--primary-deep)',
+                          cursor: index === 0 ? 'not-allowed' : 'pointer',
+                          opacity: index === 0 ? 0.4 : 1,
+                        }}
+                      >
+                        <ChevronUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveStat(index, 1)}
+                        disabled={index === stats.length - 1}
+                        title="Pindah ke bawah"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-light)',
+                          background: '#ffffff',
+                          color: 'var(--primary-deep)',
+                          cursor:
+                            index === stats.length - 1 ? 'not-allowed' : 'pointer',
+                          opacity: index === stats.length - 1 ? 0.4 : 1,
+                        }}
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeStat(index)}
+                        title="Hapus statistik"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          border: '1px solid #fecaca',
+                          background: '#fef2f2',
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                      gap: '12px',
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Angka</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={stat.number}
+                        onChange={(e) => updateStat(index, 'number', e.target.value)}
+                        placeholder="e.g. 5.000+ / 100% / 4.9/5"
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Label (Indonesia)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={stat.labelId}
+                        onChange={(e) => updateStat(index, 'labelId', e.target.value)}
+                        placeholder="e.g. Wisatawan Puas"
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">Label (English)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={stat.labelEn}
+                        onChange={(e) => updateStat(index, 'labelEn', e.target.value)}
+                        placeholder="e.g. Happy Snorkelers"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={addStat}
+              className="btn btn-secondary btn-sm"
+            >
+              <Plus size={16} />
+              <span>Tambah Statistik</span>
+            </button>
+          </div>
 
           {/* Documentation Team / Boat Image Upload (Shared) */}
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '24px', marginTop: '10px' }}>
