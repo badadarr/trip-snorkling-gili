@@ -1,12 +1,11 @@
 import React from 'react';
 import HeroSection from '@/components/public/HeroSection';
 import PackageCard from '@/components/public/PackageCard';
-import HighlightsSection from '@/components/public/HighlightsSection';
 import GalleryGrid from '@/components/public/GalleryGrid';
 import TestimonialsSection from '@/components/public/TestimonialsSection';
 import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getHero, getPackagesList, getGalleryList, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
+import { getHero, getPackagesList, getGalleryList, getGalleryCategories, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle, Ship, CheckCircle2, Clock } from 'lucide-react';
@@ -19,6 +18,7 @@ export default async function HomePage() {
   const heroData = await getHero();
   const allPackages = await getPackagesList();
   const galleryItems = await getGalleryList();
+  const galleryCategories = await getGalleryCategories();
   const testimonials = await getTestimonialsList();
   const faqs = await getFaqList();
   const settings = await getSettings();
@@ -328,8 +328,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 3. 4 Prime Spots Highlight */}
-      <HighlightsSection />
+      {/* 3. 4 Prime Spots Highlight — removed per client request (not editable from admin) */}
 
       {/* 4. Why Choose Us Section */}
       <section className="section">
@@ -459,7 +458,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <GalleryGrid items={galleryItems} />
+          <GalleryGrid items={galleryItems} categories={galleryCategories} />
 
           <div style={{ textAlign: 'center', marginTop: '36px' }}>
             <Link href="/gallery" className="btn btn-secondary">

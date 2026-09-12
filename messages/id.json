@@ -159,12 +159,15 @@
     "allTitle": "3-Gili Snorkeling Gallery",
     "allSubtitle": "Witness the vibrant marine life of Gili Trawangan, Gili Meno, and Gili Air captured by our crew and happy guests.",
     "openFullGallery": "View Full Photo Gallery",
-    "all": "All Photos",
-    "turtles": "Sea Turtles",
-    "statues": "Underwater Statues",
-    "underwater": "Coral Reefs & Fish",
-    "sunset": "Sunset & Scenery",
-    "boats": "Glass Bottom Boats"
+    "all": "Semua Foto",
+    "turtles": "Penyu Laut",
+    "statues": "Patung Bawah Air",
+    "underwater": "Terumbu Karang & Ikan",
+    "sunset": "Sunset & Pemandangan",
+    "boats": "Kapal Glass Bottom",
+    "emptyTitle": "Belum Ada Foto di Kategori Ini",
+    "emptyDesc": "Dokumentasi foto untuk kategori ini belum tersedia atau sedang dalam proses kurasi oleh tim kami.",
+    "showAll": "Lihat Semua Foto"
   },
   "testimonials": {
     "badge": "GUEST REVIEWS",

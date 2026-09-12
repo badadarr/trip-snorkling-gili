@@ -26,6 +26,37 @@ async function migrateSafe() {
     await sql`ALTER TABLE "packages" ADD COLUMN IF NOT EXISTS "price_eur" double precision DEFAULT 0;`;
     console.log('✅ Column "price_eur" ensured in "packages"');
 
+    // Gallery Categories table
+    await sql`
+      CREATE TABLE IF NOT EXISTS "gallery_categories" (
+        "id" SERIAL PRIMARY KEY,
+        "key" TEXT UNIQUE NOT NULL,
+        "label_id" TEXT NOT NULL,
+        "label_en" TEXT NOT NULL,
+        "order_index" INTEGER DEFAULT 0,
+        "created_at" TIMESTAMP DEFAULT NOW()
+      );
+    `;
+    console.log('✅ Table "gallery_categories" ensured');
+
+    // Seed default categories if table is empty
+    const existing = await sql`SELECT COUNT(*) as cnt FROM gallery_categories;`;
+    if (Number(existing[0]?.cnt) === 0) {
+      await sql`
+        INSERT INTO "gallery_categories" ("key", "label_id", "label_en", "order_index")
+        VALUES
+          ('turtles', 'Penyu (Turtles)', 'Turtles', 1),
+          ('statues', 'Patung Bawah Laut', 'Underwater Statues', 2),
+          ('underwater', 'Karang & Ikan', 'Coral & Fish', 3),
+          ('sunset', 'Sunset & Pantai', 'Sunset & Beach', 4),
+          ('boats', 'Kapal Glass Bottom', 'Glass Bottom Boats', 5)
+        ON CONFLICT ("key") DO NOTHING;
+      `;
+      console.log('✅ Default gallery categories seeded');
+    } else {
+      console.log('ℹ️  Gallery categories already exist, skipping seed');
+    }
+
     console.log('🎉 Safe database migration completed successfully!');
     process.exit(0);
   } catch (err: any) {

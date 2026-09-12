@@ -55,10 +55,10 @@ export const metadata: Metadata = {
     siteName: 'Gili Trawangan Snorkeling Trip',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop',
+        url: '/uploads/statue-point-gili-meno.webp',
         width: 1200,
         height: 630,
-        alt: 'Snorkeling Gili Trawangan Sea Turtles and Coral Reefs',
+        alt: 'Underwater Statues Bask Nest Gili Meno - Snorkeling Trip',
       },
     ],
     locale: 'en_US',
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Gili Trawangan Snorkeling Trip | Best 3-Gili Package Tours',
     description: 'Swim with sea turtles at Turtle Point & underwater statues. Free GoPro HD photos & videos.',
-    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop'],
+    images: ['/uploads/statue-point-gili-meno.webp'],
   },
   robots: {
     index: true,

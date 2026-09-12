@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { X, ZoomIn } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { X, ZoomIn, CameraOff, RotateCcw } from "lucide-react";
 
 export interface GalleryItem {
   id: number;
@@ -14,18 +14,40 @@ export interface GalleryItem {
   orderIndex?: number | null;
 }
 
-export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
+export interface GalleryCategoryItem {
+  id: number;
+  key: string;
+  labelId: string;
+  labelEn: string;
+  orderIndex?: number | null;
+}
+
+interface GalleryGridProps {
+  items: GalleryItem[];
+  categories?: GalleryCategoryItem[];
+}
+
+export default function GalleryGrid({ items, categories }: GalleryGridProps) {
   const t = useTranslations("gallery");
+  const locale = useLocale();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
 
-  const categories = [
+  // Build category tabs: "All" + dynamic categories from DB (or fallback to hardcoded)
+  const categoryTabs = [
     { key: "all", label: t("all") },
-    { key: "turtles", label: t("turtles") },
-    { key: "statues", label: t("statues") },
-    { key: "underwater", label: t("underwater") },
-    { key: "sunset", label: t("sunset") },
-    { key: "boats", label: t("boats") },
+    ...(categories && categories.length > 0
+      ? categories.map((c) => ({
+          key: c.key,
+          label: locale === "id" ? c.labelId : c.labelEn,
+        }))
+      : [
+          { key: "turtles", label: t("turtles") },
+          { key: "statues", label: t("statues") },
+          { key: "underwater", label: t("underwater") },
+          { key: "sunset", label: t("sunset") },
+          { key: "boats", label: t("boats") },
+        ]),
   ];
 
   const filteredItems =
@@ -46,7 +68,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
           marginBottom: "36px",
         }}
       >
-        {categories.map((cat) => (
+        {categoryTabs.map((cat) => (
           <button
             key={cat.key}
             type="button"
@@ -73,91 +95,210 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
         ))}
       </div>
 
-      {/* Gallery Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {filteredItems.map((item, index) => {
-          const title = item.titleEn || item.titleId;
-          return (
-            <div
-              key={item.id}
-              onClick={() => setSelectedPhoto(item)}
+      {/* Gallery Grid or Empty State Error Handling */}
+      {filteredItems.length === 0 ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "56px 24px",
+            background: "#ffffff",
+            borderRadius: "var(--radius-lg)",
+            border: "1px dashed var(--border-light)",
+            boxShadow: "var(--shadow-sm)",
+            maxWidth: "540px",
+            margin: "0 auto 30px",
+          }}
+        >
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              background: "rgba(0, 180, 216, 0.1)",
+              color: "var(--primary-ocean)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <CameraOff size={30} />
+          </div>
+
+          <div style={{ marginBottom: "12px" }}>
+            <span
               style={{
-                position: "relative",
-                height: "240px",
-                borderRadius: "var(--radius-md)",
-                overflow: "hidden",
-                cursor: "pointer",
-                boxShadow: "var(--shadow-sm)",
+                display: "inline-block",
+                background: "var(--primary-surface)",
+                color: "var(--primary-ocean)",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                padding: "3px 12px",
+                borderRadius: "var(--radius-full)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
               }}
-              className="gallery-item-wrap"
             >
-              <Image
-                src={item.imageUrl}
-                alt={title}
-                fill
-                priority={index < 4}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                style={{
-                  objectFit: "cover",
-                  transition: "transform 0.4s ease",
-                }}
-              />
+              {categoryTabs.find((c) => c.key === activeCategory)?.label || activeCategory}
+            </span>
+          </div>
+
+          <h3
+            style={{
+              fontSize: "1.25rem",
+              color: "var(--primary-deep)",
+              marginBottom: "8px",
+              fontWeight: 700,
+            }}
+          >
+            {t("emptyTitle")}
+          </h3>
+
+          <p
+            style={{
+              fontSize: "0.92rem",
+              color: "var(--text-muted)",
+              lineHeight: 1.6,
+              maxWidth: "420px",
+              margin: "0 auto 24px",
+            }}
+          >
+            {t("emptyDesc")}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setActiveCategory("all")}
+            className="btn btn-primary btn-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 22px",
+              borderRadius: "var(--radius-full)",
+              fontSize: "0.88rem",
+              fontWeight: 600,
+            }}
+          >
+            <RotateCcw size={15} />
+            <span>{t("showAll")}</span>
+          </button>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "20px",
+          }}
+        >
+          {filteredItems.map((item, index) => {
+            const title =
+              locale === "id"
+                ? item.titleId || item.titleEn
+                : item.titleEn || item.titleId;
+            return (
               <div
+                key={item.id}
+                onClick={() => setSelectedPhoto(item)}
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    "linear-gradient(to top, rgba(10, 37, 64, 0.85) 0%, transparent 60%)",
-                  opacity: 0.9,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  padding: "16px",
-                  transition: "opacity 0.2s",
+                  position: "relative",
+                  height: "240px",
+                  borderRadius: "var(--radius-md)",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  boxShadow: "var(--shadow-sm)",
                 }}
+                className="gallery-item-wrap"
               >
-                <div
+                <Image
+                  src={item.imageUrl}
+                  alt={title}
+                  fill
+                  priority={index < 4}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
+                    objectFit: "cover",
+                    transition: "transform 0.4s ease",
                   }}
-                >
-                  <span
-                    style={{
-                      color: "#ffffff",
-                      fontSize: "0.9rem",
-                      fontWeight: 600,
-                      textShadow: "0 2px 4px rgba(0,0,0,0.5)",
-                    }}
-                  >
-                    {title}
-                  </span>
+                />
+
+                {/* Category Slug Badge on Photo */}
+                {item.category && (
                   <div
                     style={{
-                      padding: "6px",
-                      borderRadius: "50%",
-                      background: "rgba(255,255,255,0.2)",
-                      color: "#ffffff",
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      zIndex: 2,
+                      background: "rgba(10, 25, 47, 0.8)",
+                      backdropFilter: "blur(6px)",
+                      color: "var(--primary-aqua)",
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      padding: "4px 10px",
+                      borderRadius: "var(--radius-full)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      boxShadow: "0 2px 6px rgba(0, 0, 0, 0.35)",
+                      pointerEvents: "none",
                     }}
                   >
-                    <ZoomIn size={14} />
+                    {item.category}
+                  </div>
+                )}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background:
+                      "linear-gradient(to top, rgba(10, 37, 64, 0.85) 0%, transparent 60%)",
+                    opacity: 0.9,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    padding: "16px",
+                    transition: "opacity 0.2s",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: "#ffffff",
+                        fontSize: "0.9rem",
+                        fontWeight: 600,
+                        textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                      }}
+                    >
+                      {title}
+                    </span>
+                    <div
+                      style={{
+                        padding: "6px",
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.2)",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <ZoomIn size={14} />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Lightbox Modal */}
       {selectedPhoto && (
@@ -225,7 +366,11 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
             >
               <Image
                 src={selectedPhoto.imageUrl}
-                alt={selectedPhoto.titleEn || selectedPhoto.titleId}
+                alt={
+                  locale === "id"
+                    ? selectedPhoto.titleId || selectedPhoto.titleEn
+                    : selectedPhoto.titleEn || selectedPhoto.titleId
+                }
                 fill
                 sizes="(max-width: 900px) 100vw, 900px"
                 style={{
@@ -251,7 +396,9 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
                     marginBottom: "4px",
                   }}
                 >
-                  {selectedPhoto.titleEn || selectedPhoto.titleId}
+                  {locale === "id"
+                    ? selectedPhoto.titleId || selectedPhoto.titleEn
+                    : selectedPhoto.titleEn || selectedPhoto.titleId}
                 </h4>
                 <span
                   style={{

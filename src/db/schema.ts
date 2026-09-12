@@ -49,13 +49,23 @@ export const packages = pgTable('packages', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// 2b. Gallery Categories (Dynamic admin-managed categories for gallery photos)
+export const galleryCategories = pgTable('gallery_categories', {
+  id: serial('id').primaryKey(),
+  key: text('key').unique().notNull(), // slug e.g. 'turtles', 'statues'
+  labelId: text('label_id').notNull(), // Indonesian label
+  labelEn: text('label_en').notNull(), // English label
+  orderIndex: integer('order_index').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // 3. Gallery (Underwater & Island Photos)
 export const gallery = pgTable('gallery', {
   id: serial('id').primaryKey(),
   imageUrl: text('image_url').notNull(),
   titleId: text('title_id').notNull(),
   titleEn: text('title_en').notNull(),
-  category: text('category').default('underwater'), // underwater, turtles, statues, sunset, boats
+  category: text('category').default('underwater'), // references gallery_categories.key
   orderIndex: integer('order_index').default(0),
   createdAt: timestamp('created_at').defaultNow(),
 });

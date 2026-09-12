@@ -4,6 +4,7 @@ import {
   heroSection,
   packages,
   gallery,
+  galleryCategories,
   testimonials,
   faq,
   bookings,
@@ -189,6 +190,87 @@ export async function deleteGalleryItem(id: number) {
       return true;
     } catch (e) {
       console.error("Error deleting gallery item from DB:", e);
+      throw e;
+    }
+  }
+  throw new Error("Database connection is not available");
+}
+
+// 3b. GALLERY CATEGORIES
+const defaultGalleryCategories = [
+  { key: 'turtles', labelId: 'Penyu (Turtles)', labelEn: 'Turtles', orderIndex: 1 },
+  { key: 'statues', labelId: 'Patung Bawah Laut', labelEn: 'Underwater Statues', orderIndex: 2 },
+  { key: 'underwater', labelId: 'Karang & Ikan', labelEn: 'Coral & Fish', orderIndex: 3 },
+  { key: 'sunset', labelId: 'Sunset & Pantai', labelEn: 'Sunset & Beach', orderIndex: 4 },
+  { key: 'boats', labelId: 'Kapal Glass Bottom', labelEn: 'Glass Bottom Boats', orderIndex: 5 },
+];
+
+export async function getGalleryCategories() {
+  const db = getDb();
+  if (db) {
+    try {
+      const rows = await db
+        .select()
+        .from(galleryCategories)
+        .orderBy(asc(galleryCategories.orderIndex));
+      if (rows.length > 0) return rows;
+
+      // Auto seed default categories if table is empty
+      for (const cat of defaultGalleryCategories) {
+        await db.insert(galleryCategories).values(cat).onConflictDoNothing();
+      }
+      return await db
+        .select()
+        .from(galleryCategories)
+        .orderBy(asc(galleryCategories.orderIndex));
+    } catch (e) {
+      console.error("Error fetching gallery categories from DB:", e);
+      throw e;
+    }
+  }
+  return defaultGalleryCategories.map((c, i) => ({ id: i + 1, ...c, createdAt: new Date() }));
+}
+
+export async function createGalleryCategory(data: { key: string; labelId: string; labelEn: string; orderIndex?: number }) {
+  const db = getDb();
+  if (db) {
+    try {
+      const [created] = await db.insert(galleryCategories).values(data).returning();
+      return created;
+    } catch (e) {
+      console.error("Error creating gallery category in DB:", e);
+      throw e;
+    }
+  }
+  throw new Error("Database connection is not available");
+}
+
+export async function updateGalleryCategory(id: number, data: Partial<{ key: string; labelId: string; labelEn: string; orderIndex: number }>) {
+  const db = getDb();
+  if (db) {
+    try {
+      const [updated] = await db
+        .update(galleryCategories)
+        .set(data)
+        .where(eq(galleryCategories.id, id))
+        .returning();
+      return updated;
+    } catch (e) {
+      console.error("Error updating gallery category in DB:", e);
+      throw e;
+    }
+  }
+  throw new Error("Database connection is not available");
+}
+
+export async function deleteGalleryCategory(id: number) {
+  const db = getDb();
+  if (db) {
+    try {
+      await db.delete(galleryCategories).where(eq(galleryCategories.id, id));
+      return true;
+    } catch (e) {
+      console.error("Error deleting gallery category from DB:", e);
       throw e;
     }
   }

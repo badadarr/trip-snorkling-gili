@@ -1,7 +1,7 @@
 import React from 'react';
 import GalleryGrid from '@/components/public/GalleryGrid';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getGalleryList, getSettings } from '@/lib/data';
+import { getGalleryList, getGalleryCategories, getSettings } from '@/lib/data';
 import { getTranslations } from 'next-intl/server';
 import { Camera } from 'lucide-react';
 
@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic';
 export default async function GalleryPage() {
   const t = await getTranslations('gallery');
   const galleryItems = await getGalleryList();
+  const galleryCategories = await getGalleryCategories();
   const settings = await getSettings();
   const waSetting = settings.find((s) => s.key === 'whatsapp_number');
   const whatsappNumber = waSetting?.value || '6282236851307';
@@ -43,7 +44,7 @@ export default async function GalleryPage() {
       {/* Gallery Section */}
       <section className="section">
         <div className="container">
-          <GalleryGrid items={galleryItems} />
+          <GalleryGrid items={galleryItems} categories={galleryCategories} />
         </div>
       </section>
 
