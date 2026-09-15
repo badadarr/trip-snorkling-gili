@@ -27,6 +27,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
+import { compressAndUpload, PROOF_COMPRESSION } from "@/lib/compress-image";
 import CustomSelect from "@/components/ui/CustomSelect";
 import ModernDatePicker from "@/components/ui/ModernDatePicker";
 import SessionTimePicker from "@/components/ui/SessionTimePicker";
@@ -546,40 +547,36 @@ export default function BookingForm({
     const toastId = toast.loading("Uploading payment proof...");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      if (submittedBooking?.id) {
-        formData.append("bookingId", String(submittedBooking.id));
+      if (!submittedBooking?.id) {
+        throw new Error(
+          "Booking reference is missing. Please submit the booking form again.",
+        );
       }
 
-      const res = await fetch("/api/bookings/upload-proof", {
-        method: "POST",
-        body: formData,
-      });
+      // Receipts are photographed on phones and regularly exceed what a
+      // serverless request body can carry, so the image is resized in the
+      // browser before it is sent.
+      const url = await compressAndUpload(
+        file,
+        "/api/bookings/upload-proof",
+        PROOF_COMPRESSION,
+        { bookingId: String(submittedBooking.id) },
+      );
 
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || "Upload failed");
-      }
-
-      const data = await res.json();
-      setPaymentProofUrl(data.url);
-
-      if (submittedBooking?.id) {
-        setSubmittedBooking((prev: any) => ({
-          ...prev,
-          paymentProofUrl: data.url,
+      setPaymentProofUrl(url);
+      setSubmittedBooking((prev: any) => ({
+        ...prev,
+        paymentProofUrl: url,
+        paymentMethod,
+      }));
+      await fetch(`/api/bookings/${submittedBooking.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           paymentMethod,
-        }));
-        await fetch(`/api/bookings/${submittedBooking.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            paymentMethod,
-            paymentProofUrl: data.url,
-          }),
-        }).catch(() => {});
-      }
+          paymentProofUrl: url,
+        }),
+      }).catch(() => {});
 
       toast.success("Payment receipt uploaded successfully!", { id: toastId });
     } catch (err: any) {

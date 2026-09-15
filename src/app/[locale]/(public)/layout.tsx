@@ -3,7 +3,7 @@ import Navbar from "@/components/public/Navbar";
 import Footer from "@/components/public/Footer";
 import WhatsAppButton from "@/components/public/WhatsAppButton";
 import CurrencyProvider from "@/components/providers/CurrencyProvider";
-import { getSettings, getPackagesList } from "@/lib/data";
+import { getSettings, getPackagesList } from "@/lib/public-data";
 import type { CurrencyCode } from "@/lib/format";
 
 export const dynamic = "force-dynamic";

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getPackageBySlug, getSettings } from '@/lib/data';
+import { getPackageBySlug, getSettings } from '@/lib/public-data';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { getTranslations } from 'next-intl/server';

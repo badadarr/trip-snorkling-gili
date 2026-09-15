@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAbout, updateAbout } from '@/lib/data';
 import { getAdminSession } from '@/lib/auth';
+import { revalidatePublicData, CACHE_TAGS } from '@/lib/revalidate';
 
 export async function GET() {
   const data = await getAbout();
@@ -16,6 +17,7 @@ export async function PUT(req: Request) {
   try {
     const body = await req.json();
     const updated = await updateAbout(body);
+    revalidatePublicData(CACHE_TAGS.about);
     return NextResponse.json({ success: true, about: updated });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

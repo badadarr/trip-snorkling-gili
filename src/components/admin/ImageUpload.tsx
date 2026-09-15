@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, Image as ImageIcon, X, Loader2, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { compressAndUpload } from '@/lib/compress-image';
 
 interface ImageUploadProps {
   value: string;
@@ -26,53 +27,9 @@ export default function ImageUpload({
   const [mode, setMode] = useState<'upload' | 'url'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Client-side canvas compression to lightweight WebP
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const maxWidth = 1600;
-          const maxHeight = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxWidth || height > maxHeight) {
-            if (width / height > maxWidth / maxHeight) {
-              height = Math.round((height * maxWidth) / width);
-              width = maxWidth;
-            } else {
-              width = Math.round((width * maxHeight) / height);
-              height = maxHeight;
-            }
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            resolve(event.target?.result as string);
-            return;
-          }
-
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/webp', 0.82);
-          resolve(dataUrl);
-        };
-        img.onerror = (e) => reject(e);
-      };
-      reader.onerror = (e) => reject(e);
-    });
-  };
-
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
-    // Validation
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
     if (!validTypes.includes(file.type)) {
       toast.error('Format file tidak didukung. Harap upload gambar JPG, PNG, atau WebP.');
@@ -88,43 +45,18 @@ export default function ImageUpload({
     const toastId = toast.loading('Mengompres dan mengunggah gambar...');
 
     try {
-      // 1. Compress image to optimized lightweight WebP in browser
-      const compressedDataUrl = await compressImage(file);
-
-      // 2. Send to API
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          dataUrl: compressedDataUrl,
-          fileName: file.name,
-          mimeType: 'image/webp',
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Fallback: if server endpoint has issues, use compressed data URL directly
-        onChange(compressedDataUrl);
-        toast.success('Foto berhasil dipasang!', { id: toastId });
-        return;
-      }
-
-      onChange(data.url || compressedDataUrl);
+      // Compressed in the browser, then stored in object storage. On failure we
+      // surface the error instead of quietly embedding the image as base64 --
+      // that fallback used to make a broken upload look successful while
+      // bloating the database.
+      const url = await compressAndUpload(file, '/api/upload');
+      onChange(url);
       toast.success('Foto berhasil diunggah!', { id: toastId });
     } catch (err: any) {
-      console.warn('Upload API notice, using direct client optimization:', err);
-      // Even in offline / serverless glitches, use client-side optimized image
-      try {
-        const directCompressed = await compressImage(file);
-        onChange(directCompressed);
-        toast.success('Foto berhasil dipasang!', { id: toastId });
-      } catch (clientErr) {
-        toast.error('Gagal memproses gambar.', { id: toastId });
-      }
+      console.error('Image upload failed:', err);
+      toast.error(err?.message || 'Gagal mengunggah gambar. Silakan coba lagi.', {
+        id: toastId,
+      });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

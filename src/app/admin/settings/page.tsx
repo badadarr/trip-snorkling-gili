@@ -35,6 +35,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { compressAndUpload, QR_COMPRESSION } from "@/lib/compress-image";
 import {
   DEFAULT_MANIFEST_SETTINGS,
   generateManifestHtml,
@@ -269,44 +270,6 @@ function AdminSettingsContent() {
   };
 
   // Client-side canvas compression for QR code image
-  const compressQrisImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const maxDim = 800; // Optimal sharp resolution for QR codes
-          let width = img.width;
-          let height = img.height;
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) {
-            resolve(event.target?.result as string);
-            return;
-          }
-          ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL("image/webp", 0.9);
-          resolve(dataUrl);
-        };
-        img.onerror = (err) => reject(err);
-      };
-      reader.onerror = (err) => reject(err);
-    });
-  };
-
   const handleUpdateSecurity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword && newPassword !== confirmNewPassword) {
@@ -2285,28 +2248,17 @@ function AdminSettingsContent() {
                           "Mengompres & mengupload barcode QRIS...",
                         );
                         try {
-                          // 1. Client-side canvas compression to high-resolution WebP Data URL
-                          const compressedDataUrl =
-                            await compressQrisImage(file);
+                          // Compress and store the QR in object storage. A
+                          // failure throws: previously this fell back to an
+                          // inline base64 data URL, which is what filled the
+                          // database with image payloads.
+                          const finalUrl = await compressAndUpload(
+                            file,
+                            "/api/upload",
+                            QR_COMPRESSION,
+                          );
 
-                          // 2. Upload to API
-                          const res = await fetch("/api/upload", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              dataUrl: compressedDataUrl,
-                              fileName: file.name,
-                              mimeType: "image/webp",
-                            }),
-                          });
-
-                          let finalUrl = compressedDataUrl;
-                          if (res.ok) {
-                            const uploadData = await res.json();
-                            finalUrl = uploadData.url || compressedDataUrl;
-                          }
-
-                          // 3. Immediately persist into Neon Database (auto-save setting)
+                          // Persist the URL into the settings table
                           handleChange("payment_qris_image", finalUrl);
                           await fetch("/api/settings", {
                             method: "PUT",

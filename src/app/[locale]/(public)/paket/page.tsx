@@ -1,7 +1,7 @@
 import React from 'react';
 import PackageCard from '@/components/public/PackageCard';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getPackagesList, getSettings } from '@/lib/data';
+import { getPackagesList, getSettings } from '@/lib/public-data';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Waves, Compass, MessageCircle, ArrowLeft, Users, Ship, Sparkles } from 'lucide-react';

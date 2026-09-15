@@ -197,7 +197,7 @@ export async function deleteGalleryItem(id: number) {
 }
 
 // 3b. GALLERY CATEGORIES
-const defaultGalleryCategories = [
+export const defaultGalleryCategories = [
   { key: 'turtles', labelId: 'Penyu (Turtles)', labelEn: 'Turtles', orderIndex: 1 },
   { key: 'statues', labelId: 'Patung Bawah Laut', labelEn: 'Underwater Statues', orderIndex: 2 },
   { key: 'underwater', labelId: 'Karang & Ikan', labelEn: 'Coral & Fish', orderIndex: 3 },
@@ -415,6 +415,24 @@ export async function getBookingsList() {
     }
   }
   return [];
+}
+
+export async function getBookingById(id: number) {
+  const db = getDb();
+  if (db) {
+    try {
+      const rows = await db
+        .select()
+        .from(bookings)
+        .where(eq(bookings.id, id))
+        .limit(1);
+      return rows[0] || null;
+    } catch (e) {
+      console.error("Error fetching booking by id from DB:", e);
+      throw e;
+    }
+  }
+  return null;
 }
 
 export async function createBooking(data: any) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import GalleryGrid from '@/components/public/GalleryGrid';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getGalleryList, getGalleryCategories, getSettings } from '@/lib/data';
+import { getGalleryList, getGalleryCategories, getSettings } from '@/lib/public-data';
 import { getTranslations } from 'next-intl/server';
 import { Camera } from 'lucide-react';
 

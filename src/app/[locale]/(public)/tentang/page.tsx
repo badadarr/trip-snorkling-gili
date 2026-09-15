@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAbout, getSettings } from '@/lib/data';
+import { getAbout, getSettings } from '@/lib/public-data';
 import CtaBanner from '@/components/public/CtaBanner';
 import { getTranslations } from 'next-intl/server';
 import { Waves, ShieldCheck, Heart, Users, Compass } from 'lucide-react';

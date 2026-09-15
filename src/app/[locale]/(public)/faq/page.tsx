@@ -1,7 +1,7 @@
 import React from 'react';
 import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getFaqList, getSettings } from '@/lib/data';
+import { getFaqList, getSettings } from '@/lib/public-data';
 import { getTranslations } from 'next-intl/server';
 import { HelpCircle } from 'lucide-react';
 

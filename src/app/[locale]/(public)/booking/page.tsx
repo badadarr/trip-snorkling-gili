@@ -1,6 +1,6 @@
 import React from 'react';
 import BookingForm from '@/components/public/BookingForm';
-import { getPackagesList, getSettings } from '@/lib/data';
+import { getPackagesList, getSettings } from '@/lib/public-data';
 import { getTranslations } from 'next-intl/server';
 import { Calendar } from 'lucide-react';
 

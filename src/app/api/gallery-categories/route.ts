@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGalleryCategories, createGalleryCategory } from '@/lib/data';
 import { getAdminSession } from '@/lib/auth';
+import { revalidatePublicData, CACHE_TAGS } from '@/lib/revalidate';
 
 export async function GET() {
   try {
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       labelEn: body.labelEn,
       orderIndex: body.orderIndex || 0,
     });
+    revalidatePublicData(CACHE_TAGS.galleryCategories);
     return NextResponse.json({ success: true, item: created });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

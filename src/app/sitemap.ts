@@ -1,5 +1,9 @@
 import { MetadataRoute } from 'next';
-import { getPackagesList } from '@/lib/data';
+import { getPackagesList } from '@/lib/public-data';
+
+// Regenerated hourly instead of frozen at build time, so packages added later
+// still reach the sitemap without a redeploy.
+export const revalidate = 3600;
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://trip-snorkling-gili.vercel.app';
 

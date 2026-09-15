@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSettings, updateSetting } from '@/lib/data';
 import { getAdminSession } from '@/lib/auth';
+import { revalidatePublicData, CACHE_TAGS } from '@/lib/revalidate';
 
 export async function GET() {
   const data = await getSettings();
@@ -20,6 +21,7 @@ export async function PUT(req: Request) {
       for (const [key, value] of Object.entries(body.settings)) {
         results.push(await updateSetting(key, String(value)));
       }
+      revalidatePublicData(CACHE_TAGS.settings);
       return NextResponse.json({ success: true, settings: results });
     }
 
@@ -28,6 +30,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Key is required' }, { status: 400 });
     }
     const updated = await updateSetting(key, value);
+    revalidatePublicData(CACHE_TAGS.settings);
     return NextResponse.json({ success: true, setting: updated });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

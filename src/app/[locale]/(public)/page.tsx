@@ -5,7 +5,7 @@ import GalleryGrid from '@/components/public/GalleryGrid';
 import TestimonialsSection from '@/components/public/TestimonialsSection';
 import FaqAccordion from '@/components/public/FaqAccordion';
 import CtaBanner from '@/components/public/CtaBanner';
-import { getHero, getPackagesList, getGalleryList, getGalleryCategories, getTestimonialsList, getFaqList, getSettings } from '@/lib/data';
+import { getHero, getPackagesList, getGalleryList, getGalleryCategories, getTestimonialsList, getFaqList, getSettings } from '@/lib/public-data';
 import { Link } from '@/i18n/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Sparkles, ArrowRight, ShieldCheck, Camera, Users, Award, Calendar, HelpCircle, Compass, MessageCircle, Ship, CheckCircle2, Clock } from 'lucide-react';
